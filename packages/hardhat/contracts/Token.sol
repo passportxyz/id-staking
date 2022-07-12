@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 contract Token is ERC20 {
     constructor() payable ERC20("Gitcoin", "GTC") {}
 
-    function mint(uint256 amount) public {
+    function mintAmount(uint256 amount) public {
         _mint(msg.sender, amount);
     }
 
