@@ -12,14 +12,16 @@ const zero = ethers.BigNumber.from("0");
 function Home({ tx, readContracts, address, writeContracts, mainnetProvider }) {
   const [challengeAddresses, setChallengeAddresses] = useState([]);
 
-  console.log({ challengeAddresses });
-
   const tokenBalance = ethers.utils.formatUnits(
     useContractReader(readContracts, "Token", "balanceOf", [address]) || zero,
   );
   const tokenSymbol = useContractReader(readContracts, "Token", "symbol");
   const stakes = useContractReader(readContracts, "Staking", "getStakeFor", [address]) || {};
   const stakedBalance = ethers.utils.formatUnits(stakes.balance || zero);
+
+  const mintToken = async () => {
+    tx(writeContracts.Token.mintAmount(ethers.utils.parseUnits("100")));
+  };
 
   const approve = async () => {
     tx(writeContracts.Token.approve(readContracts.Staking.address, ethers.utils.parseUnits("10000000")));
@@ -66,6 +68,9 @@ function Home({ tx, readContracts, address, writeContracts, mainnetProvider }) {
       <div style={{ marginTop: "20px" }}>
         <Divider>Stake</Divider>
         <div style={{ width: "100%" }}>
+          <Button style={{ marginRight: "10px" }} onClick={mintToken}>
+            Mint
+          </Button>
           <Button style={{ marginRight: "10px" }} onClick={approve}>
             Approve GTC
           </Button>
