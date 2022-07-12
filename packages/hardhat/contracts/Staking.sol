@@ -5,10 +5,10 @@ pragma solidity >=0.8.0 <0.9.0;
 import {IStaking} from "./IStaking.sol";
 
 // import "hardhat/console.sol";
-// import "@openzeppelin/contracts/access/Ownable.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-contract Staking is IStaking {
+contract Staking is IStaking, Ownable {
     IERC20 public token;
     uint256 public fee;
 
@@ -20,6 +20,17 @@ contract Staking is IStaking {
         token = _token;
         fee = _fee;
         quorum = _quorum;
+    }
+
+    function updateJuror(address juror, bool active)
+        public
+        virtual
+        override
+        onlyOwner
+    {
+        jurors[juror] = active;
+
+        emit jurorAction(juror, active);
     }
 
     // stake

@@ -25,6 +25,7 @@ abstract contract IStaking {
     mapping(address => Stake) stakes;
     mapping(bytes32 => Challenge) challenges;
 
+    event jurorAction(address juror, bool added);
     event tokenStaked(address staker, uint256 amount);
     event tokenWithdrawn(address staker, uint256 amount);
     event challenged(address challenger, bytes32 id);
@@ -45,6 +46,9 @@ abstract contract IStaking {
         );
         _;
     }
+
+    // update Juror
+    function updateJuror(address juror, bool active) public virtual {}
 
     // stake
     function stake(uint256 amount) public virtual {}
