@@ -89,11 +89,11 @@ export default function MultiAddressInput(props) {
   );
 
   const handleSearch = async val => {
-    console.log(`Searching: `, val);
+    // console.log(`Searching: `, val);
     const formattedVal = val.toLowerCase();
     const resolution = await manageSearch(formattedVal);
 
-    console.log(resolution);
+    // console.log(resolution);
 
     const [address, ens] = resolution.isResolvedAddress ? [resolution.resolvedTo, val] : [val, resolution.resolvedTo];
 
@@ -103,7 +103,7 @@ export default function MultiAddressInput(props) {
   };
 
   const handleOnChange = e => {
-    console.log(e);
+    // console.log(e);
     setSearchResults([]);
     setValue(e);
 
