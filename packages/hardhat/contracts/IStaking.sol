@@ -17,6 +17,7 @@ abstract contract IStaking {
         address challenger;
         address[] stakers;
         address[] voters;
+        mapping(address => bool) stakerList;
         mapping(address => bool) voted;
     }
 
@@ -26,12 +27,7 @@ abstract contract IStaking {
 
     event tokenStaked(address staker, uint256 amount);
     event tokenWithdrawn(address staker, uint256 amount);
-    event challenged(
-        address stakerA,
-        address stakerB,
-        address challenger,
-        bytes32 id
-    );
+    event challenged(address challenger, bytes32 id);
     event challengeVoted(bytes32 id, address juror);
     event challengeFinalized(bytes32 id);
 
@@ -57,7 +53,7 @@ abstract contract IStaking {
     function unstake(uint256 amount) public virtual {}
 
     // challenge
-    function challenge(address a, address b)
+    function challenge(address[] memory stakers)
         public
         virtual
         returns (bytes32 id)
@@ -68,6 +64,9 @@ abstract contract IStaking {
 
     // penalize
     function finalizeChallenge(bytes32 id) public virtual {}
+
+    // View functions
+    function getStakeFor(address user) public virtual returns (Stake memory) {}
 
     // to support receiving ETH by default
     receive() external payable {}

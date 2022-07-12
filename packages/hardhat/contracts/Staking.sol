@@ -40,44 +40,51 @@ contract Staking is IStaking {
 
         stakes[msg.sender].balance -= amount;
 
-        token.transferFrom(address(this), msg.sender, amount);
+        token.transfer(msg.sender, amount);
 
         emit tokenWithdrawn(msg.sender, amount);
     }
 
-    function challenge(address a, address b)
+    function challenge(address[] memory stakers)
         public
         virtual
         override
         returns (bytes32 id)
     {
-        // enough stake balance for a & b | stakes not locked for challenger, a & b
-        require(
-            stakes[a].balance > 0 &&
-                stakes[b].balance > 0 &&
-                !stakes[msg.sender].locked &&
-                !stakes[a].locked &&
-                !stakes[b].locked,
-            "Failed balance and lock checks"
-        );
-
         // create challenge ID
-        id = keccak256(abi.encodePacked(msg.sender, a, b, block.number));
+        id = keccak256(abi.encodePacked(msg.sender, block.number));
+        uint256 totalStakers = stakers.length;
+
+        require(
+            totalStakers > 0 && totalStakers < 255,
+            "Stakers out of bounds"
+        );
+        require(challenges[id].challenger == address(0), "Non-unique ID");
 
         // pay challenge fee
         token.transferFrom(msg.sender, address(this), fee);
 
         // initiate challenge
         challenges[id].amount = fee;
-        challenges[id].stakers.push(a);
-        challenges[id].stakers.push(b);
         challenges[id].challenger = msg.sender;
 
-        // lock tokens for a & b
-        stakes[a].locked = true;
-        stakes[b].locked = true;
+        for (uint256 i = 0; i < totalStakers; i++) {
+            address currentStaker = stakers[i];
+            require(
+                stakes[currentStaker].balance > 0,
+                "Not enough balance staked"
+            );
+            require(
+                !challenges[id].stakerList[currentStaker],
+                "Duplicate staker in array"
+            );
 
-        emit challenged(a, b, msg.sender, id);
+            stakes[currentStaker].locked = true;
+            challenges[id].stakers.push(currentStaker);
+            challenges[id].stakerList[currentStaker] = true;
+        }
+
+        emit challenged(msg.sender, id);
     }
 
     function voteChallenge(bytes32 id)
@@ -127,5 +134,15 @@ contract Staking is IStaking {
         }
 
         emit challengeFinalized(id);
+    }
+
+    function getStakeFor(address user)
+        public
+        view
+        virtual
+        override
+        returns (Stake memory)
+    {
+        return stakes[user];
     }
 }
