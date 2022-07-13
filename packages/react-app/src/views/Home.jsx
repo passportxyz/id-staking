@@ -60,20 +60,32 @@ function Home({ tx, readContracts, address, writeContracts, mainnetProvider }) {
       <div>
         Staked Balance: {stakedBalance} {tokenSymbol}
       </div>
-      <div>
+      {/* <div>
         Stake Locked:{" "}
         <Typography.Text type={stakes.locked ? "danger" : "success"}>{stakes.locked ? "Yes" : "No"}</Typography.Text>{" "}
-      </div>
+      </div> */}
 
       <div style={{ marginTop: "20px" }}>
-        <Divider>Stake</Divider>
+        <Divider>Get GTC Tokens</Divider>
         <div style={{ width: "100%" }}>
           <Button style={{ marginRight: "10px" }} onClick={mintToken}>
             Mint
           </Button>
+        </div>
+      </div>
+
+      <div style={{ marginTop: "20px" }}>
+        <Divider>Approve Token For Stake</Divider>
+        <div style={{ width: "100%" }}>
           <Button style={{ marginRight: "10px" }} onClick={approve}>
             Approve GTC
           </Button>
+        </div>
+      </div>
+
+      <div style={{ marginTop: "20px", padding: "5px" }}>
+        <Divider>Stake</Divider>
+        <div style={{ width: "100%" }}>
           <Button style={{ marginRight: "10px" }} onClick={() => stake("20")}>
             Stake 20 {tokenSymbol}
           </Button>
@@ -83,7 +95,7 @@ function Home({ tx, readContracts, address, writeContracts, mainnetProvider }) {
         </div>
       </div>
 
-      <div style={{ marginTop: "20px" }}>
+      <div style={{ marginTop: "20px", padding: "5px" }}>
         <Divider>Unstake</Divider>
         <div style={{ width: "100%" }}>
           <Button style={{ marginRight: "10px" }} disabled={stakes.locked} onClick={() => unstake("20")}>
@@ -95,7 +107,7 @@ function Home({ tx, readContracts, address, writeContracts, mainnetProvider }) {
         </div>
       </div>
 
-      <div style={{ marginTop: "20px" }}>
+      {/* <div style={{ marginTop: "20px" }}>
         <Divider>Challenge</Divider>
         <div style={{ width: "100%", paddingLeft: "10px", paddingRight: "10px" }}>
           <MultiAddressInput
@@ -108,7 +120,7 @@ function Home({ tx, readContracts, address, writeContracts, mainnetProvider }) {
             Submit challenges
           </Button>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }
