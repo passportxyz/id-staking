@@ -6,13 +6,58 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract Staking is Ownable {
     IERC20 public token;
+    uint256 public start;
+    uint256 public duration;
     mapping(address => uint256) stakes;
 
     event tokenStaked(address staker, uint256 amount);
     event tokenUnstaked(address staker, uint256 amount);
 
+    modifier canUnstake() {
+        require(
+            (start == 0 && duration == 0) ||
+                (start > block.timestamp) ||
+                (start < block.timestamp && block.timestamp > start + duration),
+            "Can't unstake during an active round"
+        );
+        _;
+    }
+
     constructor(IERC20 _token) payable {
         token = _token;
+    }
+
+    function updateMeta(uint256 _start, uint256 _duration) public onlyOwner {
+        require(
+            _start > 0 && _duration > 0,
+            "start and duration has to be > 0"
+        );
+        require(
+            start + duration < block.timestamp,
+            "A round is currently active"
+        );
+        require(
+            _start > block.timestamp,
+            "start point should be in the future"
+        );
+        start = _start;
+        duration = _duration;
+    }
+
+    function fetchMeta()
+        public
+        view
+        returns (
+            uint256 _start,
+            uint256 _duration,
+            bool isActiveRound
+        )
+    {
+        return (
+            start,
+            duration,
+            start < block.timestamp && block.timestamp < (start + duration)
+        );
     }
 
     // stake
@@ -25,7 +70,7 @@ contract Staking is Ownable {
     }
 
     // unstake
-    function unstake(uint256 amount) public {
+    function unstake(uint256 amount) public canUnstake {
         require(stakes[msg.sender] >= amount, "Not enough balance to withdraw");
 
         stakes[msg.sender] -= amount;
