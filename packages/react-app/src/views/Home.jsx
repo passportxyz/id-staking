@@ -1,23 +1,20 @@
-import React, { useState } from "react";
+import React from "react";
 import { useContractReader } from "eth-hooks";
 import { ethers } from "ethers";
-import { Button, Divider, Typography } from "antd";
-import { MultiAddressInput } from "../components";
-// import { Link } from "react-router-dom";
+import { Button, Divider } from "antd";
 
 // TODO : Stake, unstake, challenge
 
 const zero = ethers.BigNumber.from("0");
 
 function Home({ tx, readContracts, address, writeContracts, mainnetProvider }) {
-  const [challengeAddresses, setChallengeAddresses] = useState([]);
-
   const tokenBalance = ethers.utils.formatUnits(
     useContractReader(readContracts, "Token", "balanceOf", [address]) || zero,
   );
   const tokenSymbol = useContractReader(readContracts, "Token", "symbol");
-  const stakes = useContractReader(readContracts, "Staking", "getStakeFor", [address]) || {};
-  const stakedBalance = ethers.utils.formatUnits(stakes.balance || zero);
+  const stakedBalance = ethers.utils.formatUnits(
+    useContractReader(readContracts, "Staking", "getStakeFor", [address]) || zero,
+  );
 
   const mintToken = async () => {
     tx(writeContracts.Token.mintAmount(ethers.utils.parseUnits("100")));
@@ -34,14 +31,9 @@ function Home({ tx, readContracts, address, writeContracts, mainnetProvider }) {
   };
 
   const unstake = async amount => {
-    amount = amount || tokenBalance;
+    amount = amount || stakedBalance;
 
     tx(writeContracts.Staking.unstake(ethers.utils.parseUnits(amount)));
-  };
-
-  const challenge = async () => {
-    console.log(writeContracts.Staking.challenge);
-    tx(writeContracts.Staking.challenge(challengeAddresses));
   };
 
   return (
@@ -60,10 +52,6 @@ function Home({ tx, readContracts, address, writeContracts, mainnetProvider }) {
       <div>
         Staked Balance: {stakedBalance} {tokenSymbol}
       </div>
-      {/* <div>
-        Stake Locked:{" "}
-        <Typography.Text type={stakes.locked ? "danger" : "success"}>{stakes.locked ? "Yes" : "No"}</Typography.Text>{" "}
-      </div> */}
 
       <div style={{ marginTop: "20px" }}>
         <Divider>Get GTC Tokens</Divider>
@@ -98,10 +86,10 @@ function Home({ tx, readContracts, address, writeContracts, mainnetProvider }) {
       <div style={{ marginTop: "20px", padding: "5px" }}>
         <Divider>Unstake</Divider>
         <div style={{ width: "100%" }}>
-          <Button style={{ marginRight: "10px" }} disabled={stakes.locked} onClick={() => unstake("20")}>
+          <Button style={{ marginRight: "10px" }} onClick={() => unstake("20")}>
             Unstake 20 {tokenSymbol}
           </Button>
-          <Button style={{ marginRight: "10px" }} disabled={stakes.locked} onClick={() => unstake()}>
+          <Button style={{ marginRight: "10px" }} onClick={() => unstake()}>
             Unstake All
           </Button>
         </div>
