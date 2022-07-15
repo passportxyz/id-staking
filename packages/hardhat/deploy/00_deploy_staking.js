@@ -17,7 +17,7 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
 
   const Token = await ethers.getContract("Token", deployer);
 
-  const stakingArgs = [Token.address, 3, ethers.utils.parseEther("20")];
+  const stakingArgs = [Token.address];
 
   await deploy("Staking", {
     // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
