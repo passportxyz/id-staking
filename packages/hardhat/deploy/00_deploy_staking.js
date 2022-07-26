@@ -21,7 +21,7 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
 
   const stakingArgs = [Token.address];
 
-  await deploy("Staking", {
+  await deploy("IDStaking", {
     // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
     from: deployer,
     args: stakingArgs,
@@ -30,8 +30,8 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
   });
 
   // Getting a previously deployed contract
-  const Staking = await ethers.getContract("Staking", deployer);
-  await Staking.transferOwnership(admin);
+  const IDStaking = await ethers.getContract("IDStaking", deployer);
+  await IDStaking.transferOwnership(admin);
 
   // Verify from the command line by running `yarn verify`
 
@@ -40,8 +40,8 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
   try {
     if (chainId !== localChainId) {
       await run("verify:verify", {
-        address: Staking.address,
-        contract: "contracts/Staking.sol:Staking",
+        address: IDStaking.address,
+        contract: "contracts/IDStaking.sol:IDStaking",
         constructorArguments: stakingArgs,
       });
     }
@@ -49,4 +49,4 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
     console.error(error);
   }
 };
-module.exports.tags = ["Staking", "Token"];
+module.exports.tags = ["IDStaking", "Token"];
