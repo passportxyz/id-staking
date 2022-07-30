@@ -25,7 +25,7 @@ function Stakes({ readContracts, localProvider, mainnetProvider }) {
         </div>
         <div>
           {stakeLogs.map(stake => (
-            <Typography.Paragraph>
+            <Typography.Paragraph key={stake.transactionHash}>
               Round {stake.args.roundId?.toString()}:{" "}
               <Address ensProvider={mainnetProvider} fontSize={14} address={stake.args.staker} />{" "}
               {stake.args.staked ? "staked" : "unstaked"} {ethers.utils.formatUnits(stake.args.amount)} {tokenSymbol} on{" "}
