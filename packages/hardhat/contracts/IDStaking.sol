@@ -18,16 +18,25 @@ contract IDStaking is XStaking, Ownable {
     mapping(uint256 => Round) rounds;
 
     event roundCreated(uint256 id);
-    event tokenStaked(uint256 roundId, address staker, uint256 amount);
-    event xStaked(
+    event selfStake(
+        uint256 roundId,
+        address staker,
+        uint256 amount,
+        bool staked
+    );
+    event xStake(
         uint256 roundId,
         address staker,
         address user,
         uint256 amount,
         bool staked
     );
-    event tokenUnstaked(uint256 roundId, address staker, uint256 amount);
-    event tokenMigrated(address staker, uint256 fromRound, uint256 toRound);
+    event tokenMigrated(
+        address staker,
+        uint256 amount,
+        uint256 fromRound,
+        uint256 toRound
+    );
 
     modifier roundExists(uint256 roundId) {
         require(
@@ -73,7 +82,7 @@ contract IDStaking is XStaking, Ownable {
 
         rounds[roundId].tvl += amount;
 
-        emit tokenStaked(roundId, msg.sender, amount);
+        emit selfStake(roundId, msg.sender, amount, true);
     }
 
     // stakeUser
@@ -95,7 +104,7 @@ contract IDStaking is XStaking, Ownable {
 
             rounds[roundId].tvl += amounts[i];
 
-            emit xStaked(roundId, msg.sender, users[i], amounts[i], true);
+            emit xStake(roundId, msg.sender, users[i], amounts[i], true);
         }
     }
 
@@ -114,7 +123,7 @@ contract IDStaking is XStaking, Ownable {
 
         _unstake(roundId, amount);
 
-        emit tokenUnstaked(roundId, msg.sender, amount);
+        emit selfStake(roundId, msg.sender, amount, false);
     }
 
     // unstakeUser
@@ -139,7 +148,7 @@ contract IDStaking is XStaking, Ownable {
 
                 _unstakeUser(roundId, users[i], unstakeBalance);
 
-                emit xStaked(
+                emit xStake(
                     roundId,
                     msg.sender,
                     users[i],
@@ -163,9 +172,9 @@ contract IDStaking is XStaking, Ownable {
         rounds[latestRound].tvl += balance;
         stakes[latestRound][msg.sender] = balance;
 
-        emit tokenUnstaked(fromRound, msg.sender, balance);
-        emit tokenStaked(latestRound, msg.sender, balance);
-        emit tokenMigrated(msg.sender, fromRound, latestRound);
+        emit selfStake(fromRound, msg.sender, balance, false);
+        emit selfStake(latestRound, msg.sender, balance, true);
+        emit tokenMigrated(msg.sender, balance, fromRound, latestRound);
     }
 
     // VIEW
@@ -176,13 +185,15 @@ contract IDStaking is XStaking, Ownable {
         returns (
             uint256 start,
             uint256 duration,
-            uint256 tvl
+            uint256 tvl,
+            string memory meta
         )
     {
         return (
             rounds[roundId].start,
             rounds[roundId].duration,
-            rounds[roundId].tvl
+            rounds[roundId].tvl,
+            rounds[roundId].meta
         );
     }
 
@@ -191,7 +202,7 @@ contract IDStaking is XStaking, Ownable {
         view
         returns (bool isActive)
     {
-        (uint256 start, uint256 duration, ) = fetchRoundMeta(roundId);
+        (uint256 start, uint256 duration, , ) = fetchRoundMeta(roundId);
         isActive =
             start < block.timestamp &&
             start + duration > block.timestamp;
