@@ -7,7 +7,6 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract IDStaking is XStaking, Ownable {
     uint256 public latestRound;
-
     struct Round {
         string meta;
         uint256 tvl;
@@ -39,9 +38,24 @@ contract IDStaking is XStaking, Ownable {
     );
 
     modifier roundExists(uint256 roundId) {
+        require(roundId > 0 && roundId <= latestRound, "Round does not exist");
+        _;
+    }
+
+    modifier canStakeRound(uint256 roundId) {
+        require(roundId > 0 && roundId <= latestRound, "Round does not exist");
         require(
-            rounds[roundId].start > 0 && roundId > 0,
-            "Round does not exist"
+            rounds[roundId].start + rounds[roundId].duration < block.timestamp,
+            "Can't stake on this round"
+        );
+        _;
+    }
+
+    modifier canUnstakeRound(uint256 roundId) {
+        require(roundId > 0 && roundId <= latestRound, "Round does not exist");
+        require(
+            rounds[roundId].start + rounds[roundId].duration > block.timestamp,
+            "Can't unstake an active round"
         );
         _;
     }
@@ -75,9 +89,10 @@ contract IDStaking is XStaking, Ownable {
     }
 
     // stake
-    function stake(uint256 roundId, uint256 amount) public {
-        require(isActiveRound(roundId), "Can't stake an inactive round");
-
+    function stake(uint256 roundId, uint256 amount)
+        public
+        canStakeRound(roundId)
+    {
         _stake(roundId, amount);
 
         rounds[roundId].tvl += amount;
@@ -90,8 +105,7 @@ contract IDStaking is XStaking, Ownable {
         uint256 roundId,
         address[] memory users,
         uint256[] memory amounts
-    ) public {
-        require(isActiveRound(roundId), "Can't stake an inactive round");
+    ) public canStakeRound(roundId) {
         require(users.length == amounts.length, "Unequal users and amount");
 
         for (uint256 i = 0; i < users.length; i++) {
@@ -109,11 +123,10 @@ contract IDStaking is XStaking, Ownable {
     }
 
     // unstake
-    function unstake(uint256 roundId, uint256 amount) public {
-        require(
-            !isActiveRound(roundId),
-            "Can't unstake during an active round"
-        );
+    function unstake(uint256 roundId, uint256 amount)
+        public
+        canUnstakeRound(roundId)
+    {
         require(
             stakes[roundId][msg.sender] >= amount,
             "Not enough balance to withdraw"
@@ -127,12 +140,10 @@ contract IDStaking is XStaking, Ownable {
     }
 
     // unstakeUser
-    function unstakeUsers(uint256 roundId, address[] memory users) public {
-        require(
-            !isActiveRound(roundId),
-            "Can't unstake during an active round"
-        );
-
+    function unstakeUsers(uint256 roundId, address[] memory users)
+        public
+        canUnstakeRound(roundId)
+    {
         for (uint256 i = 0; i < users.length; i++) {
             require(address(0) != users[i], "can't stake the zero address");
             require(
@@ -160,7 +171,7 @@ contract IDStaking is XStaking, Ownable {
     }
 
     // migrateStake
-    function migrateStake(uint256 fromRound) public {
+    function migrateStake(uint256 fromRound) public canUnstakeRound(fromRound) {
         require(fromRound < latestRound, "Can't migrate from an active round");
 
         uint256 balance = stakes[fromRound][msg.sender];
