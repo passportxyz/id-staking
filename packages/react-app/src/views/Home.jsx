@@ -11,7 +11,7 @@ function Home({ tx, readContracts, address, writeContracts, mainnetProvider }) {
     useContractReader(readContracts, "Token", "balanceOf", [address]) || zero,
   );
   const tokenSymbol = useContractReader(readContracts, "Token", "symbol");
-  const latestRound = (useContractReader(readContracts, "Staking", "latestRound", []) || zero).toNumber();
+  const latestRound = (useContractReader(readContracts, "IDStaking", "latestRound", []) || zero).toNumber();
 
   const rounds = [...Array(latestRound).keys()].map(i => i + 1).reverse();
 
@@ -20,19 +20,27 @@ function Home({ tx, readContracts, address, writeContracts, mainnetProvider }) {
   };
 
   const approve = async () => {
-    tx(writeContracts.Token.approve(readContracts.Staking.address, ethers.utils.parseUnits("10000000")));
+    tx(writeContracts.Token.approve(readContracts.IDStaking.address, ethers.utils.parseUnits("10000000")));
   };
 
   const stake = async (id, amount) => {
-    tx(writeContracts.Staking.stake(id + "", ethers.utils.parseUnits(amount)));
+    tx(writeContracts.IDStaking.stake(id + "", ethers.utils.parseUnits(amount)));
+  };
+
+  const stakeUsers = async (id, users, amounts) => {
+    tx(writeContracts.IDStaking.stakeUsers(id + "", users, amounts));
   };
 
   const unstake = async (id, amount) => {
-    tx(writeContracts.Staking.unstake(id + "", ethers.utils.parseUnits(amount)));
+    tx(writeContracts.IDStaking.unstake(id + "", ethers.utils.parseUnits(amount)));
+  };
+
+  const unstakeUsers = async (id, users, amount) => {
+    tx(writeContracts.IDStaking.unstakeUsers(id + "", users));
   };
 
   const migrate = async id => {
-    tx(writeContracts.Staking.migrateStake(id + ""));
+    tx(writeContracts.IDStaking.migrateStake(id + ""));
   };
 
   return (
@@ -70,9 +78,12 @@ function Home({ tx, readContracts, address, writeContracts, mainnetProvider }) {
           unstake={unstake}
           address={address}
           migrate={migrate}
+          stakeUsers={stakeUsers}
           latestRound={latestRound}
           tokenSymbol={tokenSymbol}
+          unstakeUsers={unstakeUsers}
           readContracts={readContracts}
+          mainnetProvider={mainnetProvider}
         />
       ))}
     </>
