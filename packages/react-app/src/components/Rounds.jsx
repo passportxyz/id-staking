@@ -56,11 +56,11 @@ const Rounds = ({
       <div style={{ padding: "5px", marginTop: "5px" }}>
         <Divider>Your Stakings</Divider>
         <div style={{ width: "100%", marginTop: "5px" }}>
-          <Button style={{ marginRight: "10px" }} onClick={() => stake(round, "50")}>
-            Stake 50 {tokenSymbol}
+          <Button style={{ marginRight: "10px" }} onClick={() => stake(round, "100")}>
+            Stake 100 {tokenSymbol}
           </Button>
-          <Button style={{ marginRight: "10px" }} onClick={() => unstake(round, "50")}>
-            Unstake 50 {tokenSymbol}
+          <Button style={{ marginRight: "10px" }} onClick={() => unstake(round, "100")}>
+            Unstake 100 {tokenSymbol}
           </Button>
           {round !== latestRound && stakedBalance !== "0.0" && (
             <Button style={{ marginRight: "10px" }} onClick={() => migrate(round)}>
