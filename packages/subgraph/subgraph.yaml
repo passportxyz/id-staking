@@ -1,14 +1,14 @@
-specVersion: 0.0.4
+specVersion: 0.0.5
 schema:
   file: ./src/schema.graphql
 dataSources:
   - kind: ethereum/contract
     name: IDStaking
-    network: localhost
+    network: goerli
     source:
-      address: '0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1'
       abi: IDStaking
-      startBlock: 1
+      address: '0x5acEfAC466Fa29579C462F84e9F2D8892df2b12F'
+      startBlock: 7346553
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
