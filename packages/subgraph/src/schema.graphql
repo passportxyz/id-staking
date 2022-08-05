@@ -1,15 +1,47 @@
-type Purpose @entity {
+type User @entity {
   id: ID!
-  sender: Sender!
-  purpose: String!
+  address: Bytes!
+  createdAt: BigInt!
+  transactionHash: String!
+  stakes: [Stake!] @derivedFrom(field: "user")
+  xstakeOnMe: [XStake!] @derivedFrom(field: "to")
+  xstakeTo: [XStake!] @derivedFrom(field: "from")
+}
+
+type Stake @entity {
+  id: ID!
+  user: User!
+  round: Round!
+  stake: BigInt!
+}
+
+type XStake @entity {
+  id: ID!
+  to: User!
+  from: User!
+  round: Round!
+  amount: BigInt!
+}
+
+type Migration @entity {
+  id: ID!
+  user: User!
+  stake: Stake!
+  toRound: Round!
+  amount: BigInt!
+  fromRound: Round!
   createdAt: BigInt!
   transactionHash: String!
 }
 
-type Sender @entity {
+type Round @entity {
   id: ID!
-  address: Bytes!
-  purposes: [Purpose!] @derivedFrom(field: "sender")
+  tvl: BigInt!
+  meta: String!
+  start: BigInt!
+  duration: BigInt!
   createdAt: BigInt!
-  purposeCount: BigInt!
+  transactionHash: String!
+  stakes: [Stake!] @derivedFrom(field: "round")
+  xstakes: [XStake!] @derivedFrom(field: "round")
 }

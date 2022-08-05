@@ -1,25 +1,31 @@
-specVersion: 0.0.4
+specVersion: 0.0.5
 schema:
   file: ./src/schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: YourContract
-    network: localhost
+    name: IDStaking
+    network: goerli
     source:
-      address: "0x5FbDB2315678afecb367f032d93F642f64180aa3"
-      abi: YourContract
-      startBlock: 1
+      abi: IDStaking
+      address: '0x5acEfAC466Fa29579C462F84e9F2D8892df2b12F'
+      startBlock: 7346553
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
-        - Purpose
-        - Sender
+        - Stake
+        - Round
       abis:
-        - name: YourContract
-          file: ./abis/localhost_YourContract.json
+        - name: IDStaking
+          file: ./abis/localhost_IDStaking.json
       eventHandlers:
-        - event: SetPurpose(address,string)
-          handler: handleSetPurpose
+        - event: roundCreated(uint256)
+          handler: handleRound
+        - event: selfStake(uint256,address,uint256,bool)
+          handler: handleStake
+        - event: tokenMigrated(address,uint256,uint256,uint256)
+          handler: handleMigration
+        - event: xStake(uint256,address,address,uint256,bool)
+          handler: handleXStake
       file: ./src/mapping.ts

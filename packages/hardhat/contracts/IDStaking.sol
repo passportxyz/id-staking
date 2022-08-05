@@ -7,7 +7,6 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract IDStaking is XStaking, Ownable {
     uint256 public latestRound;
-
     struct Round {
         string meta;
         uint256 tvl;
@@ -18,21 +17,45 @@ contract IDStaking is XStaking, Ownable {
     mapping(uint256 => Round) rounds;
 
     event roundCreated(uint256 id);
-    event tokenStaked(uint256 roundId, address staker, uint256 amount);
-    event xStaked(
+    event selfStake(
+        uint256 roundId,
+        address staker,
+        uint256 amount,
+        bool staked
+    );
+    event xStake(
         uint256 roundId,
         address staker,
         address user,
         uint256 amount,
         bool staked
     );
-    event tokenUnstaked(uint256 roundId, address staker, uint256 amount);
-    event tokenMigrated(address staker, uint256 fromRound, uint256 toRound);
+    event tokenMigrated(
+        address staker,
+        uint256 amount,
+        uint256 fromRound,
+        uint256 toRound
+    );
 
     modifier roundExists(uint256 roundId) {
+        require(roundId > 0 && roundId <= latestRound, "Round does not exist");
+        _;
+    }
+
+    modifier canStakeRound(uint256 roundId) {
+        require(roundId > 0 && roundId <= latestRound, "Round does not exist");
         require(
-            rounds[roundId].start > 0 && roundId > 0,
-            "Round does not exist"
+            rounds[roundId].start + rounds[roundId].duration > block.timestamp,
+            "Can't stake on this round"
+        );
+        _;
+    }
+
+    modifier canUnstakeRound(uint256 roundId) {
+        require(roundId > 0 && roundId <= latestRound, "Round does not exist");
+        require(
+            rounds[roundId].start + rounds[roundId].duration < block.timestamp,
+            "Can't unstake an active round"
         );
         _;
     }
@@ -66,14 +89,15 @@ contract IDStaking is XStaking, Ownable {
     }
 
     // stake
-    function stake(uint256 roundId, uint256 amount) public {
-        require(isActiveRound(roundId), "Can't stake an inactive round");
-
+    function stake(uint256 roundId, uint256 amount)
+        public
+        canStakeRound(roundId)
+    {
         _stake(roundId, amount);
 
         rounds[roundId].tvl += amount;
 
-        emit tokenStaked(roundId, msg.sender, amount);
+        emit selfStake(roundId, msg.sender, amount, true);
     }
 
     // stakeUser
@@ -81,8 +105,7 @@ contract IDStaking is XStaking, Ownable {
         uint256 roundId,
         address[] memory users,
         uint256[] memory amounts
-    ) public {
-        require(isActiveRound(roundId), "Can't stake an inactive round");
+    ) public canStakeRound(roundId) {
         require(users.length == amounts.length, "Unequal users and amount");
 
         for (uint256 i = 0; i < users.length; i++) {
@@ -95,16 +118,15 @@ contract IDStaking is XStaking, Ownable {
 
             rounds[roundId].tvl += amounts[i];
 
-            emit xStaked(roundId, msg.sender, users[i], amounts[i], true);
+            emit xStake(roundId, msg.sender, users[i], amounts[i], true);
         }
     }
 
     // unstake
-    function unstake(uint256 roundId, uint256 amount) public {
-        require(
-            !isActiveRound(roundId),
-            "Can't unstake during an active round"
-        );
+    function unstake(uint256 roundId, uint256 amount)
+        public
+        canUnstakeRound(roundId)
+    {
         require(
             stakes[roundId][msg.sender] >= amount,
             "Not enough balance to withdraw"
@@ -114,16 +136,14 @@ contract IDStaking is XStaking, Ownable {
 
         _unstake(roundId, amount);
 
-        emit tokenUnstaked(roundId, msg.sender, amount);
+        emit selfStake(roundId, msg.sender, amount, false);
     }
 
     // unstakeUser
-    function unstakeUsers(uint256 roundId, address[] memory users) public {
-        require(
-            !isActiveRound(roundId),
-            "Can't unstake during an active round"
-        );
-
+    function unstakeUsers(uint256 roundId, address[] memory users)
+        public
+        canUnstakeRound(roundId)
+    {
         for (uint256 i = 0; i < users.length; i++) {
             require(address(0) != users[i], "can't stake the zero address");
             require(
@@ -139,7 +159,7 @@ contract IDStaking is XStaking, Ownable {
 
                 _unstakeUser(roundId, users[i], unstakeBalance);
 
-                emit xStaked(
+                emit xStake(
                     roundId,
                     msg.sender,
                     users[i],
@@ -151,7 +171,7 @@ contract IDStaking is XStaking, Ownable {
     }
 
     // migrateStake
-    function migrateStake(uint256 fromRound) public {
+    function migrateStake(uint256 fromRound) public canUnstakeRound(fromRound) {
         require(fromRound < latestRound, "Can't migrate from an active round");
 
         uint256 balance = stakes[fromRound][msg.sender];
@@ -163,9 +183,9 @@ contract IDStaking is XStaking, Ownable {
         rounds[latestRound].tvl += balance;
         stakes[latestRound][msg.sender] = balance;
 
-        emit tokenUnstaked(fromRound, msg.sender, balance);
-        emit tokenStaked(latestRound, msg.sender, balance);
-        emit tokenMigrated(msg.sender, fromRound, latestRound);
+        emit selfStake(fromRound, msg.sender, balance, false);
+        emit selfStake(latestRound, msg.sender, balance, true);
+        emit tokenMigrated(msg.sender, balance, fromRound, latestRound);
     }
 
     // VIEW
@@ -176,13 +196,15 @@ contract IDStaking is XStaking, Ownable {
         returns (
             uint256 start,
             uint256 duration,
-            uint256 tvl
+            uint256 tvl,
+            string memory meta
         )
     {
         return (
             rounds[roundId].start,
             rounds[roundId].duration,
-            rounds[roundId].tvl
+            rounds[roundId].tvl,
+            rounds[roundId].meta
         );
     }
 
@@ -191,7 +213,7 @@ contract IDStaking is XStaking, Ownable {
         view
         returns (bool isActive)
     {
-        (uint256 start, uint256 duration, ) = fetchRoundMeta(roundId);
+        (uint256 start, uint256 duration, , ) = fetchRoundMeta(roundId);
         isActive =
             start < block.timestamp &&
             start + duration > block.timestamp;

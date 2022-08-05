@@ -16,7 +16,7 @@ function Home({ tx, readContracts, address, writeContracts, mainnetProvider }) {
   const rounds = [...Array(latestRound).keys()].map(i => i + 1).reverse();
 
   const mintToken = async () => {
-    tx(writeContracts.Token.mintAmount(ethers.utils.parseUnits("100")));
+    tx(writeContracts.Token.mintAmount(ethers.utils.parseUnits("1000")));
   };
 
   const approve = async () => {
@@ -53,7 +53,7 @@ function Home({ tx, readContracts, address, writeContracts, mainnetProvider }) {
 
           <div style={{ width: "100%" }}>
             <Button style={{ marginRight: "10px" }} onClick={mintToken}>
-              Mint 100 {tokenSymbol}
+              Mint 1000 {tokenSymbol}
             </Button>
             <Button style={{ marginRight: "10px" }} onClick={approve}>
               Approve Stake contract for GTC

@@ -9,7 +9,7 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
   const { deployer } = await getNamedAccounts();
   const chainId = await getChainId();
 
-  const admin = "0x77B8A624b2e8f6772C0f20c683b075E2bf778d64";
+  const admin = "0x14a78dE2263FC6665Dac7ACb7f492A1eA474F836";
 
   await deploy("Token", {
     from: deployer,
