@@ -27,16 +27,8 @@ function Home({ tx, readContracts, address, writeContracts, mainnetProvider }) {
     tx(writeContracts.IDStaking.stake(id + "", ethers.utils.parseUnits(amount)));
   };
 
-  const stakeUsers = async (id, users, amounts) => {
-    tx(writeContracts.IDStaking.stakeUsers(id + "", users, amounts));
-  };
-
   const unstake = async (id, amount) => {
     tx(writeContracts.IDStaking.unstake(id + "", ethers.utils.parseUnits(amount)));
-  };
-
-  const unstakeUsers = async (id, users, amount) => {
-    tx(writeContracts.IDStaking.unstakeUsers(id + "", users));
   };
 
   const migrate = async id => {
