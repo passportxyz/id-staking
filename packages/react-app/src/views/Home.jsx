@@ -70,9 +70,12 @@ function Home({ tx, readContracts, address, writeContracts, mainnetProvider }) {
           unstake={unstake}
           address={address}
           migrate={migrate}
+          stakeUsers={stakeUsers}
           latestRound={latestRound}
           tokenSymbol={tokenSymbol}
+          unstakeUsers={unstakeUsers}
           readContracts={readContracts}
+          mainnetProvider={mainnetProvider}
         />
       ))}
     </>

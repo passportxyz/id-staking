@@ -1,11 +1,11 @@
 //SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0 <0.9.0;
 
-import {Staking} from "./Staking.sol";
+import {XStaking} from "./XStaking.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-contract IDStaking is Staking, Ownable {
+contract IDStaking is XStaking, Ownable {
     uint256 public latestRound;
 
     struct Round {
@@ -19,6 +19,13 @@ contract IDStaking is Staking, Ownable {
 
     event roundCreated(uint256 id);
     event tokenStaked(uint256 roundId, address staker, uint256 amount);
+    event xStaked(
+        uint256 roundId,
+        address staker,
+        address user,
+        uint256 amount,
+        bool staked
+    );
     event tokenUnstaked(uint256 roundId, address staker, uint256 amount);
     event tokenMigrated(address staker, uint256 fromRound, uint256 toRound);
 
@@ -69,6 +76,29 @@ contract IDStaking is Staking, Ownable {
         emit tokenStaked(roundId, msg.sender, amount);
     }
 
+    // stakeUser
+    function stakeUsers(
+        uint256 roundId,
+        address[] memory users,
+        uint256[] memory amounts
+    ) public {
+        require(isActiveRound(roundId), "Can't stake an inactive round");
+        require(users.length == amounts.length, "Unequal users and amount");
+
+        for (uint256 i = 0; i < users.length; i++) {
+            require(address(0) != users[i], "can't stake the zero address");
+            require(
+                users[i] != msg.sender,
+                "You can't stake on your address here"
+            );
+            _stakeUser(roundId, users[i], amounts[i]);
+
+            rounds[roundId].tvl += amounts[i];
+
+            emit xStaked(roundId, msg.sender, users[i], amounts[i], true);
+        }
+    }
+
     // unstake
     function unstake(uint256 roundId, uint256 amount) public {
         require(
@@ -85,6 +115,39 @@ contract IDStaking is Staking, Ownable {
         _unstake(roundId, amount);
 
         emit tokenUnstaked(roundId, msg.sender, amount);
+    }
+
+    // unstakeUser
+    function unstakeUsers(uint256 roundId, address[] memory users) public {
+        require(
+            !isActiveRound(roundId),
+            "Can't unstake during an active round"
+        );
+
+        for (uint256 i = 0; i < users.length; i++) {
+            require(address(0) != users[i], "can't stake the zero address");
+            require(
+                users[i] != msg.sender,
+                "You can't stake on your address here"
+            );
+
+            bytes32 stakeId = getStakeId(msg.sender, users[i]);
+            uint256 unstakeBalance = xStakes[roundId][stakeId];
+
+            if (unstakeBalance > 0) {
+                rounds[roundId].tvl -= unstakeBalance;
+
+                _unstakeUser(roundId, users[i], unstakeBalance);
+
+                emit xStaked(
+                    roundId,
+                    msg.sender,
+                    users[i],
+                    unstakeBalance,
+                    false
+                );
+            }
+        }
     }
 
     // migrateStake

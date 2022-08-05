@@ -22,7 +22,7 @@ import externalContracts from "./contracts/external_contracts";
 // contracts
 import deployedContracts from "./contracts/hardhat_contracts.json";
 import { Transactor, Web3ModalSetup } from "./helpers";
-import { Admin, Home, Subgraph } from "./views";
+import { Admin, Home, Stakes, Subgraph } from "./views";
 import { useStaticJsonRPC } from "./hooks";
 
 const { ethers } = require("ethers");
@@ -46,7 +46,7 @@ const { ethers } = require("ethers");
 */
 
 /// 📡 What chain are your contracts deployed to?
-const initialNetwork = NETWORKS.localhost; // <------- select your target frontend network (localhost, rinkeby, xdai, mainnet)
+const initialNetwork = NETWORKS.goerli; // <------- select your target frontend network (localhost, rinkeby, xdai, mainnet)
 
 // 😬 Sorry for all the console logging
 const DEBUG = true;
@@ -60,7 +60,7 @@ const web3Modal = Web3ModalSetup();
 const providers = [
   "https://eth-mainnet.gateway.pokt.network/v1/lb/611156b4a585a20035148406",
   `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_KEY}`,
-  "https://rpc.scaffoldeth.io:48544",
+  // "https://rpc.scaffoldeth.io:48544",
 ];
 
 function App(props) {
@@ -70,7 +70,7 @@ function App(props) {
 
   const [injectedProvider, setInjectedProvider] = useState();
   const [address, setAddress] = useState();
-  const [selectedNetwork, setSelectedNetwork] = useState(networkOptions[0]);
+  const [selectedNetwork, setSelectedNetwork] = useState(networkOptions[3]);
   const location = useLocation();
 
   const targetNetwork = NETWORKS[selectedNetwork];
@@ -179,7 +179,7 @@ function App(props) {
   return (
     <div className="App">
       {/* ✏️ Edit the header and change the title to your project name */}
-      <Header>
+      <Header title="🆔🤑 ID Staking" subTitle="Stake GTC on your Identity" link="/">
         {/* 👨‍💼 Your account is in the top right with a wallet at connect options */}
         <div style={{ position: "relative", display: "flex", flexDirection: "column" }}>
           <div style={{ display: "flex", flex: 1 }}>
@@ -222,6 +222,9 @@ function App(props) {
         <Menu.Item key="/">
           <Link to="/">App Home</Link>
         </Menu.Item>
+        <Menu.Item key="/stake-log">
+          <Link to="/stake-log">xStake Log</Link>
+        </Menu.Item>
         <Menu.Item key="/admin">
           <Link to="/admin">Admin Control</Link>
         </Menu.Item>
@@ -254,6 +257,17 @@ function App(props) {
             mainnetProvider={mainnetProvider}
           />
         </Route>
+        <Route exact path="/stake-log">
+          {/* pass in any web3 props to this Home component. For example, yourLocalBalance */}
+          <Stakes
+            tx={tx}
+            address={address}
+            localProvider={localProvider}
+            readContracts={readContracts}
+            writeContracts={writeContracts}
+            mainnetProvider={mainnetProvider}
+          />
+        </Route>
         <Route exact path="/debug">
           {/*
                 🎛 this scaffolding is full of commonly used components
@@ -271,7 +285,7 @@ function App(props) {
             contractConfig={contractConfig}
           />
           <Contract
-            name="Staking"
+            name="IDStaking"
             price={price}
             signer={userSigner}
             provider={localProvider}
@@ -293,7 +307,7 @@ function App(props) {
       <ThemeSwitch />
 
       {/* 🗺 Extra UI like gas price, eth price, faucet, and support: */}
-      <div style={{ position: "fixed", textAlign: "left", left: 0, bottom: 20, padding: 10 }}>
+      {/* <div style={{ position: "fixed", textAlign: "left", left: 0, bottom: 20, padding: 10 }}>
         <Row align="middle" gutter={[4, 4]}>
           <Col span={8}>
             <Ramp price={price} address={address} networks={NETWORKS} />
@@ -320,17 +334,14 @@ function App(props) {
 
         <Row align="middle" gutter={[4, 4]}>
           <Col span={24}>
-            {
-              /*  if the local provider has a signer, let's show the faucet:  */
-              faucetAvailable ? (
-                <Faucet localProvider={localProvider} price={price} ensProvider={mainnetProvider} />
-              ) : (
-                ""
-              )
-            }
+            {faucetAvailable ? (
+              <Faucet localProvider={localProvider} price={price} ensProvider={mainnetProvider} />
+            ) : (
+              ""
+            )}
           </Col>
         </Row>
-      </div>
+      </div> */}
     </div>
   );
 }
