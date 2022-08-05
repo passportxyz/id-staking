@@ -29,13 +29,4 @@ contract Staking {
     {
         return stakes[roundId][user];
     }
-
-        function getUserStakeFromLatestRound(address user)
-        public
-        view
-        ///roundExists(roundId)
-        returns (uint256)
-    {
-        return rounds[latestRound].stakes[user];
-    }
 }
