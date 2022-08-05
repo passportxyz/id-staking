@@ -1,23 +1,34 @@
-import React, { useState } from "react";
+import React from "react";
 import { useContractReader } from "eth-hooks";
 import { ethers } from "ethers";
-import { Button, Divider, Typography } from "antd";
-import { MultiAddressInput } from "../components";
-// import { Link } from "react-router-dom";
+import { Button, Divider, Form, InputNumber } from "antd";
+import moment, { duration } from "moment";
 
 // TODO : Stake, unstake, challenge
 
 const zero = ethers.BigNumber.from("0");
 
 function Home({ tx, readContracts, address, writeContracts, mainnetProvider }) {
-  const [challengeAddresses, setChallengeAddresses] = useState([]);
+  const [form] = Form.useForm();
 
   const tokenBalance = ethers.utils.formatUnits(
     useContractReader(readContracts, "Token", "balanceOf", [address]) || zero,
   );
   const tokenSymbol = useContractReader(readContracts, "Token", "symbol");
-  const stakes = useContractReader(readContracts, "Staking", "getStakeFor", [address]) || {};
-  const stakedBalance = ethers.utils.formatUnits(stakes.balance || zero);
+  const stakedBalance = ethers.utils.formatUnits(
+    useContractReader(readContracts, "Staking", "getStakeFor", [address]) || zero,
+  );
+  const [start, duration, isActiveRound] = useContractReader(readContracts, "Staking", "fetchMeta", []) || [];
+
+  console.log({ isActiveRound });
+
+  const initialize = async v => {
+    const durationInSeconds = 86400 * parseInt(v.duration);
+    // const startInSeconds = Math.floor(Date.now() / 1000) + 120;
+    const startInSeconds = Math.floor(Date.now() / 1000) + 60;
+
+    tx(writeContracts.Staking.updateMeta(startInSeconds, durationInSeconds));
+  };
 
   const mintToken = async () => {
     tx(writeContracts.Token.mintAmount(ethers.utils.parseUnits("100")));
@@ -34,14 +45,9 @@ function Home({ tx, readContracts, address, writeContracts, mainnetProvider }) {
   };
 
   const unstake = async amount => {
-    amount = amount || tokenBalance;
+    amount = amount || stakedBalance;
 
     tx(writeContracts.Staking.unstake(ethers.utils.parseUnits(amount)));
-  };
-
-  const challenge = async () => {
-    console.log(writeContracts.Staking.challenge);
-    tx(writeContracts.Staking.challenge(challengeAddresses));
   };
 
   return (
@@ -60,20 +66,67 @@ function Home({ tx, readContracts, address, writeContracts, mainnetProvider }) {
       <div>
         Staked Balance: {stakedBalance} {tokenSymbol}
       </div>
-      <div>
-        Stake Locked:{" "}
-        <Typography.Text type={stakes.locked ? "danger" : "success"}>{stakes.locked ? "Yes" : "No"}</Typography.Text>{" "}
+      {start && start.gt(zero) && (
+        <div>Start: {moment.unix(start.toString()).format("dddd, MMMM Do YYYY, h:mm:ss a")}</div>
+      )}
+      {duration && duration.gt(zero) && (
+        <div>End: {moment.unix(start.add(duration)).format("dddd, MMMM Do YYYY, h:mm:ss a")}</div>
+      )}
+      <div>Is active round: {isActiveRound ? "Yes" : "No"}</div>
+
+      <div style={{ marginTop: "20px" }}>
+        <Divider>Start New Staking Round</Divider>
+        <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
+          <Form
+            form={form}
+            style={{ margin: "0px auto" }}
+            initialValues={{ duration: "14" }}
+            name="initialize"
+            layout="inline"
+            onFinish={initialize}
+          >
+            <Form.Item
+              name="duration"
+              rules={[
+                {
+                  required: true,
+                  message: "Duration has to be a number > 0",
+                },
+              ]}
+              label="Duration (in days)"
+            >
+              <InputNumber min={1} />
+            </Form.Item>
+            <Form.Item>
+              <Button style={{ marginRight: "10px" }} htmlType="submit">
+                Start
+              </Button>
+            </Form.Item>
+          </Form>
+        </div>
       </div>
 
       <div style={{ marginTop: "20px" }}>
-        <Divider>Stake</Divider>
+        <Divider>Get GTC Tokens</Divider>
         <div style={{ width: "100%" }}>
           <Button style={{ marginRight: "10px" }} onClick={mintToken}>
             Mint
           </Button>
+        </div>
+      </div>
+
+      <div style={{ marginTop: "20px" }}>
+        <Divider>Approve Token For Stake</Divider>
+        <div style={{ width: "100%" }}>
           <Button style={{ marginRight: "10px" }} onClick={approve}>
             Approve GTC
           </Button>
+        </div>
+      </div>
+
+      <div style={{ marginTop: "20px", padding: "5px" }}>
+        <Divider>Stake</Divider>
+        <div style={{ width: "100%" }}>
           <Button style={{ marginRight: "10px" }} onClick={() => stake("20")}>
             Stake 20 {tokenSymbol}
           </Button>
@@ -83,29 +136,14 @@ function Home({ tx, readContracts, address, writeContracts, mainnetProvider }) {
         </div>
       </div>
 
-      <div style={{ marginTop: "20px" }}>
+      <div style={{ marginTop: "20px", padding: "5px" }}>
         <Divider>Unstake</Divider>
         <div style={{ width: "100%" }}>
-          <Button style={{ marginRight: "10px" }} disabled={stakes.locked} onClick={() => unstake("20")}>
+          <Button style={{ marginRight: "10px" }} onClick={() => unstake("20")}>
             Unstake 20 {tokenSymbol}
           </Button>
-          <Button style={{ marginRight: "10px" }} disabled={stakes.locked} onClick={() => unstake()}>
+          <Button style={{ marginRight: "10px" }} onClick={() => unstake()}>
             Unstake All
-          </Button>
-        </div>
-      </div>
-
-      <div style={{ marginTop: "20px" }}>
-        <Divider>Challenge</Divider>
-        <div style={{ width: "100%", paddingLeft: "10px", paddingRight: "10px" }}>
-          <MultiAddressInput
-            ensProvider={mainnetProvider}
-            placeholder="Enter addresses for the challenge"
-            onChange={adds => setChallengeAddresses(adds)}
-          />
-
-          <Button style={{ marginTop: "10px" }} onClick={challenge} disabled={challengeAddresses.length === 0}>
-            Submit challenges
           </Button>
         </div>
       </div>
