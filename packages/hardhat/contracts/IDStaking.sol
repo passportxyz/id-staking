@@ -45,7 +45,7 @@ contract IDStaking is XStaking, Ownable {
     modifier canStakeRound(uint256 roundId) {
         require(roundId > 0 && roundId <= latestRound, "Round does not exist");
         require(
-            rounds[roundId].start + rounds[roundId].duration < block.timestamp,
+            rounds[roundId].start + rounds[roundId].duration > block.timestamp,
             "Can't stake on this round"
         );
         _;
@@ -54,7 +54,7 @@ contract IDStaking is XStaking, Ownable {
     modifier canUnstakeRound(uint256 roundId) {
         require(roundId > 0 && roundId <= latestRound, "Round does not exist");
         require(
-            rounds[roundId].start + rounds[roundId].duration > block.timestamp,
+            rounds[roundId].start + rounds[roundId].duration < block.timestamp,
             "Can't unstake an active round"
         );
         _;
