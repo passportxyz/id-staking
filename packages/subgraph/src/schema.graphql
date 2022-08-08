@@ -3,6 +3,7 @@ type User @entity {
   address: Bytes!
   createdAt: BigInt!
   transactionHash: String!
+  totalStakedOnMe: BigInt!
   stakes: [Stake!] @derivedFrom(field: "user")
   xstakeOnMe: [XStake!] @derivedFrom(field: "to")
   xstakeTo: [XStake!] @derivedFrom(field: "from")
