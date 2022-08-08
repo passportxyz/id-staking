@@ -1,7 +1,8 @@
-import { Button, Divider, Form, InputNumber } from "antd";
+import { Button, Form, InputNumber, Menu, Typography } from "antd";
 import { useContractReader } from "eth-hooks";
 import { ethers } from "ethers";
 import moment from "moment";
+import { useState } from "react";
 import AddressInput from "./AddressInput";
 
 const zero = ethers.BigNumber.from("0");
@@ -20,6 +21,8 @@ const Rounds = ({
   unstakeUsers,
 }) => {
   const [form] = Form.useForm();
+  const [openView, setOpenView] = useState("self");
+
   const stakedBalance = ethers.utils.formatUnits(
     useContractReader(readContracts, "IDStaking", "getUserStakeForRound", [round, address]) || zero,
   );
@@ -53,45 +56,68 @@ const Rounds = ({
         {moment.unix((start || zero).add(duration || zero).toString()).format("dddd, MMMM Do YYYY, h:mm:ss a")}
       </div>
 
-      <div style={{ padding: "5px", marginTop: "5px" }}>
-        <Divider>Your Stakings</Divider>
-        <div style={{ width: "100%", marginTop: "5px" }}>
-          <Button style={{ marginRight: "10px" }} onClick={() => stake(round, "100")}>
-            Stake 100 {tokenSymbol}
-          </Button>
-          <Button style={{ marginRight: "10px" }} onClick={() => unstake(round, "100")}>
-            Unstake 100 {tokenSymbol}
-          </Button>
-          {round !== latestRound && stakedBalance !== "0.0" && (
-            <Button style={{ marginRight: "10px" }} onClick={() => migrate(round)}>
-              Migrate Stake {tokenSymbol}
-            </Button>
-          )}
-        </div>
+      <Menu
+        mode="horizontal"
+        defaultSelectedKeys={["self"]}
+        style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}
+        onSelect={({ key }) => setOpenView(key)}
+      >
+        <Menu.Item key="self">Self Staking</Menu.Item>
+        <Menu.Item key="community">Community Staking</Menu.Item>
+      </Menu>
 
-        <Divider>Cross Stakings</Divider>
-        <div style={{ width: "100%", marginTop: "5px" }}>
-          <Form
-            form={form}
-            style={{ margin: "0px auto", width: "100%", padding: "0px 10px" }}
-            initialValues={{ amount: "10" }}
-            name="stakeUsers"
-            layout="vertical"
-            onFinish={handleStakeUsers}
-          >
-            <Form.Item name="address" required label="User Address">
-              <AddressInput ensProvider={mainnetProvider} placeholder="Address of trusted staker" />
-            </Form.Item>
-            <Form.Item name="amount" required label="GTC stake amount">
-              <InputNumber min={1} style={{ width: "100%" }} />
-            </Form.Item>
-            <Form.Item>
-              <Button style={{ marginRight: "10px" }} htmlType="submit">
-                Stake on User
+      <div style={{ padding: "5px", marginTop: "10px" }}>
+        {openView === "self" && (
+          <div style={{ width: "100%", marginTop: "5px" }}>
+            <Button style={{ marginRight: "10px" }} onClick={() => stake(round, "100")}>
+              Stake 100 {tokenSymbol}
+            </Button>
+            <Button style={{ marginRight: "10px" }} onClick={() => unstake(round, "100")}>
+              Unstake 100 {tokenSymbol}
+            </Button>
+            {round !== latestRound && stakedBalance !== "0.0" && (
+              <Button style={{ marginRight: "10px" }} onClick={() => migrate(round)}>
+                Migrate Stake {tokenSymbol}
               </Button>
-            </Form.Item>
-          </Form>
-        </div>
+            )}
+          </div>
+        )}
+
+        {openView === "community" && (
+          <div style={{ width: "100%", marginTop: "5px" }}>
+            <Typography.Title level={5} style={{ marginBottom: "10px" }}>
+              Stake on other user
+            </Typography.Title>
+            <Form
+              form={form}
+              style={{
+                margin: "0px auto",
+                width: "100%",
+                display: "flex",
+                justifyContent: "center",
+                padding: "0px 10px",
+              }}
+              initialValues={{ amount: "10" }}
+              name="stakeUsers"
+              layout="inline"
+              onFinish={handleStakeUsers}
+            >
+              <Form.Item name="address" required>
+                <AddressInput ensProvider={mainnetProvider} placeholder="Address of user" />
+              </Form.Item>
+              <Form.Item name="amount" required>
+                <InputNumber min={1} />
+              </Form.Item>
+              <Form.Item>
+                <Button style={{ marginRight: "10px" }} htmlType="submit">
+                  Stake on User
+                </Button>
+              </Form.Item>
+            </Form>
+
+            <div style={{ marginTop: "20px" }}>All my stakes on others</div>
+          </div>
+        )}
       </div>
     </div>
   );
