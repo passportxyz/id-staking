@@ -1,9 +1,12 @@
-import { Button, Form, InputNumber, Menu, Typography } from "antd";
+import { Button, Form, InputNumber, Menu, Table, Typography } from "antd";
 import { useContractReader } from "eth-hooks";
 import { ethers } from "ethers";
 import moment from "moment";
 import { useState } from "react";
+import Address from "./Address";
 import AddressInput from "./AddressInput";
+import { gql, useQuery } from "@apollo/client";
+// import
 
 const zero = ethers.BigNumber.from("0");
 
@@ -22,6 +25,28 @@ const Rounds = ({
 }) => {
   const [form] = Form.useForm();
   const [openView, setOpenView] = useState("self");
+  const [usersToUnstake, setUsersToUnstake] = useState([]);
+
+  const query = gql(`
+    query User($address: String!) {
+      user(id: $address) {
+        xstakeTo (where: { amount_gt: 0 }) {
+          id
+          amount
+          to {
+            address
+          }
+        }
+      }
+    }
+  `);
+
+  const { loading, data } = useQuery(query, {
+    pollInterval: 2500,
+    variables: {
+      address: address.toLowerCase(),
+    },
+  });
 
   const stakedBalance = ethers.utils.formatUnits(
     useContractReader(readContracts, "IDStaking", "getUserStakeForRound", [round, address]) || zero,
@@ -33,6 +58,37 @@ const Rounds = ({
     console.log(v);
     await stakeUsers(round, [v.address], [ethers.utils.parseUnits(`${v.amount}`)]);
   };
+
+  const columns = [
+    {
+      title: "User",
+      dataIndex: ["to", "address"],
+      key: ["to", "address"],
+      render: text => <Address ensProvider={mainnetProvider} address={text} fontSize={14} />,
+    },
+    {
+      title: "Amount (GTC)",
+      dataIndex: "amount",
+      key: "id",
+      render: text => <span>{ethers.utils.formatUnits(text)} GTC</span>,
+    },
+    {
+      title: "Action",
+      key: "action",
+      render: (_, record) => (
+        <a
+          href="#"
+          onClick={async e => {
+            e.preventDefault();
+
+            await unstakeUsers(round, [record.to.address]);
+          }}
+        >
+          Unstake
+        </a>
+      ),
+    },
+  ];
 
   return (
     <div
@@ -85,9 +141,9 @@ const Rounds = ({
 
         {openView === "community" && (
           <div style={{ width: "100%", marginTop: "5px" }}>
-            <Typography.Title level={5} style={{ marginBottom: "10px" }}>
+            {/* <Typography.Title level={5} style={{ marginBottom: "10px" }}>
               Stake on other user
-            </Typography.Title>
+            </Typography.Title> */}
             <Form
               form={form}
               style={{
@@ -115,7 +171,23 @@ const Rounds = ({
               </Form.Item>
             </Form>
 
-            <div style={{ marginTop: "20px" }}>All my stakes on others</div>
+            {!loading && (data?.user?.xstakeTo || []).length > 0 && (
+              <div style={{ marginTop: "20px" }}>
+                <Table
+                  rowSelection={{ type: "checkbox", onChange: keys => setUsersToUnstake(keys) }}
+                  rowKey={x => x.to.address}
+                  columns={columns}
+                  dataSource={data?.user?.xstakeTo || []}
+                />
+                <Button
+                  onClick={async () => {
+                    await unstakeUsers(round, usersToUnstake);
+                  }}
+                >
+                  Unstake {usersToUnstake.length} users
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </div>

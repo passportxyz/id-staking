@@ -1,0 +1,12 @@
+query XStakes($user: String!) {
+  xstakes(from: $user) {
+    id
+    amount
+    from {
+      address
+    }
+    to {
+      address
+    }
+  }
+}

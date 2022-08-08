@@ -28,15 +28,15 @@ function Home({ tx, readContracts, address, writeContracts, mainnetProvider }) {
   };
 
   const stakeUsers = async (id, users, amounts) => {
-    tx(writeContracts.IDStaking.stake(id + "", users, amounts));
+    tx(writeContracts.IDStaking.stakeUsers(id + "", users, amounts));
   };
 
   const unstake = async (id, amount) => {
     tx(writeContracts.IDStaking.unstake(id + "", ethers.utils.parseUnits(amount)));
   };
 
-  const unstakeUsers = async (id, amount) => {
-    tx(writeContracts.IDStaking.unstake(id + "", ethers.utils.parseUnits(amount)));
+  const unstakeUsers = async (id, users) => {
+    tx(writeContracts.IDStaking.unstakeUsers(id + "", users));
   };
 
   const migrate = async id => {
