@@ -1,6 +1,6 @@
 import { BigInt, Address } from '@graphprotocol/graph-ts'
 import { IDStaking, roundCreated, selfStake, tokenMigrated, xStake } from '../generated/IDStaking/IDStaking'
-import { User, Stake, XStake, Migration, Round } from '../generated/schema'
+import { User, Stake, XStake, Migration, Round, XStakeAggregate } from '../generated/schema'
 
 function handleUser(userAddress: Address, createdAt: BigInt, hash: string): User {
   let userId = userAddress.toHexString()
@@ -11,7 +11,6 @@ function handleUser(userAddress: Address, createdAt: BigInt, hash: string): User
     user = new User(userId)
     user.address = userAddress
     user.createdAt = createdAt
-    user.totalStakedOnMe = BigInt.fromI32(0)
     user.transactionHash = hash
   }
 
@@ -19,7 +18,7 @@ function handleUser(userAddress: Address, createdAt: BigInt, hash: string): User
 }
 
 export function handleRound(event: roundCreated): void {
-  let roundId = event.params.id.toHexString()
+  let roundId = event.params.id.toString()
 
   let round = Round.load(roundId)
 
@@ -41,7 +40,7 @@ export function handleRound(event: roundCreated): void {
 }
 
 export function handleStake(event: selfStake): void {
-  let roundId = event.params.roundId.toHexString()
+  let roundId = event.params.roundId.toString()
 
   let round = Round.load(roundId)
   let user = handleUser(event.params.staker, event.block.timestamp, event.transaction.hash.toHex())
@@ -79,8 +78,8 @@ export function handleStake(event: selfStake): void {
 }
 
 export function handleMigration(event: tokenMigrated): void {
-  let fromRoundId = event.params.fromRound.toHexString()
-  let toRoundId = event.params.toRound.toHexString()
+  let fromRoundId = event.params.fromRound.toString()
+  let toRoundId = event.params.toRound.toString()
   let migrationId = event.params.staker.toHexString() + '-' + fromRoundId + '-' + toRoundId
 
   let fromRound = Round.load(fromRoundId)
@@ -112,11 +111,12 @@ export function handleMigration(event: tokenMigrated): void {
 }
 
 export function handleXStake(event: xStake): void {
-  let roundId = event.params.roundId.toHexString()
+  let roundId = event.params.roundId.toString()
 
   let round = Round.load(roundId)
   let staker = handleUser(event.params.staker, event.block.timestamp, event.transaction.hash.toHex())
   let stakee = handleUser(event.params.user, event.block.timestamp, event.transaction.hash.toHex())
+  let xstakeAgg = XStakeAggregate.load(stakee.address.toHexString() + '-' + roundId)
 
   let xstakeId = staker.id + '-' + stakee.id + '-' + roundId
 
@@ -132,12 +132,17 @@ export function handleXStake(event: xStake): void {
     return
   }
 
-  if (stakee !== null) {
-    if (event.params.staked) {
-      stakee.totalStakedOnMe = stakee.totalStakedOnMe.plus(event.params.amount)
-    } else {
-      stakee.totalStakedOnMe = stakee.totalStakedOnMe.minus(event.params.amount)
-    }
+  if (xstakeAgg === null) {
+    xstakeAgg = new XStakeAggregate(stakee.address.toHexString() + '-' + roundId)
+    xstakeAgg.user = stakee.id
+    xstakeAgg.round = round.id
+    xstakeAgg.total = BigInt.fromI32(0)
+  }
+
+  if (event.params.staked) {
+    xstakeAgg.total = xstakeAgg.total.plus(event.params.amount)
+  } else {
+    xstakeAgg.total = xstakeAgg.total.minus(event.params.amount)
   }
 
   if (xstake === null) {
@@ -158,6 +163,7 @@ export function handleXStake(event: xStake): void {
   staker.save()
   stakee.save()
   xstake.save()
+  xstakeAgg.save()
 }
 
 //  -----------------------------------------------------------
