@@ -2,7 +2,7 @@ import { BigInt, Address } from '@graphprotocol/graph-ts'
 import { IDStaking, roundCreated, selfStake, tokenMigrated, xStake } from '../generated/IDStaking/IDStaking'
 import { User, Stake, XStake, Migration, Round } from '../generated/schema'
 
-function handleUser(userAddress: Address, createdAt: BigInt, hash: String): User {
+function handleUser(userAddress: Address, createdAt: BigInt, hash: string): User {
   let userId = userAddress.toHexString()
 
   let user = User.load(userId)
@@ -11,6 +11,7 @@ function handleUser(userAddress: Address, createdAt: BigInt, hash: String): User
     user = new User(userId)
     user.address = userAddress
     user.createdAt = createdAt
+    user.totalStakedOnMe = BigInt.fromI32(0)
     user.transactionHash = hash
   }
 
