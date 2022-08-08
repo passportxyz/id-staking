@@ -1,4 +1,4 @@
-import { Button, Form, InputNumber, Menu, Table, Typography } from "antd";
+import { Button, Empty, Form, InputNumber, Menu, Table, Typography } from "antd";
 import { useContractReader } from "eth-hooks";
 import { ethers } from "ethers";
 import moment from "moment";
@@ -28,9 +28,9 @@ const Rounds = ({
   const [usersToUnstake, setUsersToUnstake] = useState([]);
 
   const query = gql(`
-    query User($address: String!) {
+    query User($address: String!, $round: BigInt!) {
       user(id: $address) {
-        xstakeTo (where: { amount_gt: 0 }) {
+        xstakeTo (where: { amount_gt: 0, round: $round }) {
           id
           amount
           to {
@@ -41,12 +41,15 @@ const Rounds = ({
     }
   `);
 
-  const { loading, data } = useQuery(query, {
+  const { loading, data, error } = useQuery(query, {
     pollInterval: 2500,
     variables: {
       address: address.toLowerCase(),
+      round: round,
     },
   });
+
+  console.log({ data, error });
 
   const stakedBalance = ethers.utils.formatUnits(
     useContractReader(readContracts, "IDStaking", "getUserStakeForRound", [round, address]) || zero,
@@ -171,7 +174,7 @@ const Rounds = ({
               </Form.Item>
             </Form>
 
-            {!loading && (data?.user?.xstakeTo || []).length > 0 && (
+            {!loading && (data?.user?.xstakeTo || []).length > 0 ? (
               <div style={{ marginTop: "20px" }}>
                 <Table
                   rowSelection={{ type: "checkbox", onChange: keys => setUsersToUnstake(keys) }}
@@ -179,13 +182,19 @@ const Rounds = ({
                   columns={columns}
                   dataSource={data?.user?.xstakeTo || []}
                 />
-                <Button
-                  onClick={async () => {
-                    await unstakeUsers(round, usersToUnstake);
-                  }}
-                >
-                  Unstake {usersToUnstake.length} users
-                </Button>
+                {usersToUnstake.length > 0 && (
+                  <Button
+                    onClick={async () => {
+                      await unstakeUsers(round, usersToUnstake);
+                    }}
+                  >
+                    Unstake {usersToUnstake.length} users
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div style={{ marginTop: "30px" }}>
+                <Empty description="You haven't staked on anyone in the community... yet" />
               </div>
             )}
           </div>
