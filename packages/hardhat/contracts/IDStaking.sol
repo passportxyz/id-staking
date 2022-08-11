@@ -1,11 +1,11 @@
 //SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0 <0.9.0;
 
-import {XStaking} from "./XStaking.sol";
+import {Staking} from "./Staking.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-contract IDStaking is XStaking, Ownable {
+contract IDStaking is Staking, Ownable {
     uint256 public latestRound;
     struct Round {
         string meta;
@@ -14,6 +14,7 @@ contract IDStaking is XStaking, Ownable {
         uint256 duration;
     }
 
+    mapping(uint256 => mapping(bytes32 => uint256)) public xStakes;
     mapping(uint256 => Round) rounds;
 
     event roundCreated(uint256 id);
@@ -100,28 +101,6 @@ contract IDStaking is XStaking, Ownable {
         emit selfStake(roundId, msg.sender, amount, true);
     }
 
-    // stakeUser
-    function stakeUsers(
-        uint256 roundId,
-        address[] memory users,
-        uint256[] memory amounts
-    ) public canStakeRound(roundId) {
-        require(users.length == amounts.length, "Unequal users and amount");
-
-        for (uint256 i = 0; i < users.length; i++) {
-            require(address(0) != users[i], "can't stake the zero address");
-            require(
-                users[i] != msg.sender,
-                "You can't stake on your address here"
-            );
-            _stakeUser(roundId, users[i], amounts[i]);
-
-            rounds[roundId].tvl += amounts[i];
-
-            emit xStake(roundId, msg.sender, users[i], amounts[i], true);
-        }
-    }
-
     // unstake
     function unstake(uint256 roundId, uint256 amount)
         public
@@ -139,11 +118,44 @@ contract IDStaking is XStaking, Ownable {
         emit selfStake(roundId, msg.sender, amount, false);
     }
 
+    // stakeUser
+    function stakeUsers(
+        uint256 roundId,
+        address[] memory users,
+        uint256[] memory amounts
+    ) public canStakeRound(roundId) {
+        require(users.length == amounts.length, "Unequal users and amount");
+
+        uint256 totalAmount;
+
+        for (uint256 i = 0; i < users.length; i++) {
+            address user = users[i];
+            uint256 amount = amounts[i];
+            require(
+                amount > 0,
+                "You can't stake nothing on a selected address"
+            );
+            require(address(0) != user, "can't stake the zero address");
+            require(user != msg.sender, "You can't stake on your address here");
+
+            xStakes[roundId][getStakeId(msg.sender, user)] += amount;
+            totalAmount += amount;
+
+            emit xStake(roundId, msg.sender, user, amount, true);
+        }
+
+        token.transferFrom(msg.sender, address(this), totalAmount);
+
+        rounds[roundId].tvl += totalAmount;
+    }
+
     // unstakeUser
     function unstakeUsers(uint256 roundId, address[] memory users)
         public
         canUnstakeRound(roundId)
     {
+        uint256 totalAmount;
+
         for (uint256 i = 0; i < users.length; i++) {
             require(address(0) != users[i], "can't stake the zero address");
             require(
@@ -155,9 +167,11 @@ contract IDStaking is XStaking, Ownable {
             uint256 unstakeBalance = xStakes[roundId][stakeId];
 
             if (unstakeBalance > 0) {
-                rounds[roundId].tvl -= unstakeBalance;
+                xStakes[roundId][
+                    getStakeId(msg.sender, users[i])
+                ] -= unstakeBalance;
 
-                _unstakeUser(roundId, users[i], unstakeBalance);
+                totalAmount += unstakeBalance;
 
                 emit xStake(
                     roundId,
@@ -168,6 +182,9 @@ contract IDStaking is XStaking, Ownable {
                 );
             }
         }
+
+        rounds[roundId].tvl -= totalAmount;
+        token.transfer(msg.sender, totalAmount);
     }
 
     // migrateStake
@@ -226,5 +243,21 @@ contract IDStaking is XStaking, Ownable {
         returns (uint256)
     {
         return _getUserStakeForRound(roundId, user);
+    }
+
+    function _getUserXStakeForRound(
+        uint256 roundId,
+        address staker,
+        address user
+    ) internal view returns (uint256) {
+        return xStakes[roundId][getStakeId(staker, user)];
+    }
+
+    function getStakeId(address staker, address user)
+        public
+        pure
+        returns (bytes32)
+    {
+        return keccak256(abi.encode(staker, user));
     }
 }
