@@ -1,22 +1,11 @@
-import { Button, Col, Menu, Row } from "antd";
+import { Menu } from "antd";
 import "antd/dist/antd.css";
 import { useBalance, useContractLoader, useGasPrice, useOnBlock, useUserProviderAndSigner } from "eth-hooks";
 import { useExchangeEthPrice } from "eth-hooks/dapps/dex";
 import React, { useCallback, useEffect, useState } from "react";
 import { Link, Route, Switch, useLocation } from "react-router-dom";
 import "./App.css";
-import {
-  Account,
-  Contract,
-  Faucet,
-  GasGauge,
-  Header,
-  Ramp,
-  ThemeSwitch,
-  NetworkDisplay,
-  FaucetHint,
-  NetworkSwitch,
-} from "./components";
+import { Account, Contract, Header, ThemeSwitch, NetworkDisplay, FaucetHint, NetworkSwitch } from "./components";
 import { NETWORKS, ALCHEMY_KEY } from "./constants";
 import externalContracts from "./contracts/external_contracts";
 // contracts
@@ -24,6 +13,9 @@ import deployedContracts from "./contracts/hardhat_contracts.json";
 import { Transactor, Web3ModalSetup } from "./helpers";
 import { Admin, Home, Stakes, Subgraph } from "./views";
 import { useStaticJsonRPC } from "./hooks";
+
+// --- sdk import
+import { PassportReader } from "@gitcoinco/passport-sdk-reader";
 
 const { ethers } = require("ethers");
 /*
@@ -72,6 +64,7 @@ function App(props) {
   const [address, setAddress] = useState();
   const [selectedNetwork, setSelectedNetwork] = useState(networkOptions[3]);
   const location = useLocation();
+  const [passport, setPassport] = useState({});
 
   const targetNetwork = NETWORKS[selectedNetwork];
 
@@ -108,11 +101,17 @@ function App(props) {
   const userProviderAndSigner = useUserProviderAndSigner(injectedProvider, localProvider, USE_BURNER_WALLET);
   const userSigner = userProviderAndSigner.signer;
 
+  // Update Passport on address change
+  const reader = new PassportReader();
+
   useEffect(() => {
     async function getAddress() {
       if (userSigner) {
         const newAddress = await userSigner.getAddress();
         setAddress(newAddress);
+        reader.getPassportStream(newAddress).then(result => {
+          setPassport(result);
+        });
       }
     }
     getAddress();
@@ -146,27 +145,30 @@ function App(props) {
     console.log(`⛓ A new mainnet block is here: ${mainnetProvider._lastBlockNumber}`);
   });
 
-  const loadWeb3Modal = useCallback(async () => {
-    const provider = await web3Modal.connect();
-    setInjectedProvider(new ethers.providers.Web3Provider(provider));
-
-    provider.on("chainChanged", chainId => {
-      console.log(`chain changed to ${chainId}! updating providers`);
+  const loadWeb3Modal = useCallback(
+    async result => {
+      const provider = await web3Modal.connect();
       setInjectedProvider(new ethers.providers.Web3Provider(provider));
-    });
 
-    provider.on("accountsChanged", () => {
-      console.log(`account changed!`);
-      setInjectedProvider(new ethers.providers.Web3Provider(provider));
-    });
+      provider.on("chainChanged", chainId => {
+        console.log(`chain changed to ${chainId}! updating providers`);
+        setInjectedProvider(new ethers.providers.Web3Provider(provider));
+      });
 
-    // Subscribe to session disconnection
-    provider.on("disconnect", (code, reason) => {
-      console.log(code, reason);
-      logoutOfWeb3Modal();
-    });
-    // eslint-disable-next-line
-  }, [setInjectedProvider]);
+      provider.on("accountsChanged", () => {
+        console.log(`account changed!`);
+        setInjectedProvider(new ethers.providers.Web3Provider(provider));
+      });
+
+      // Subscribe to session disconnection
+      provider.on("disconnect", (code, reason) => {
+        console.log(code, reason);
+        logoutOfWeb3Modal();
+      });
+      // eslint-disable-next-line
+    },
+    [setInjectedProvider],
+  );
 
   useEffect(() => {
     if (web3Modal.cachedProvider) {
@@ -193,6 +195,7 @@ function App(props) {
               </div>
             )}
             <Account
+              passport={passport}
               useBurner={USE_BURNER_WALLET}
               address={address}
               localProvider={localProvider}
@@ -221,9 +224,6 @@ function App(props) {
       <Menu style={{ textAlign: "center", marginTop: 20 }} selectedKeys={[location.pathname]} mode="horizontal">
         <Menu.Item key="/">
           <Link to="/">App Home</Link>
-        </Menu.Item>
-        <Menu.Item key="/stake-log">
-          <Link to="/stake-log">xStake Log</Link>
         </Menu.Item>
         <Menu.Item key="/admin">
           <Link to="/admin">Admin Control</Link>
