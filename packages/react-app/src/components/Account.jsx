@@ -42,6 +42,7 @@ import Wallet from "./Wallet";
 **/
 
 export default function Account({
+  passport,
   address,
   userSigner,
   localProvider,
@@ -86,6 +87,20 @@ export default function Account({
 
   return (
     <div style={{ display: "flex" }}>
+      <div className="mx-4 relative ">
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://passport.gitcoin.co/"
+          className="inline-flex items-center bg-gray-800 px-5 py-2 rounded-lg"
+        >
+          <img className="object-fit w-6 h-6 -ml-2.5 mr-2.5" src="GitcoinLogo.svg" />
+
+          <span className="text-[16px] font-medium text-white">
+            Passport {passport.expiryDate && passport.issuanceDate ? "✅" : "❌"}
+          </span>
+        </a>
+      </div>
       {display}
       {web3Modal && (
         <Button style={{ marginLeft: 8 }} shape="round" onClick={accountButtonInfo.action}>

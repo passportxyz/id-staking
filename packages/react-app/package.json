@@ -19,7 +19,11 @@
     "@apollo/client": "^3.3.21",
     "@apollo/react-hooks": "^4.0.0",
     "@arbitrum/sdk": "^2.0.0",
+    "@craco/craco": "^6.3.0",
     "@eth-optimism/sdk": "^1.0.0",
+    "@ethersproject/contracts": "^5.6.2",
+    "@ethersproject/networks": "^5.6.4",
+    "@gitcoinco/passport-sdk-reader": "^0.1.2",
     "@portis/web3": "^4.0.5",
     "@ramp-network/ramp-instant-sdk": "^2.2.0",
     "@testing-library/jest-dom": "^5.11.4",
@@ -37,6 +41,7 @@
     "bl": "^5.0.0",
     "bnc-notify": "^1.5.0",
     "dotenv": "^8.2.0",
+    "eslint-plugin-prettier": "^4.0.0",
     "eth-hooks": "2.3.16",
     "ethers": "^5.4.1",
     "fortmatic": "^2.2.1",
@@ -54,7 +59,7 @@
     "react-dom": "^17.0.2",
     "react-qr-reader": "^2.2.1",
     "react-router-dom": "^5.2.0",
-    "react-scripts": "4.0.1",
+    "react-scripts": "4.0.3",
     "searchico": "^1.2.1",
     "walletlink": "^2.1.5",
     "web3modal": "^1.9.1"
@@ -63,7 +68,7 @@
     "@apollo/client": "^3.3.21",
     "@testing-library/dom": "^6.12.2",
     "@types/react": "^16.9.19",
-    "autoprefixer": "^10.2.4",
+    "autoprefixer": "^9",
     "chalk": "^4.1.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
@@ -73,9 +78,11 @@
     "gulp-less": "^4.0.1",
     "gulp-postcss": "^9.0.0",
     "less-plugin-npm-import": "^2.1.0",
+    "postcss": "^7",
     "prettier": "^2.0.5",
     "s3-folder-upload": "^2.3.1",
-    "surge": "^0.21.5"
+    "surge": "^0.21.5",
+    "tailwindcss": "npm:@tailwindcss/postcss7-compat"
   },
   "eslintConfig": {
     "extends": [
@@ -87,11 +94,8 @@
     }
   },
   "scripts": {
-    "build": "react-scripts build",
     "eject": "react-scripts eject",
     "prestart": "node ./scripts/create_contracts.js",
-    "start": "react-scripts start",
-    "test": "react-scripts test",
     "lint": "eslint --config ./.eslintrc.js --ignore-path ./.eslintignore ./src/**/*",
     "ipfs": "node ./scripts/ipfs.js",
     "surge": "cp build/index.html build/200.html && surge ./build",
@@ -99,6 +103,9 @@
     "ship": "yarn surge",
     "theme": "npx gulp less",
     "watch": "node ./scripts/watch.js",
-    "prettier": "npx prettier --write . '!(node_module|build)/**/*'"
+    "prettier": "npx prettier --write . '!(node_module|build)/**/*'",
+    "start": "craco start",
+    "build": "craco build",
+    "test": "craco test"
   }
 }
