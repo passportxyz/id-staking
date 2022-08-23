@@ -1,92 +1,141 @@
-import React from "react";
-import { useContractReader } from "eth-hooks";
-import { ethers } from "ethers";
-import { Button, Divider } from "antd";
-import { Rounds } from "../components";
+import React, { useEffect, useState } from "react";
+import { Modal } from "antd";
+import { ExportOutlined } from "@ant-design/icons";
+import { Navbar, Account } from "../components";
+import { useNavigate } from "react-router-dom";
 
-const zero = ethers.BigNumber.from("0");
+function Home({
+  tx,
+  readContracts,
+  address,
+  writeContracts,
+  mainnetProvider,
+  selectedNetwork,
+  setSelectedNetwork,
+  yourLocalBalance,
+  USE_NETWORK_SELECTOR,
+  localProvider,
+  targetNetwork,
+  logoutOfWeb3Modal,
+  selectedChainId,
+  localChainId,
+  NETWORKCHECK,
+  passport,
+  userSigner,
+  price,
+  web3Modal,
+  loadWeb3Modal,
+  blockExplorer,
+  networkOptions,
+}) {
+  const navigate = useNavigate();
+  // Route user to dashboard when wallet is connected
+  useEffect(() => {
+    if (web3Modal?.cachedProvider) {
+      navigate("/StakeDashboard");
+    }
+  }, [web3Modal?.cachedProvider]);
 
-function Home({ tx, readContracts, address, writeContracts, mainnetProvider }) {
-  const tokenBalance = ethers.utils.formatUnits(
-    useContractReader(readContracts, "Token", "balanceOf", [address]) || zero,
-  );
-  const tokenSymbol = useContractReader(readContracts, "Token", "symbol");
-  const latestRound = (useContractReader(readContracts, "IDStaking", "latestRound", []) || zero).toNumber();
+  useEffect(() => {
+    if (!passport.expiryDate && !passport.issuanceDate && web3Modal?.cachedProvider) {
+      showModal();
+    }
+  }, [passport]);
 
-  const rounds = [...Array(latestRound).keys()].map(i => i + 1).reverse();
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
-  const mintToken = async () => {
-    tx(writeContracts.Token.mintAmount(ethers.utils.parseUnits("1000")));
+  const showModal = () => {
+    setIsModalVisible(true);
   };
 
-  const approve = async () => {
-    tx(writeContracts.Token.approve(readContracts.IDStaking.address, ethers.utils.parseUnits("10000000")));
+  const handleOk = () => {
+    setIsModalVisible(false);
+    window.location.replace("https://passport.gitcoin.co/");
   };
 
-  const stake = async (id, amount) => {
-    tx(writeContracts.IDStaking.stake(id + "", ethers.utils.parseUnits(amount)));
-  };
-
-  const stakeUsers = async (id, users, amounts) => {
-    tx(writeContracts.IDStaking.stakeUsers(id + "", users, amounts));
-  };
-
-  const unstake = async (id, amount) => {
-    tx(writeContracts.IDStaking.unstake(id + "", ethers.utils.parseUnits(amount)));
-  };
-
-  const unstakeUsers = async (id, users) => {
-    tx(writeContracts.IDStaking.unstakeUsers(id + "", users));
-  };
-
-  const migrate = async id => {
-    tx(writeContracts.IDStaking.migrateStake(id + ""));
+  const handleCancel = () => {
+    setIsModalVisible(false);
   };
 
   return (
-    <>
-      <div
-        style={{
-          paddingBottom: "20px",
-          maxWidth: "600px",
-          margin: "60px auto 20px auto",
-          // border: "1px solid",
-        }}
+    <div className="font-miriam-libre min-h-max min-h-default bg-landingPageBackground bg-cover bg-no-repeat text-gray-100 md:bg-center">
+      <Modal
+        title="Create a Passport to Get Started"
+        visible={isModalVisible}
+        onOk={handleOk}
+        onCancel={handleCancel}
+        okText={`Create a Passport`}
+        footer={[
+          <button
+            key="submit"
+            className="rounded-sm rounded bg-purple-connectPurple py-2 px-10 text-white"
+            onClick={handleOk}
+          >
+            <ExportOutlined />
+            Create Passport
+          </button>,
+        ]}
       >
-        <div style={{ marginTop: "30px" }}>
-          <Divider>GTC Token</Divider>
-          <div style={{ marginBottom: "10px" }}>
-            Token Balance: {tokenBalance} {tokenSymbol}
-          </div>
-
-          <div style={{ width: "100%" }}>
-            <Button style={{ marginRight: "10px" }} onClick={mintToken}>
-              Mint 1000 {tokenSymbol}
-            </Button>
-            <Button style={{ marginRight: "10px" }} onClick={approve}>
-              Approve Stake contract for GTC
-            </Button>
+        <p>
+          Looks like you don’t have a Passport yet! To get started on Identity Staking, create a passport on Gitcoin
+          Passport
+        </p>
+      </Modal>
+      <Navbar
+        networkOptions={networkOptions}
+        selectedNetwork={selectedNetwork}
+        setSelectedNetwork={setSelectedNetwork}
+        yourLocalBalance={yourLocalBalance}
+        USE_NETWORK_SELECTOR={USE_NETWORK_SELECTOR}
+        localProvider={localProvider}
+        address={address}
+        targetNetwork={targetNetwork}
+        logoutOfWeb3Modal={logoutOfWeb3Modal}
+        selectedChainId={selectedChainId}
+        localChainId={localChainId}
+        NETWORKCHECK={NETWORKCHECK}
+        passport={passport}
+        userSigner={userSigner}
+        mainnetProvider={mainnetProvider}
+        price={price}
+        web3Modal={web3Modal}
+        loadWeb3Modal={loadWeb3Modal}
+        blockExplorer={blockExplorer}
+      />
+      <div className="container mx-auto px-5 py-2">
+        <div className="mx-auto flex flex-wrap">
+          <div className="mt-0 md:ml-4 w-full pb-6 text-white sm:mt-40 sm:w-1/2 md:mt-40 md:w-1/2 md:pt-6">
+            <div className="font-miriam-libre leading-relaxed">
+              <p className="text-2xl sm:text-xl md:text-xl text-black text-left">Identity Staking</p>
+              <p className="text-2xl sm:text-3xl md:text-3xl text-black text-left">
+                Defend against sybil by staking on your identity
+              </p>
+            </div>
+            <div className="text-left mt-0 text-lg text-gray-900 sm:text-xl md:mt-10 md:pr-20 md:text-xl">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+              dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex
+              ea commodo consequat.
+            </div>
+            <div className="mt-4 w-full sm:mt-10 sm:w-1/2 md:mt-10 md:block md:w-1/2">
+              <Account
+                passport={passport}
+                address={address}
+                localProvider={localProvider}
+                userSigner={userSigner}
+                mainnetProvider={mainnetProvider}
+                price={price}
+                web3Modal={web3Modal}
+                loadWeb3Modal={loadWeb3Modal}
+                logoutOfWeb3Modal={logoutOfWeb3Modal}
+                blockExplorer={blockExplorer}
+                minimized={undefined}
+                isContract={undefined}
+              />
+            </div>
           </div>
         </div>
       </div>
-
-      {rounds.map(r => (
-        <Rounds
-          key={r}
-          round={r}
-          stake={stake}
-          unstake={unstake}
-          address={address}
-          migrate={migrate}
-          stakeUsers={stakeUsers}
-          latestRound={latestRound}
-          tokenSymbol={tokenSymbol}
-          unstakeUsers={unstakeUsers}
-          readContracts={readContracts}
-          mainnetProvider={mainnetProvider}
-        />
-      ))}
-    </>
+    </div>
   );
 }
 

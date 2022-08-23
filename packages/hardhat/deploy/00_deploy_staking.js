@@ -9,7 +9,9 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
   const { deployer } = await getNamedAccounts();
   const chainId = await getChainId();
 
-  const admin = "0x14a78dE2263FC6665Dac7ACb7f492A1eA474F836";
+  const admin = "0x77B8A624b2e8f6772C0f20c683b075E2bf778d64";
+  // const trustedSigner = "0x7ba1e5E9d013EaE624D274bfbAC886459F291081";
+  const trustedSigner = "0xb9598Aca9eDA4e229924726A11b38d8073184899";
 
   await deploy("Token", {
     from: deployer,
@@ -19,7 +21,7 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
 
   const Token = await ethers.getContract("Token", deployer);
 
-  const stakingArgs = [Token.address];
+  const stakingArgs = [Token.address, trustedSigner];
 
   await deploy("IDStaking", {
     // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy

@@ -1,17 +1,16 @@
-import { Menu } from "antd";
 import "antd/dist/antd.css";
 import { useBalance, useContractLoader, useGasPrice, useOnBlock, useUserProviderAndSigner } from "eth-hooks";
 import { useExchangeEthPrice } from "eth-hooks/dapps/dex";
 import React, { useCallback, useEffect, useState } from "react";
-import { Link, Route, Switch, useLocation } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import "./App.css";
-import { Account, Contract, Header, ThemeSwitch, NetworkDisplay, FaucetHint, NetworkSwitch } from "./components";
+import { Contract, ThemeSwitch } from "./components";
 import { NETWORKS, ALCHEMY_KEY } from "./constants";
 import externalContracts from "./contracts/external_contracts";
 // contracts
 import deployedContracts from "./contracts/hardhat_contracts.json";
 import { Transactor, Web3ModalSetup } from "./helpers";
-import { Admin, Home, Stakes, Subgraph } from "./views";
+import { Admin, Home, Subgraph, StakeDashboard, Stakes } from "./views";
 import { useStaticJsonRPC } from "./hooks";
 
 // --- sdk import
@@ -38,7 +37,7 @@ const { ethers } = require("ethers");
 */
 
 /// 📡 What chain are your contracts deployed to?
-const initialNetwork = NETWORKS.goerli; // <------- select your target frontend network (localhost, rinkeby, xdai, mainnet)
+const initialNetwork = NETWORKS.localhost; // <------- select your target frontend network (localhost, rinkeby, xdai, mainnet)
 
 // 😬 Sorry for all the console logging
 const DEBUG = true;
@@ -61,9 +60,9 @@ function App(props) {
   const networkOptions = [initialNetwork.name, "mainnet", "rinkeby", "goerli"];
 
   const [injectedProvider, setInjectedProvider] = useState();
-  const [address, setAddress] = useState();
+  const [address, setAddress] = useState("");
+  // Set Goerli as default
   const [selectedNetwork, setSelectedNetwork] = useState(networkOptions[3]);
-  const location = useLocation();
   const [passport, setPassport] = useState({});
 
   const targetNetwork = NETWORKS[selectedNetwork];
@@ -109,9 +108,10 @@ function App(props) {
       if (userSigner) {
         const newAddress = await userSigner.getAddress();
         setAddress(newAddress);
-        reader.getPassportStream(newAddress).then(result => {
-          setPassport(result);
-        });
+        const newPassport = await reader.getPassport(newAddress);
+        setPassport(newPassport);
+      } else {
+        setPassport({});
       }
     }
     getAddress();
@@ -180,168 +180,128 @@ function App(props) {
 
   return (
     <div className="App">
-      {/* ✏️ Edit the header and change the title to your project name */}
-      <Header title="🆔🤑 ID Staking" subTitle="Stake GTC on your Identity" link="/">
-        {/* 👨‍💼 Your account is in the top right with a wallet at connect options */}
-        <div style={{ position: "relative", display: "flex", flexDirection: "column" }}>
-          <div style={{ display: "flex", flex: 1 }}>
-            {USE_NETWORK_SELECTOR && (
-              <div style={{ marginRight: 20 }}>
-                <NetworkSwitch
-                  networkOptions={networkOptions}
-                  selectedNetwork={selectedNetwork}
-                  setSelectedNetwork={setSelectedNetwork}
-                />
-              </div>
-            )}
-            <Account
-              passport={passport}
-              useBurner={USE_BURNER_WALLET}
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <Home
+              tx={tx}
               address={address}
-              localProvider={localProvider}
-              userSigner={userSigner}
+              readContracts={readContracts}
+              writeContracts={writeContracts}
               mainnetProvider={mainnetProvider}
+              networkOptions={networkOptions}
+              selectedNetwork={selectedNetwork}
+              setSelectedNetwork={setSelectedNetwork}
+              yourLocalBalance={yourLocalBalance}
+              USE_NETWORK_SELECTOR={USE_NETWORK_SELECTOR}
+              localProvider={localProvider}
+              targetNetwork={targetNetwork}
+              logoutOfWeb3Modal={logoutOfWeb3Modal}
+              selectedChainId={selectedChainId}
+              localChainId={localChainId}
+              NETWORKCHECK={NETWORKCHECK}
+              passport={passport}
+              userSigner={userSigner}
               price={price}
               web3Modal={web3Modal}
               loadWeb3Modal={loadWeb3Modal}
-              logoutOfWeb3Modal={logoutOfWeb3Modal}
               blockExplorer={blockExplorer}
             />
-          </div>
-        </div>
-      </Header>
-      {yourLocalBalance.lte(ethers.BigNumber.from("0")) && (
-        <FaucetHint localProvider={localProvider} targetNetwork={targetNetwork} address={address} />
-      )}
-      <NetworkDisplay
-        NETWORKCHECK={NETWORKCHECK}
-        localChainId={localChainId}
-        selectedChainId={selectedChainId}
-        targetNetwork={targetNetwork}
-        logoutOfWeb3Modal={logoutOfWeb3Modal}
-        USE_NETWORK_SELECTOR={USE_NETWORK_SELECTOR}
-      />
-      <Menu style={{ textAlign: "center", marginTop: 20 }} selectedKeys={[location.pathname]} mode="horizontal">
-        <Menu.Item key="/">
-          <Link to="/">App Home</Link>
-        </Menu.Item>
-        <Menu.Item key="/admin">
-          <Link to="/admin">Admin Control</Link>
-        </Menu.Item>
-        <Menu.Item key="/debug">
-          <Link to="/debug">Debug Contracts</Link>
-        </Menu.Item>
-        <Menu.Item key="/subgraph">
-          <Link to="/subgraph">Subgraph</Link>
-        </Menu.Item>
-      </Menu>
-
-      <Switch>
-        <Route exact path="/">
-          {/* pass in any web3 props to this Home component. For example, yourLocalBalance */}
-          <Home
-            tx={tx}
-            address={address}
-            readContracts={readContracts}
-            writeContracts={writeContracts}
-            mainnetProvider={mainnetProvider}
-          />
-        </Route>
-        <Route exact path="/admin">
-          {/* pass in any web3 props to this Home component. For example, yourLocalBalance */}
-          <Admin
-            tx={tx}
-            address={address}
-            readContracts={readContracts}
-            writeContracts={writeContracts}
-            mainnetProvider={mainnetProvider}
-          />
-        </Route>
-        <Route exact path="/stake-log">
-          {/* pass in any web3 props to this Home component. For example, yourLocalBalance */}
-          <Stakes
-            tx={tx}
-            address={address}
-            localProvider={localProvider}
-            readContracts={readContracts}
-            writeContracts={writeContracts}
-            mainnetProvider={mainnetProvider}
-          />
-        </Route>
-        <Route exact path="/debug">
-          {/*
-                🎛 this scaffolding is full of commonly used components
-                this <Contract/> component will automatically parse your ABI
-                and give you a form to interact with it locally
-            */}
-
-          <Contract
-            name="Token"
-            price={price}
-            signer={userSigner}
-            provider={localProvider}
-            address={address}
-            blockExplorer={blockExplorer}
-            contractConfig={contractConfig}
-          />
-          <Contract
-            name="IDStaking"
-            price={price}
-            signer={userSigner}
-            provider={localProvider}
-            address={address}
-            blockExplorer={blockExplorer}
-            contractConfig={contractConfig}
-          />
-        </Route>
-        <Route path="/subgraph">
-          <Subgraph
-            subgraphUri={props.subgraphUri}
-            tx={tx}
-            writeContracts={writeContracts}
-            mainnetProvider={mainnetProvider}
-          />
-        </Route>
-      </Switch>
-
+          }
+        />
+        <Route
+          path="/StakeDashboard"
+          element={
+            <StakeDashboard
+              tx={tx}
+              address={address}
+              readContracts={readContracts}
+              writeContracts={writeContracts}
+              mainnetProvider={mainnetProvider}
+              networkOptions={networkOptions}
+              selectedNetwork={selectedNetwork}
+              setSelectedNetwork={setSelectedNetwork}
+              yourLocalBalance={yourLocalBalance}
+              USE_NETWORK_SELECTOR={USE_NETWORK_SELECTOR}
+              localProvider={localProvider}
+              targetNetwork={targetNetwork}
+              logoutOfWeb3Modal={logoutOfWeb3Modal}
+              selectedChainId={selectedChainId}
+              localChainId={localChainId}
+              NETWORKCHECK={NETWORKCHECK}
+              passport={passport}
+              userSigner={userSigner}
+              price={price}
+              web3Modal={web3Modal}
+              loadWeb3Modal={loadWeb3Modal}
+              blockExplorer={blockExplorer}
+            />
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <Admin
+              tx={tx}
+              address={address}
+              readContracts={readContracts}
+              writeContracts={writeContracts}
+              mainnetProvider={mainnetProvider}
+            />
+          }
+        />
+        <Route
+          path="/stake-log"
+          element={
+            <Stakes
+              tx={tx}
+              address={address}
+              localProvider={localProvider}
+              readContracts={readContracts}
+              writeContracts={writeContracts}
+              mainnetProvider={mainnetProvider}
+            />
+          }
+        />
+        <Route
+          path="/debug"
+          element={
+            <div>
+              <Contract
+                name="Token"
+                price={price}
+                signer={userSigner}
+                provider={localProvider}
+                address={address}
+                blockExplorer={blockExplorer}
+                contractConfig={contractConfig}
+              />
+              <Contract
+                name="IDStaking"
+                price={price}
+                signer={userSigner}
+                provider={localProvider}
+                address={address}
+                blockExplorer={blockExplorer}
+                contractConfig={contractConfig}
+              />
+            </div>
+          }
+        />
+        <Route
+          path="/subgraph"
+          element={
+            <Subgraph
+              subgraphUri={props.subgraphUri}
+              tx={tx}
+              writeContracts={writeContracts}
+              mainnetProvider={mainnetProvider}
+            />
+          }
+        />
+      </Routes>
       <ThemeSwitch />
-
-      {/* 🗺 Extra UI like gas price, eth price, faucet, and support: */}
-      {/* <div style={{ position: "fixed", textAlign: "left", left: 0, bottom: 20, padding: 10 }}>
-        <Row align="middle" gutter={[4, 4]}>
-          <Col span={8}>
-            <Ramp price={price} address={address} networks={NETWORKS} />
-          </Col>
-
-          <Col span={8} style={{ textAlign: "center", opacity: 0.8 }}>
-            <GasGauge gasPrice={gasPrice} />
-          </Col>
-          <Col span={8} style={{ textAlign: "center", opacity: 1 }}>
-            <Button
-              onClick={() => {
-                window.open("https://t.me/joinchat/KByvmRe5wkR-8F_zz6AjpA");
-              }}
-              size="large"
-              shape="round"
-            >
-              <span style={{ marginRight: 8 }} role="img" aria-label="support">
-                💬
-              </span>
-              Support
-            </Button>
-          </Col>
-        </Row>
-
-        <Row align="middle" gutter={[4, 4]}>
-          <Col span={24}>
-            {faucetAvailable ? (
-              <Faucet localProvider={localProvider} price={price} ensProvider={mainnetProvider} />
-            ) : (
-              ""
-            )}
-          </Col>
-        </Row>
-      </div> */}
     </div>
   );
 }

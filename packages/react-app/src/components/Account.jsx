@@ -1,4 +1,3 @@
-import { Button } from "antd";
 import React from "react";
 import { useThemeSwitcher } from "react-css-theme-switcher";
 
@@ -58,54 +57,47 @@ export default function Account({
   const { currentTheme } = useThemeSwitcher();
 
   let accountButtonInfo;
-  if (web3Modal?.cachedProvider) {
+  if (web3Modal?.cachedProvider && passport.expiryDate && passport.issuanceDate) {
     accountButtonInfo = { name: "Logout", action: logoutOfWeb3Modal };
   } else {
-    accountButtonInfo = { name: "Connect", action: loadWeb3Modal };
+    accountButtonInfo = { name: "Connect Wallet", action: loadWeb3Modal };
   }
 
   const display = !minimized && (
     <span>
-      {address && (
-        <Address address={address} ensProvider={mainnetProvider} blockExplorer={blockExplorer} fontSize={20} />
-      )}
-      <Balance address={address} provider={localProvider} price={price} size={20} />
-      {!isContract && (
-        <Wallet
-          address={address}
-          provider={localProvider}
-          signer={userSigner}
-          ensProvider={mainnetProvider}
-          price={price}
-          color={currentTheme === "light" ? "#1890ff" : "#2caad9"}
-          size={22}
-          padding={"0px"}
-        />
+      {passport.expiryDate && passport.issuanceDate && web3Modal?.cachedProvider && (
+        <span className="mr-6">
+          {address && (
+            <Address address={address} ensProvider={mainnetProvider} blockExplorer={blockExplorer} fontSize={20} />
+          )}
+          {<Balance address={address} provider={localProvider} price={price} size={20} />}
+          {!isContract && (
+            <Wallet
+              address={address}
+              provider={localProvider}
+              signer={userSigner}
+              ensProvider={mainnetProvider}
+              price={price}
+              color={currentTheme === "light" ? "#1890ff" : "#2caad9"}
+              size={22}
+              padding={"0px"}
+            />
+          )}
+        </span>
       )}
     </span>
   );
 
   return (
-    <div style={{ display: "flex" }}>
-      <div className="mx-4 relative ">
-        <a
-          target="_blank"
-          rel="noopener noreferrer"
-          href="https://passport.gitcoin.co/"
-          className="inline-flex items-center bg-gray-800 px-5 py-2 rounded-lg"
-        >
-          <img className="object-fit w-6 h-6 -ml-2.5 mr-2.5" src="GitcoinLogo.svg" />
-
-          <span className="text-[16px] font-medium text-white">
-            Passport {passport.expiryDate && passport.issuanceDate ? "✅" : "❌"}
-          </span>
-        </a>
-      </div>
+    <div className="flex">
       {display}
       {web3Modal && (
-        <Button style={{ marginLeft: 8 }} shape="round" onClick={accountButtonInfo.action}>
+        <button
+          className="rounded-sm bg-purple-connectPurple py-4 px-10 text-white text-base"
+          onClick={accountButtonInfo.action}
+        >
           {accountButtonInfo.name}
-        </Button>
+        </button>
       )}
     </div>
   );
