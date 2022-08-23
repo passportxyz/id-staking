@@ -781,7 +781,7 @@
       "chainId": "31337",
       "contracts": {
         "Token": {
-          "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+          "address": "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d",
           "abi": [
             {
               "inputs": [],
@@ -1080,8 +1080,8 @@
             }
           ]
         },
-        "Staking": {
-          "address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+        "IDStaking": {
+          "address": "0x59b670e9fA9D0A427751Af201D676719a970857b",
           "abi": [
             {
               "inputs": [
@@ -1091,17 +1091,12 @@
                   "type": "address"
                 },
                 {
-                  "internalType": "uint256",
-                  "name": "_quorum",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "_fee",
-                  "type": "uint256"
+                  "internalType": "address",
+                  "name": "_trustedSigner",
+                  "type": "address"
                 }
               ],
-              "stateMutability": "payable",
+              "stateMutability": "nonpayable",
               "type": "constructor"
             },
             {
@@ -1128,12 +1123,12 @@
               "inputs": [
                 {
                   "indexed": false,
-                  "internalType": "bytes32",
+                  "internalType": "uint256",
                   "name": "id",
-                  "type": "bytes32"
+                  "type": "uint256"
                 }
               ],
-              "name": "challengeFinalized",
+              "name": "roundCreated",
               "type": "event"
             },
             {
@@ -1141,56 +1136,43 @@
               "inputs": [
                 {
                   "indexed": false,
-                  "internalType": "bytes32",
-                  "name": "id",
-                  "type": "bytes32"
+                  "internalType": "uint256",
+                  "name": "roundId",
+                  "type": "uint256"
                 },
                 {
                   "indexed": false,
                   "internalType": "address",
-                  "name": "juror",
-                  "type": "address"
-                }
-              ],
-              "name": "challengeVoted",
-              "type": "event"
-            },
-            {
-              "anonymous": false,
-              "inputs": [
-                {
-                  "indexed": false,
-                  "internalType": "address",
-                  "name": "challenger",
+                  "name": "staker",
                   "type": "address"
                 },
                 {
                   "indexed": false,
-                  "internalType": "bytes32",
-                  "name": "id",
-                  "type": "bytes32"
-                }
-              ],
-              "name": "challenged",
-              "type": "event"
-            },
-            {
-              "anonymous": false,
-              "inputs": [
-                {
-                  "indexed": false,
-                  "internalType": "address",
-                  "name": "juror",
-                  "type": "address"
+                  "internalType": "uint256",
+                  "name": "amount",
+                  "type": "uint256"
                 },
                 {
                   "indexed": false,
                   "internalType": "bool",
-                  "name": "added",
+                  "name": "staked",
                   "type": "bool"
                 }
               ],
-              "name": "jurorAction",
+              "name": "selfStake",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "signer",
+                  "type": "address"
+                }
+              ],
+              "name": "signerUpdated",
               "type": "event"
             },
             {
@@ -1207,14 +1189,32 @@
                   "internalType": "uint256",
                   "name": "amount",
                   "type": "uint256"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "uint256",
+                  "name": "fromRound",
+                  "type": "uint256"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "uint256",
+                  "name": "toRound",
+                  "type": "uint256"
                 }
               ],
-              "name": "tokenStaked",
+              "name": "tokenMigrated",
               "type": "event"
             },
             {
               "anonymous": false,
               "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "uint256",
+                  "name": "roundId",
+                  "type": "uint256"
+                },
                 {
                   "indexed": false,
                   "internalType": "address",
@@ -1223,59 +1223,45 @@
                 },
                 {
                   "indexed": false,
+                  "internalType": "address",
+                  "name": "user",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
                   "internalType": "uint256",
                   "name": "amount",
                   "type": "uint256"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "bool",
+                  "name": "staked",
+                  "type": "bool"
                 }
               ],
-              "name": "tokenWithdrawn",
+              "name": "xStake",
               "type": "event"
             },
             {
-              "stateMutability": "payable",
-              "type": "fallback"
-            },
-            {
               "inputs": [
-                {
-                  "internalType": "address[]",
-                  "name": "stakers",
-                  "type": "address[]"
-                }
-              ],
-              "name": "challenge",
-              "outputs": [
-                {
-                  "internalType": "bytes32",
-                  "name": "id",
-                  "type": "bytes32"
-                }
-              ],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "fee",
-              "outputs": [
                 {
                   "internalType": "uint256",
-                  "name": "",
+                  "name": "start",
                   "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
+                },
                 {
-                  "internalType": "bytes32",
-                  "name": "id",
-                  "type": "bytes32"
+                  "internalType": "uint256",
+                  "name": "duration",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "string",
+                  "name": "meta",
+                  "type": "string"
                 }
               ],
-              "name": "finalizeChallenge",
+              "name": "createRound",
               "outputs": [],
               "stateMutability": "nonpayable",
               "type": "function"
@@ -1283,32 +1269,128 @@
             {
               "inputs": [
                 {
+                  "internalType": "uint256",
+                  "name": "roundId",
+                  "type": "uint256"
+                }
+              ],
+              "name": "fetchRoundMeta",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "start",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "duration",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "tvl",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "string",
+                  "name": "meta",
+                  "type": "string"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "staker",
+                  "type": "address"
+                },
+                {
                   "internalType": "address",
                   "name": "user",
                   "type": "address"
                 }
               ],
-              "name": "getStakeFor",
+              "name": "getStakeId",
               "outputs": [
                 {
-                  "components": [
-                    {
-                      "internalType": "uint256",
-                      "name": "balance",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "bool",
-                      "name": "locked",
-                      "type": "bool"
-                    }
-                  ],
-                  "internalType": "struct IStaking.Stake",
+                  "internalType": "bytes32",
                   "name": "",
-                  "type": "tuple"
+                  "type": "bytes32"
+                }
+              ],
+              "stateMutability": "pure",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "roundId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "address",
+                  "name": "user",
+                  "type": "address"
+                }
+              ],
+              "name": "getUserStakeForRound",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
                 }
               ],
               "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "roundId",
+                  "type": "uint256"
+                }
+              ],
+              "name": "isActiveRound",
+              "outputs": [
+                {
+                  "internalType": "bool",
+                  "name": "isActive",
+                  "type": "bool"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "latestRound",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "fromRound",
+                  "type": "uint256"
+                }
+              ],
+              "name": "migrateStake",
+              "outputs": [],
+              "stateMutability": "nonpayable",
               "type": "function"
             },
             {
@@ -1326,19 +1408,6 @@
             },
             {
               "inputs": [],
-              "name": "quorum",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
               "name": "renounceOwnership",
               "outputs": [],
               "stateMutability": "nonpayable",
@@ -1348,6 +1417,11 @@
               "inputs": [
                 {
                   "internalType": "uint256",
+                  "name": "roundId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
                   "name": "amount",
                   "type": "uint256"
                 }
@@ -1355,6 +1429,68 @@
               "name": "stake",
               "outputs": [],
               "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "bytes",
+                  "name": "signature",
+                  "type": "bytes"
+                },
+                {
+                  "internalType": "string",
+                  "name": "nonce",
+                  "type": "string"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "timestamp",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "roundId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "address[]",
+                  "name": "users",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "uint256[]",
+                  "name": "amounts",
+                  "type": "uint256[]"
+                }
+              ],
+              "name": "stakeUsers",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "name": "stakes",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
               "type": "function"
             },
             {
@@ -1384,7 +1520,25 @@
               "type": "function"
             },
             {
+              "inputs": [],
+              "name": "trustedSigner",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
               "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "roundId",
+                  "type": "uint256"
+                },
                 {
                   "internalType": "uint256",
                   "name": "amount",
@@ -1399,17 +1553,17 @@
             {
               "inputs": [
                 {
-                  "internalType": "address",
-                  "name": "juror",
-                  "type": "address"
+                  "internalType": "uint256",
+                  "name": "roundId",
+                  "type": "uint256"
                 },
                 {
-                  "internalType": "bool",
-                  "name": "active",
-                  "type": "bool"
+                  "internalType": "address[]",
+                  "name": "users",
+                  "type": "address[]"
                 }
               ],
-              "name": "updateJuror",
+              "name": "unstakeUsers",
               "outputs": [],
               "stateMutability": "nonpayable",
               "type": "function"
@@ -1417,19 +1571,39 @@
             {
               "inputs": [
                 {
-                  "internalType": "bytes32",
-                  "name": "id",
-                  "type": "bytes32"
+                  "internalType": "address",
+                  "name": "signer",
+                  "type": "address"
                 }
               ],
-              "name": "voteChallenge",
+              "name": "updateSigner",
               "outputs": [],
               "stateMutability": "nonpayable",
               "type": "function"
             },
             {
-              "stateMutability": "payable",
-              "type": "receive"
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "",
+                  "type": "bytes32"
+                }
+              ],
+              "name": "xStakes",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
             }
           ]
         }

@@ -5,9 +5,14 @@
         "internalType": "contract IERC20",
         "name": "_token",
         "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_trustedSigner",
+        "type": "address"
       }
     ],
-    "stateMutability": "payable",
+    "stateMutability": "nonpayable",
     "type": "constructor"
   },
   {
@@ -71,6 +76,19 @@
       }
     ],
     "name": "selfStake",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "signer",
+        "type": "address"
+      }
+    ],
+    "name": "signerUpdated",
     "type": "event"
   },
   {
@@ -332,6 +350,21 @@
   {
     "inputs": [
       {
+        "internalType": "bytes",
+        "name": "signature",
+        "type": "bytes"
+      },
+      {
+        "internalType": "string",
+        "name": "nonce",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "timestamp",
+        "type": "uint256"
+      },
+      {
         "internalType": "uint256",
         "name": "roundId",
         "type": "uint256"
@@ -403,6 +436,19 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "trustedSigner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -434,6 +480,19 @@
       }
     ],
     "name": "unstakeUsers",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "signer",
+        "type": "address"
+      }
+    ],
+    "name": "updateSigner",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
