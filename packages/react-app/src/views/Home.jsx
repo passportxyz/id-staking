@@ -2,11 +2,12 @@ import React from "react";
 import { useContractReader } from "eth-hooks";
 import { ethers } from "ethers";
 import { Button, Divider } from "antd";
+import axios from "axios";
 import { Rounds } from "../components";
 
 const zero = ethers.BigNumber.from("0");
 
-function Home({ tx, readContracts, address, writeContracts, mainnetProvider }) {
+function Home({ tx, readContracts, address, writeContracts, targetNetwork, mainnetProvider }) {
   const tokenBalance = ethers.utils.formatUnits(
     useContractReader(readContracts, "Token", "balanceOf", [address]) || zero,
   );
@@ -28,7 +29,25 @@ function Home({ tx, readContracts, address, writeContracts, mainnetProvider }) {
   };
 
   const stakeUsers = async (id, users, amounts) => {
-    tx(writeContracts.IDStaking.stakeUsers(id + "", users, amounts));
+    let data = {};
+
+    try {
+      const res = await axios({
+        method: "POST",
+        url: "https://id-staking-passport-api.vercel.app/api/passport/reader",
+        data: {
+          address,
+          domainChainId: targetNetwork.chainId,
+        },
+      });
+
+      data = res.data;
+    } catch (error) {
+      // TODO : Throw notification error
+      return null;
+    }
+
+    tx(writeContracts.IDStaking.stakeUsers(data.signature, data.nonce, data.timestamp, id + "", users, amounts));
   };
 
   const unstake = async (id, amount) => {

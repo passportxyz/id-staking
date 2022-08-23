@@ -11,7 +11,7 @@ import externalContracts from "./contracts/external_contracts";
 // contracts
 import deployedContracts from "./contracts/hardhat_contracts.json";
 import { Transactor, Web3ModalSetup } from "./helpers";
-import { Admin, Home, Stakes, Subgraph } from "./views";
+import { Admin, Home, Subgraph } from "./views";
 import { useStaticJsonRPC } from "./hooks";
 
 // --- sdk import
@@ -38,7 +38,7 @@ const { ethers } = require("ethers");
 */
 
 /// 📡 What chain are your contracts deployed to?
-const initialNetwork = NETWORKS.goerli; // <------- select your target frontend network (localhost, rinkeby, xdai, mainnet)
+const initialNetwork = NETWORKS.localhost; // <------- select your target frontend network (localhost, rinkeby, xdai, mainnet)
 
 // 😬 Sorry for all the console logging
 const DEBUG = true;
@@ -62,7 +62,7 @@ function App(props) {
 
   const [injectedProvider, setInjectedProvider] = useState();
   const [address, setAddress] = useState();
-  const [selectedNetwork, setSelectedNetwork] = useState(networkOptions[3]);
+  const [selectedNetwork, setSelectedNetwork] = useState(networkOptions[0]);
   const location = useLocation();
   const [passport, setPassport] = useState({});
 
@@ -242,6 +242,7 @@ function App(props) {
           <Home
             tx={tx}
             address={address}
+            targetNetwork={targetNetwork}
             readContracts={readContracts}
             writeContracts={writeContracts}
             mainnetProvider={mainnetProvider}
@@ -257,17 +258,6 @@ function App(props) {
             mainnetProvider={mainnetProvider}
           />
         </Route>
-        <Route exact path="/stake-log">
-          {/* pass in any web3 props to this Home component. For example, yourLocalBalance */}
-          <Stakes
-            tx={tx}
-            address={address}
-            localProvider={localProvider}
-            readContracts={readContracts}
-            writeContracts={writeContracts}
-            mainnetProvider={mainnetProvider}
-          />
-        </Route>
         <Route exact path="/debug">
           {/*
                 🎛 this scaffolding is full of commonly used components
@@ -276,7 +266,7 @@ function App(props) {
             */}
 
           <Contract
-            name="Token"
+            name="IDStaking"
             price={price}
             signer={userSigner}
             provider={localProvider}
@@ -285,7 +275,7 @@ function App(props) {
             contractConfig={contractConfig}
           />
           <Contract
-            name="IDStaking"
+            name="Token"
             price={price}
             signer={userSigner}
             provider={localProvider}
