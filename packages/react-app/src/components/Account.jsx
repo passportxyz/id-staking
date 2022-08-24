@@ -37,7 +37,6 @@ export default function Account({
 }) {
   const { currentNetwork } = useContext(Web3Context);
   const { currentTheme } = useThemeSwitcher();
-  console.log("cool ", JSON.stringify(web3Modal?.network, web3Modal?.cachedProvider));
   let accountButtonInfo;
   if (web3Modal?.cachedProvider && passport.expiryDate && passport.issuanceDate) {
     accountButtonInfo = { name: "Logout", action: logoutOfWeb3Modal };

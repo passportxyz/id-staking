@@ -1,10 +1,13 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useContractReader } from "eth-hooks";
 import { ethers } from "ethers";
-import { Button, Divider } from "antd";
+import { Button, Divider, Select } from "antd";
 import axios from "axios";
 import { Rounds, Navbar } from "../components";
+import { STARTING_GRANTS_ROUND } from "../components/Rounds";
 import { useNavigate } from "react-router-dom";
+
+const { Option } = Select;
 
 const zero = ethers.BigNumber.from("0");
 
@@ -32,6 +35,7 @@ function StakeDashboard({
   loadWeb3Modal,
   blockExplorer,
 }) {
+  const [roundInView, setRoundInView] = useState(1);
   const navigate = useNavigate();
   // Route user to dashboard when wallet is connected
   useEffect(() => {
@@ -94,6 +98,11 @@ function StakeDashboard({
     tx(writeContracts.IDStaking.migrateStake(id + ""));
   };
 
+  const handleChange = value => {
+    console.log(`selected ${value}`);
+    setRoundInView(value);
+  };
+
   return (
     <>
       <Navbar
@@ -117,12 +126,12 @@ function StakeDashboard({
         loadWeb3Modal={loadWeb3Modal}
         blockExplorer={blockExplorer}
       />
-      <div
+
+      {/* <div
         style={{
-          paddingBottom: "20px",
+          paddingBottom: "10px",
           maxWidth: "600px",
-          margin: "60px auto 20px auto",
-          // border: "1px solid",
+          margin: "6px auto 2px auto",
         }}
       >
         <div style={{ marginTop: "30px" }}>
@@ -140,12 +149,29 @@ function StakeDashboard({
             </Button>
           </div>
         </div>
-      </div>
+      </div> */}
 
-      {rounds.map(r => (
+      {/* Toggle through rounds  */}
+
+      {/* <div className="flex flex-row p-10">
+        <p className="ml-10">Choose a round (placeholder to toggle through rounds)</p>
+        <Select
+          defaultValue={"Round..."}
+          style={{
+            width: 120,
+          }}
+          onChange={handleChange}
+        >
+          {rounds.map(r => (
+            <Option value={r}>{`Round: ${r + STARTING_GRANTS_ROUND}`}</Option>
+          ))}
+        </Select>
+      </div> */}
+
+      {roundInView && (
         <Rounds
-          key={r}
-          round={r}
+          key={roundInView}
+          round={roundInView}
           stake={stake}
           unstake={unstake}
           address={address}
@@ -157,7 +183,7 @@ function StakeDashboard({
           readContracts={readContracts}
           mainnetProvider={mainnetProvider}
         />
-      ))}
+      )}
     </>
   );
 }
