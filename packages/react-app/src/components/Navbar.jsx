@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Account } from "../components";
 
-// displays a page header
+import { Web3Context } from "../helpers/Web3Context";
 
 export default function Navbar({
   networkOptions,
@@ -10,7 +10,6 @@ export default function Navbar({
   yourLocalBalance,
   USE_NETWORK_SELECTOR,
   localProvider,
-  address,
   targetNetwork,
   logoutOfWeb3Modal,
   selectedChainId,
@@ -24,6 +23,7 @@ export default function Navbar({
   loadWeb3Modal,
   blockExplorer,
 }) {
+  const { address, setAddress, currentNetwork } = useContext(Web3Context);
   return (
     <div className="App md:pb-4 sm:pb-20 flex flex-col">
       <div className="p-10 mx-auto flex flex-wrap w-full">
@@ -49,6 +49,7 @@ export default function Navbar({
             blockExplorer={blockExplorer}
             minimized={undefined}
             isContract={undefined}
+            networkOptions={networkOptions}
           />
         </div>
       </div>

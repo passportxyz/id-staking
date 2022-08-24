@@ -3,18 +3,18 @@ import React, { useState } from "react";
 
 import { utils } from "ethers";
 
-export default function TokenBalance(props) {
+export default function TokenBalance({ contracts, name, address, balance, dollarMultiplier, img }) {
   const [dollarMode, setDollarMode] = useState(true);
 
-  const tokenContract = props.contracts && props.contracts[props.name];
-  const balance = useTokenBalance(tokenContract, props.address, 1777);
+  const tokenContract = contracts && contracts[name];
+  const getBalance = useTokenBalance(contracts, address, 0);
 
   let floatBalance = parseFloat("0.00");
 
-  let usingBalance = balance;
+  let usingBalance = getBalance;
 
-  if (typeof props.balance !== "undefined") {
-    usingBalance = props.balance;
+  if (typeof balance !== "undefined") {
+    usingBalance = balance;
   }
 
   if (usingBalance) {
@@ -25,8 +25,8 @@ export default function TokenBalance(props) {
 
   let displayBalance = floatBalance.toFixed(4);
 
-  if (props.dollarMultiplier && dollarMode) {
-    displayBalance = "$" + (floatBalance * props.dollarMultiplier).toFixed(2);
+  if (dollarMultiplier && dollarMode) {
+    displayBalance = "$" + (floatBalance * dollarMultiplier).toFixed(2);
   }
 
   return (
@@ -37,11 +37,12 @@ export default function TokenBalance(props) {
         padding: 8,
         cursor: "pointer",
       }}
+      className="flex flex-row"
       onClick={() => {
         setDollarMode(!dollarMode);
       }}
     >
-      {props.img} {displayBalance}
+      <img src={img} alt={name} className="mr-2 h-6" /> {displayBalance} {name}
     </span>
   );
 }

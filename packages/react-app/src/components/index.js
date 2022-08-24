@@ -25,3 +25,5 @@ export { default as MultiAddressInput } from "./MultiAddressInput";
 export { default as TokenSelect } from "./TokenSelect";
 export { default as Rounds } from "./Rounds";
 export { default as Navbar } from "./Navbar";
+export { default as AddressDropDown } from "./AddressDropDown";
+export { default as AccountHomePage } from "./AccountHomePage";
