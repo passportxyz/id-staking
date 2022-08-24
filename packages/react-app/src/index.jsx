@@ -5,6 +5,9 @@ import { BrowserRouter } from "react-router-dom";
 import ReactDOM from "react-dom";
 import App from "./App";
 import "./index.css";
+import { Web3Provider } from "./helpers/Web3Context";
+
+const targetNetwork = "goerli";
 
 const themes = {
   dark: `${process.env.PUBLIC_URL}/dark-theme.css`,
@@ -22,12 +25,14 @@ const client = new ApolloClient({
 });
 
 ReactDOM.render(
-  <ApolloProvider client={client}>
-    <ThemeSwitcherProvider themeMap={themes} defaultTheme={prevTheme || "light"}>
-      <BrowserRouter>
-        <App subgraphUri={subgraphUri} />
-      </BrowserRouter>
-    </ThemeSwitcherProvider>
-  </ApolloProvider>,
+  <Web3Provider network={targetNetwork}>
+    <ApolloProvider client={client}>
+      <ThemeSwitcherProvider themeMap={themes} defaultTheme={prevTheme || "light"}>
+        <BrowserRouter>
+          <App subgraphUri={subgraphUri} />
+        </BrowserRouter>
+      </ThemeSwitcherProvider>
+    </ApolloProvider>
+  </Web3Provider>,
   document.getElementById("root"),
 );

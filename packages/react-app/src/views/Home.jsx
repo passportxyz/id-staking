@@ -1,13 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { Modal } from "antd";
 import { ExportOutlined } from "@ant-design/icons";
-import { Navbar, Account } from "../components";
+import { Navbar, Account, AccountHomePage } from "../components";
 import { useNavigate } from "react-router-dom";
+
+import { Web3Context } from "../helpers/Web3Context";
 
 function Home({
   tx,
   readContracts,
-  address,
   writeContracts,
   mainnetProvider,
   selectedNetwork,
@@ -41,6 +42,8 @@ function Home({
       showModal();
     }
   }, [passport]);
+
+  const { address, setAddress } = useContext(Web3Context);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -117,7 +120,7 @@ function Home({
               ea commodo consequat.
             </div>
             <div className="mt-4 w-full sm:mt-10 sm:w-1/2 md:mt-10 md:block md:w-1/2">
-              <Account
+              <AccountHomePage
                 passport={passport}
                 address={address}
                 localProvider={localProvider}

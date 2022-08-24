@@ -1,7 +1,7 @@
 import "antd/dist/antd.css";
 import { useBalance, useContractLoader, useGasPrice, useOnBlock, useUserProviderAndSigner } from "eth-hooks";
 import { useExchangeEthPrice } from "eth-hooks/dapps/dex";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useContext } from "react";
 import { Route, Routes } from "react-router-dom";
 import "./App.css";
 import { Contract, ThemeSwitch } from "./components";
@@ -16,7 +16,10 @@ import { useStaticJsonRPC } from "./hooks";
 // --- sdk import
 import { PassportReader } from "@gitcoinco/passport-sdk-reader";
 
+import { Web3Context } from "./helpers/Web3Context";
+
 const { ethers } = require("ethers");
+
 /*
     Welcome to 🏗 scaffold-eth !
 
@@ -60,7 +63,7 @@ function App(props) {
   const networkOptions = [initialNetwork.name, "mainnet", "rinkeby", "goerli"];
 
   const [injectedProvider, setInjectedProvider] = useState();
-  const [address, setAddress] = useState("");
+  // const [address, setAddress] = useState("");
   // Set Goerli as default
   const [selectedNetwork, setSelectedNetwork] = useState(networkOptions[3]);
   const [passport, setPassport] = useState({});
@@ -75,6 +78,9 @@ function App(props) {
     process.env.REACT_APP_PROVIDER ? process.env.REACT_APP_PROVIDER : targetNetwork.rpcUrl,
   ]);
   const mainnetProvider = useStaticJsonRPC(providers);
+
+  //User Context
+  const { address, setAddress, currentNetwork, setCurrentNetwork } = useContext(Web3Context);
 
   if (DEBUG) console.log(`Using ${selectedNetwork} network`);
 
@@ -102,6 +108,10 @@ function App(props) {
 
   // Update Passport on address change
   const reader = new PassportReader();
+
+  useEffect(() => {
+    setCurrentNetwork(targetNetwork);
+  }, [targetNetwork]);
 
   useEffect(() => {
     async function getAddress() {
@@ -175,8 +185,6 @@ function App(props) {
       loadWeb3Modal();
     }
   }, [loadWeb3Modal]);
-
-  const faucetAvailable = localProvider && localProvider.connection && targetNetwork.name.indexOf("local") !== -1;
 
   return (
     <div className="App">
@@ -301,7 +309,6 @@ function App(props) {
           }
         />
       </Routes>
-      <ThemeSwitch />
     </div>
   );
 }
