@@ -27,3 +27,4 @@ export { default as Rounds } from "./Rounds";
 export { default as Navbar } from "./Navbar";
 export { default as AddressDropDown } from "./AddressDropDown";
 export { default as AccountHomePage } from "./AccountHomePage";
+export { default as StakingModal } from "./StakingModal/StakingModal";

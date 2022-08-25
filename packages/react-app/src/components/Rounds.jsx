@@ -1,10 +1,11 @@
 import React from "react";
-import { Button, Empty, Form, InputNumber, Menu, Table, Typography, Modal, Select } from "antd";
+import { Button, Empty, Form, InputNumber, Modal, Select } from "antd";
 import { useContractReader } from "eth-hooks";
 import { ethers } from "ethers";
 import { useState } from "react";
 import Address from "./Address";
 import AddressInput from "./AddressInput";
+import StakingModal from "./StakingModal/StakingModal";
 import { gql, useQuery } from "@apollo/client";
 
 const zero = ethers.BigNumber.from("0");
@@ -27,7 +28,9 @@ const Rounds = ({
   unstakeUsers,
 }) => {
   const [form] = Form.useForm();
-  const [openView, setOpenView] = useState("self");
+  // Set to visibility of Staking Modal
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [stakingType, setStakingType] = useState("self");
   const [usersToUnstake, setUsersToUnstake] = useState([]);
 
   const query = gql(`
@@ -100,37 +103,6 @@ const Rounds = ({
     tx(writeContracts.Token.approve(readContracts.IDStaking.address, ethers.utils.parseUnits("10000000")));
   };
 
-  const [isAcceptableModalVisible, setIsAcceptableModalVisible] = useState(false);
-  const [isSelfStakingModalVisible, setIsSelfStakingModalVisible] = useState(false);
-  const [isCommunityStakingModalVisible, setIsCommunityStakingModalVisible] = useState(false);
-
-  const showSelfStakingModal = () => {
-    const checkApproved = localStorage.getItem(`${address}+approvedGtcTransactions`);
-    if (checkApproved !== "true") {
-      setIsAcceptableModalVisible(true);
-    } else {
-      setIsSelfStakingModalVisible(true);
-    }
-  };
-
-  const showCommunityStakingModal = () => {
-    const checkApproved = localStorage.getItem(`${address}+approvedGtcTransactions`);
-    if (checkApproved !== "true") {
-      setIsAcceptableModalVisible(true);
-    } else {
-      setIsCommunityStakingModalVisible(true);
-    }
-  };
-
-  const handleOk = () => {
-    setIsAcceptableModalVisible(false);
-    approve().then(result => localStorage.setItem(`${address}+approvedGtcTransactions`, "true"));
-  };
-
-  const handleCancel = () => {
-    setIsAcceptableModalVisible(false);
-  };
-
   return (
     <>
       <div className="text-gray-600 body-font">
@@ -158,7 +130,10 @@ const Rounds = ({
               <p className="leading-relaxed text-base">Staked</p>
             </div>
             <button
-              onClick={showSelfStakingModal}
+              onClick={() => {
+                setStakingType("community");
+                setIsModalVisible(true);
+              }}
               className="flex mx-auto text-white bg-purple-connectPurple border-0 py-2 px-20 focus:outline-none hover:bg-indigo-600 rounded-sm text-lg font-miriam-libre"
             >
               Stake
@@ -189,7 +164,10 @@ const Rounds = ({
               <p className="leading-relaxed text-base">Staked</p>
             </div>
             <button
-              onClick={showCommunityStakingModal}
+              onClick={() => {
+                setStakingType("self");
+                setIsModalVisible(true);
+              }}
               className="flex mx-auto text-white bg-purple-connectPurple border-0 py-2 px-20 focus:outline-none hover:bg-indigo-600 rounded-sm text-lg font-miriam-libre"
             >
               Stake
@@ -284,92 +262,15 @@ const Rounds = ({
           </div>
         )}
       </div> */}
-
-      {/*  Acceptance Modal. This will be removed  */}
-      <Modal
-        title="Approve GTC"
-        visible={isAcceptableModalVisible}
-        onOk={handleOk}
-        onCancel={handleCancel}
-        okText={`Create a Passport`}
-        footer={[
-          <button
-            onClick={handleOk}
-            key="Approve GTC"
-            className="rounded-sm rounded bg-purple-connectPurple py-2 px-10 text-white"
-          >
-            Approve GTC
-          </button>,
-        ]}
-      >
-        <p>
-          Looks like you don’t have a Passport yet! To get started on Identity Staking, create a passport on Gitcoin
-          Passport
-        </p>
-      </Modal>
-      {/* Self Staking. This will be moved into a component */}
-      <Modal
-        title="Stake on yourself"
-        visible={isSelfStakingModalVisible}
-        onOk={() => setIsSelfStakingModalVisible(false)}
-        onCancel={() => setIsSelfStakingModalVisible(false)}
-        okText={`Create a Passport`}
-        footer={[
-          <button
-            onClick={() => setIsSelfStakingModalVisible(false)}
-            key="Approve GTC"
-            className="rounded-sm rounded bg-purple-connectPurple py-2 px-10 text-white"
-          >
-            Stake
-          </button>,
-        ]}
-      >
-        <p>Your stake amount (in GTC)</p>
-        <InputNumber />
-      </Modal>
-      {/* Community Staking. This will be moved into a component */}
-      <Modal
-        title="Stake on others"
-        visible={isCommunityStakingModalVisible}
-        onOk={() => setIsCommunityStakingModalVisible(false)}
-        onCancel={() => setIsCommunityStakingModalVisible(false)}
-        okText={`Create a Passport`}
-        footer={[
-          <button
-            onClick={() => setIsCommunityStakingModalVisible(false)}
-            key="Approve GTC"
-            className="rounded-sm rounded bg-purple-connectPurple py-2 px-10 text-white"
-          >
-            Stake
-          </button>,
-        ]}
-      >
-        <p>
-          Looks like you don’t have a Passport yet! To get started on Identity Staking, create a passport on Gitcoin
-          Passport
-        </p>
-        <Form
-          form={form}
-          style={{
-            margin: "0px auto",
-            width: "100%",
-            display: "flex",
-            justifyContent: "center",
-            padding: "0px 10px",
-          }}
-          initialValues={{ amount: "10" }}
-          name="stakeUsers"
-          layout="inline"
-          onFinish={handleStakeUsers}
-        >
-          <Form.Item name="address" required>
-            <AddressInput ensProvider={mainnetProvider} placeholder="Address of user" />
-          </Form.Item>
-          <Form.Item name="amount" required>
-            <InputNumber min={1} />
-          </Form.Item>
-        </Form>
-      </Modal>
+      <StakingModal
+        isModalVisible={isModalVisible}
+        setIsModalVisible={setIsModalVisible}
+        stakingType={stakingType}
+        readContracts={readContracts}
+        writeContracts={writeContracts}
+        tx={tx}
+        address={address}
+      />
     </>
   );
 };

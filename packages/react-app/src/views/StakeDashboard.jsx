@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useContractReader } from "eth-hooks";
 import { ethers } from "ethers";
 import { Button, Divider, Select, Modal } from "antd";
@@ -7,6 +7,8 @@ import { Rounds, Navbar } from "../components";
 import { STARTING_GRANTS_ROUND } from "../components/Rounds";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
+
+import { Web3Context } from "../helpers/Web3Context";
 
 const { Option } = Select;
 
@@ -36,7 +38,7 @@ function StakeDashboard({
   loadWeb3Modal,
   blockExplorer,
 }) {
-  const [roundInView, setRoundInView] = useState(1);
+  const { roundInView, setRoundInView } = useContext(Web3Context);
   const navigate = useNavigate();
   // Route user to dashboard when wallet is connected
   useEffect(() => {
