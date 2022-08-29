@@ -9,9 +9,11 @@ import StakeItem from "./StakeItem";
 import StakingModal from "./StakingModal/StakingModal";
 import { gql, useQuery } from "@apollo/client";
 
+import { getSelfStakeAmount, getCommunityStakeAmount } from "./StakingModal/utils";
+
 const zero = ethers.BigNumber.from("0");
 
-export const STARTING_GRANTS_ROUND = 14;
+export const STARTING_GRANTS_ROUND = 11;
 
 const Rounds = ({
   tx,
@@ -27,6 +29,8 @@ const Rounds = ({
   mainnetProvider,
   stakeUsers,
   unstakeUsers,
+  userSigner,
+  targetNetwork,
 }) => {
   const [form] = Form.useForm();
   // Set to visibility of Staking Modal
@@ -37,11 +41,14 @@ const Rounds = ({
   const query = gql(`
     query User($address: String!, $round: BigInt!) {
       user(id: $address) {
-        xstakeTo (where: { amount_gt: 0, round: $round }) {
+        xstakeAggregates (where: { round: $round }) {
           id
-          amount
-          to {
-            address
+          total
+        },
+        stakes(where: { round: $round }) {
+          stake
+          round {
+            id
           }
         }
       }
@@ -56,53 +63,7 @@ const Rounds = ({
     },
   });
 
-  console.log({ data, error });
-
-  const stakedBalance = ethers.utils.formatUnits(
-    useContractReader(readContracts, "IDStaking", "getUserStakeForRound", [round, address]) || zero,
-  );
-
-  const [start, duration, tvl] = useContractReader(readContracts, "IDStaking", "fetchRoundMeta", [round]) || [];
-
-  const handleStakeUsers = async v => {
-    console.log(v);
-    await stakeUsers(round, [v.address], [ethers.utils.parseUnits(`${v.amount}`)]);
-  };
-
-  const { Option } = Select;
-
-  const columns = [
-    {
-      title: "User",
-      dataIndex: ["to", "address"],
-      key: ["to", "address"],
-      render: text => <Address ensProvider={mainnetProvider} address={text} fontSize={14} />,
-    },
-    {
-      title: "Amount (GTC)",
-      dataIndex: "amount",
-      key: "id",
-      render: text => <span>{ethers.utils.formatUnits(text)} GTC</span>,
-    },
-    {
-      title: "Action",
-      key: "action",
-      render: (_, record) => (
-        <button
-          onClick={async e => {
-            e.preventDefault();
-            await unstakeUsers(round, [record.to.address]);
-          }}
-        >
-          Unstake
-        </button>
-      ),
-    },
-  ];
-
-  const approve = async () => {
-    tx(writeContracts.Token.approve(readContracts.IDStaking.address, ethers.utils.parseUnits("10000000")));
-  };
+  console.log("view new data ", data, error);
 
   return (
     <>
@@ -251,6 +212,10 @@ const Rounds = ({
         writeContracts={writeContracts}
         tx={tx}
         address={address}
+        userSigner={userSigner}
+        round={round}
+        targetNetwork={targetNetwork}
+        mainnetProvider={mainnetProvider}
       />
     </>
   );

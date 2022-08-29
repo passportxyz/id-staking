@@ -15,7 +15,7 @@ export const Web3Context = createContext(startingState);
 export function Web3Provider({ children, network = "localhost", DEBUG = false, NETWORKCHECK = true, ...props }) {
   const [address, setAddress] = useState("");
   const [currentNetwork, setCurrentNetwork] = useState("");
-  const [roundInView, setRoundInView] = useState(1);
+  const [roundInView, setRoundInView] = useState(4);
 
   const stateMemo = useMemo(
     () => ({

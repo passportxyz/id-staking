@@ -103,11 +103,6 @@ function StakeDashboard({
     tx(writeContracts.IDStaking.migrateStake(id + ""));
   };
 
-  const handleChange = value => {
-    console.log(`selected ${value}`);
-    setRoundInView(value);
-  };
-
   return (
     <>
       <Navbar
@@ -209,6 +204,8 @@ function StakeDashboard({
                     readContracts={readContracts}
                     writeContracts={writeContracts}
                     mainnetProvider={mainnetProvider}
+                    userSigner={userSigner}
+                    targetNetwork={targetNetwork}
                   />
                 )}
               </div>
