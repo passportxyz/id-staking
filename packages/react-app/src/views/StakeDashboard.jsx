@@ -174,97 +174,112 @@ function StakeDashboard({
       </div> */}
 
       {/* Grants Round Header */}
-      <div className="border-b-2 px-10">
-        <p className="font-miriam-libre text-3xl text-left">
-          Gitcoin Round {roundInView ? STARTING_GRANTS_ROUND + roundInView : "Not Found"} {/*{round} of {latestRound}*/}
-        </p>
-        {roundInView ? (
-          <p className="font-miriam-libre text-base text-left mb-4">
-            {moment.unix((start || zero).toString()).format("MMMM Do YYYY (h:mm:ss a)")} {" - "}
-            {moment.unix((start || zero).add(duration || zero).toString()).format("MMMM Do YYYY (h:mm:ss a)")}
+      <main className="container flex flex-1 flex-col mx-auto">
+        <div className="mt-8">
+          <p className="font-miriam-libre text-3xl text-left">
+            Gitcoin Round {roundInView ? STARTING_GRANTS_ROUND + roundInView : "Not Found"}{" "}
+            {/*{round} of {latestRound}*/}
           </p>
-        ) : (
-          <></>
-        )}
-      </div>
-      <div className="pt-2 pb-2 w-full flex flex-row">
-        <div className="text-gray-600 body-font w-full">
-          {roundInView && (
-            <Rounds
-              tx={tx}
-              key={roundInView}
-              round={roundInView}
-              stake={stake}
-              unstake={unstake}
-              address={address}
-              migrate={migrate}
-              stakeUsers={stakeUsers}
-              latestRound={latestRound}
-              tokenSymbol={tokenSymbol}
-              unstakeUsers={unstakeUsers}
-              readContracts={readContracts}
-              writeContracts={writeContracts}
-              mainnetProvider={mainnetProvider}
-            />
+          {roundInView ? (
+            <p className="font-miriam-libre text-base text-left mb-4">
+              {moment.unix((start || zero).toString()).format("MMMM Do YYYY (h:mm:ss a)")} {" - "}
+              {moment.unix((start || zero).add(duration || zero).toString()).format("MMMM Do YYYY (h:mm:ss a)")}
+            </p>
+          ) : (
+            <></>
           )}
         </div>
-        {/* Passport Windows on the  side. This could be moved into its own component */}
-        <div className="p-4 w-1/3 flex flex-col">
-          <div className="border-2 border-gray-200 px-4 py-6 rounded-lg bg-purple-200">
-            <div className="flex flex-row items-center">
-              <div className="ml-2 w-10 h-10 inline-flex items-center justify-center rounded-full bg-indigo-100 text-indigo-500 flex-shrink-0">
-                <svg
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  className="w-4 h-4"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
-                </svg>
+        <div className="flex flex-1 flex-row">
+          <section className="w-full border-t mr-4">
+            <div className="py-2 mt-6 w-full flex flex-row">
+              <div className="text-gray-600 body-font w-full">
+                {roundInView && (
+                  <Rounds
+                    tx={tx}
+                    key={roundInView}
+                    round={roundInView}
+                    stake={stake}
+                    unstake={unstake}
+                    address={address}
+                    migrate={migrate}
+                    stakeUsers={stakeUsers}
+                    latestRound={latestRound}
+                    tokenSymbol={tokenSymbol}
+                    unstakeUsers={unstakeUsers}
+                    readContracts={readContracts}
+                    writeContracts={writeContracts}
+                    mainnetProvider={mainnetProvider}
+                  />
+                )}
               </div>
-              <h2 className="text-gray-900 text-md text-left ml-6">
-                Get staked and receive the Community Staking stamp
-              </h2>
             </div>
+          </section>
 
-            <div className="flex-grow pl-6 mt-4">
-              <p className="leading-relaxed text-base text-left border-b-2">
-                Looks like no one has staked on you yet. Get people you know to stake on you and receive the community
-                staking stamp on Gitcoin Passport.
-              </p>
-              <a className="mt-3 text-indigo-500 inline-flex items-center">More Info</a>
-            </div>
-          </div>
-          <div className="border-2 border-gray-200 px-4 py-6 rounded-lg mt-6 bg-purple-200">
-            <div className="flex flex-row items-center">
-              <div className="ml-2 w-10 h-10 inline-flex items-center justify-center rounded-full bg-indigo-100 text-indigo-500 flex-shrink-0">
-                <svg
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  className="w-4 h-4"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
-                </svg>
+          <aside className="w-1/3">
+            <div className="border-2 border-gray-200 px-4 py-6 rounded-lg bg-purple-200">
+              <div className="flex flex-row items-center">
+                <div className="w-10 h-10 inline-flex items-center justify-center rounded-full bg-indigo-100 text-indigo-500 flex-shrink-0">
+                  <svg
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    className="w-4 h-4"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                  </svg>
+                </div>
+                <h2 className="text-gray-900 text-md text-left ml-4 mb-0">
+                  Get staked and receive the Community Staking stamp
+                </h2>
               </div>
-              <h2 className="text-gray-900 text-md text-left ml-6">Useful Info 1</h2>
-            </div>
 
-            <div className="flex-grow pl-6 mt-4">
-              <p className="leading-relaxed text-base text-left border-b-2">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-              </p>
-              <a className="mt-3 text-indigo-500 inline-flex items-center">More Info</a>
+              <div className="flex-grow mt-4">
+                <p className="leading-relaxed text-base text-left">
+                  Looks like no one has staked on you yet. Get people you know to stake on you and receive the community
+                  staking stamp on Gitcoin Passport.
+                </p>
+                <div className="mt-3 border-t border-divider">
+                  <a href="#" className="mt-3 text-indigo-500 inline-flex items-center">
+                    More Info
+                  </a>
+                </div>
+              </div>
             </div>
-          </div>
+            <div className="border-2 border-gray-200 px-4 py-6 rounded-lg mt-6 bg-purple-200">
+              <div className="flex flex-row items-center">
+                <div className="w-10 h-10 inline-flex items-center justify-center rounded-full bg-indigo-100 text-indigo-500 flex-shrink-0">
+                  <svg
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    className="w-4 h-4"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                  </svg>
+                </div>
+                <h2 className="text-gray-900 text-md text-left ml-4 mb-0">Useful Info 1</h2>
+              </div>
+
+              <div className="flex-grow mt-4">
+                <p className="leading-relaxed text-base text-left">
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+                </p>
+                <div className="mt-3 border-t border-divider">
+                  <a href="#" className="mt-3 text-indigo-500 inline-flex items-center">
+                    More Info
+                  </a>
+                </div>
+              </div>
+            </div>
+          </aside>
         </div>
-      </div>
+      </main>
     </>
   );
 }

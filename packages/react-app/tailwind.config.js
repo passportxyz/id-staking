@@ -14,6 +14,7 @@ module.exports = {
       backgroundImage: {},
 
       colors: {
+        divider: "rgba(0, 0, 0, 0.06)",
         orange: colors.orange,
         purple: {
           darkpurple: "#0E0333",

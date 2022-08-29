@@ -92,37 +92,37 @@ export default function Account({
       )}
       {web3Modal?.cachedProvider && (
         <>
-          <nav className="md:ml-auto flex flex-wrap items-center text-base justify-center">
-            <span className="mr-5 hover:text-gray-900">
-              <TokenBalance
-                contracts={"0xde30da39c46104798bb5aa3fe8b9e0e1f348163f"}
-                img={"./gtcTokenLogo.svg"}
-                name={"GTC"}
-                address={address}
-                dollarMultiplier={null}
-                balance={undefined}
-              />
-            </span>
-            <a
-              className="mr-5 hover:text-gray-900 flex flex-row"
-              target="_blank"
-              rel="noopener noreferrer"
-              href="https://passport.gitcoin.co/"
-            >
-              <img src={"./passportLogo.svg"} alt={"Passport Navbar Badge"} className="mr-2 h-6" /> Gitcoin Passport{" "}
-              <img
-                src={passport?.expiryDate && passport?.issuanceDate ? "./greenEllipse.svg" : "./redEllipse.svg"}
-                alt="passport status dot"
-                className="ml-2"
-              />
-            </a>
-            <span className="mr-5 hover:text-gray-900 capitalize flex flex-row">
-              {" "}
-              <img className="mr-2 h-5" src={"./ethDiamondBlackIcon.svg"} alt="eth icon" /> {currentNetwork?.name}
-            </span>
-          </nav>
-          <Dropdown overlay={menu} icon={<DownOutlined />} trigger={["click"]}>
-            <Button size="large">
+          <div className="flex items-center text-base justify-center">
+            <>
+              <span className="mr-5 hover:text-gray-900">
+                <TokenBalance
+                  contracts={"0xde30da39c46104798bb5aa3fe8b9e0e1f348163f"}
+                  img={"./gtcTokenLogo.svg"}
+                  name={"GTC"}
+                  address={address}
+                  dollarMultiplier={null}
+                  balance={undefined}
+                />
+              </span>
+              <a
+                className="mr-5 hover:text-gray-900 flex flex-row"
+                target="_blank"
+                rel="noopener noreferrer"
+                href="https://passport.gitcoin.co/"
+              >
+                <img src={"./passportLogo.svg"} alt={"Passport Navbar Badge"} className="mr-2 h-6" /> Gitcoin Passport{" "}
+                <img
+                  src={passport?.expiryDate && passport?.issuanceDate ? "./greenEllipse.svg" : "./redEllipse.svg"}
+                  alt="passport status dot"
+                  className="ml-2"
+                />
+              </a>
+              <span className="mr-5 hover:text-gray-900 capitalize flex flex-row">
+                {" "}
+                <img className="mr-2 h-5" src={"./ethDiamondBlackIcon.svg"} alt="eth icon" /> {currentNetwork?.name}
+              </span>
+            </>
+            <Dropdown overlay={menu} icon={<DownOutlined />} trigger={["click"]}>
               <Space>
                 <AddressDropDown
                   address={address}
@@ -132,8 +132,8 @@ export default function Account({
                 />
                 <DownOutlined />
               </Space>
-            </Button>
-          </Dropdown>
+            </Dropdown>
+          </div>
         </>
       )}
     </div>
