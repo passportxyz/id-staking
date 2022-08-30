@@ -190,7 +190,7 @@ function StakeDashboard({
           )}
         </div>
         <div className="flex flex-1 flex-row">
-          <section className="w-full border-t mr-4">
+          <section className="w-full border-t mr-8">
             <div className="py-2 mt-6 w-full flex flex-row">
               <div className="text-gray-600 body-font w-full">
                 {roundInView && (
