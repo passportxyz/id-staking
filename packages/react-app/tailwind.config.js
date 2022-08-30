@@ -15,6 +15,8 @@ module.exports = {
 
       colors: {
         divider: "rgba(0, 0, 0, 0.06)",
+        asideBorder: "#D5BDFF",
+        asideBG: "#F6F0FF",
         orange: colors.orange,
         purple: {
           darkpurple: "#0E0333",

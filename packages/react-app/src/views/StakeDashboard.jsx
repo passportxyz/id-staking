@@ -216,7 +216,7 @@ function StakeDashboard({
           </section>
 
           <aside className="w-1/3">
-            <div className="border-2 border-gray-200 px-4 py-6 rounded-lg bg-purple-200">
+            <div className="border border-asideBorder px-4 py-6 rounded-lg bg-asideBG">
               <div className="flex flex-row items-center">
                 <div className="w-10 h-10 inline-flex items-center justify-center rounded-full bg-indigo-100 text-indigo-500 flex-shrink-0">
                   <svg
@@ -248,7 +248,7 @@ function StakeDashboard({
                 </div>
               </div>
             </div>
-            <div className="border-2 border-gray-200 px-4 py-6 rounded-lg mt-6 bg-purple-200">
+            <div className="border border-asideBorder px-4 py-6 rounded-lg mt-6 bg-asideBG">
               <div className="flex flex-row items-center">
                 <div className="w-10 h-10 inline-flex items-center justify-center rounded-full bg-indigo-100 text-indigo-500 flex-shrink-0">
                   <svg
