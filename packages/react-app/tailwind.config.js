@@ -37,6 +37,11 @@ module.exports = {
       librefranklin: ["Libre Franklin"],
     },
 
+    maxWidth: {
+      aside: "22rem",
+      button: "13rem",
+    },
+
     minHeight: {
       0: "0",
 

@@ -174,7 +174,7 @@ function StakeDashboard({
       </div> */}
 
       {/* Grants Round Header */}
-      <main className="container flex flex-1 flex-col mx-auto">
+      <main className="container flex flex-1 flex-col px-8 md:mx-auto pb-10">
         <div className="mt-8">
           <p className="font-miriam-libre text-3xl text-left">
             Gitcoin Round {roundInView ? STARTING_GRANTS_ROUND + roundInView : "Not Found"}{" "}
@@ -189,9 +189,9 @@ function StakeDashboard({
             <></>
           )}
         </div>
-        <div className="flex flex-1 flex-row">
-          <section className="w-full border-t mr-8">
-            <div className="py-2 mt-6 w-full flex flex-row">
+        <div className="flex flex-1 md:flex-row flex-col">
+          <section className="w-full border-t mr-8 mb-2">
+            <div className="py-2 mt-6 w-full">
               <div className="text-gray-600 body-font w-full">
                 {roundInView && (
                   <Rounds
@@ -215,7 +215,7 @@ function StakeDashboard({
             </div>
           </section>
 
-          <aside className="w-1/3">
+          <aside className="md:max-w-aside w-full">
             <div className="border border-asideBorder px-4 py-6 rounded-lg bg-asideBG">
               <div className="flex flex-row items-center">
                 <div className="w-10 h-10 inline-flex items-center justify-center rounded-full bg-indigo-100 text-indigo-500 flex-shrink-0">
