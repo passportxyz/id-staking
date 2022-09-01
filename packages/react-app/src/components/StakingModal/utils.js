@@ -78,6 +78,20 @@ export const getSelfStakeAmount = data => {
 
 export const getCommunityStakeAmount = data => {
   if (!data || !data?.user) return 0;
+  const xstakes = data?.user?.xstakeTo;
+  if (xstakes.length < 1) {
+    return 0;
+  }
+  let total = 0;
+  xstakes.forEach(element => {
+    total += element.amount;
+  });
+  const stakeAmountFormatted = ethers.utils.formatUnits(total.toString(), 18);
+  return stakeAmountFormatted;
+};
+
+export const getAmountStakedOnMe = data => {
+  if (!data || !data?.user) return 0;
   const stake = data?.user?.xstakeAggregates[0]?.total;
   if (!stake) {
     return 0;

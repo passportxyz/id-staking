@@ -51,6 +51,9 @@ const Rounds = ({
             id
           }
         }
+        xstakeTo(where: { round: $round }) {
+          amount
+        }
       }
     }
   `);
@@ -63,7 +66,7 @@ const Rounds = ({
     },
   });
 
-  console.log("view new data ", data, error);
+  // console.log("view new data ", data, error);
 
   return (
     <>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Modal, InputNumber, Form, Row, Col } from "antd";
+import { Button, Modal, InputNumber, Input, Form, Row, Col, notification } from "antd";
 import { ethers } from "ethers";
 import axios from "axios";
 import AddressInput from "../AddressInput";
@@ -20,11 +20,17 @@ export default function CommunityStakingModalContent({
   mainnetProvider,
   targetNetwork,
 }) {
-  const [stakeAmount, setStakeAmount] = useState(0);
   const [modalStatus, setModalStatus] = useState(1);
   const [numberOfCommunityStakes, setNumberOfCommunityStakes] = useState(1);
-  const [allStakeAmounts, setAllStakeAmounts] = useState({});
-  const [allStakeAddresses, setAllStakeAddresses] = useState({});
+  const [allStakeAmounts, setAllStakeAmounts] = useState({ 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 });
+  const [allStakeAddresses, setAllStakeAddresses] = useState({
+    0: undefined,
+    1: undefined,
+    2: undefined,
+    3: undefined,
+    4: undefined,
+    5: undefined,
+  });
 
   /*
   Modal Status
@@ -35,50 +41,64 @@ export default function CommunityStakingModalContent({
   4) Staking
   */
 
-  const [tokenInfo, setTokenInfo] = useState({});
+  // const refreshTokenDetails = async () => {
+  //   const readUpdate = new ethers.Contract(tokenAddress, ERC20ABI, userSigner);
+  //   const decimals = await readUpdate.decimals();
+  //   const allowance = await readUpdate.allowance(address, writeContracts?.IDStaking?.address);
+  //   const balance = await readUpdate.balanceOf(address);
 
-  const refreshTokenDetails = async () => {
-    const readUpdate = new ethers.Contract(tokenAddress, ERC20ABI, userSigner);
-    const decimals = await readUpdate.decimals();
-    const allowance = await readUpdate.allowance(address, writeContracts?.IDStaking?.address);
-    const balance = await readUpdate.balanceOf(address);
+  //   const adjustedAmount = ethers.utils.parseUnits(stakeAmount.toString() || "0", decimals);
+  //   const hasEnoughAllowance = allowance.lt(adjustedAmount);
 
-    const adjustedAmount = ethers.utils.parseUnits(stakeAmount.toString() || "0", decimals);
-    const hasEnoughAllowance = allowance.lt(adjustedAmount);
+  //   setTokenInfo({ ...tokenInfo, [token]: { decimals, allowance, tokenAddress, balance } });
 
-    setTokenInfo({ ...tokenInfo, [token]: { decimals, allowance, tokenAddress, balance } });
-
-    if (balance.isZero()) {
-      setModalStatus(5);
-    } else {
-      if (allowance.isZero() || hasEnoughAllowance) {
-        setModalStatus(1);
-      } else {
-        setModalStatus(3);
-      }
-    }
-    console.log("view modal status ", modalStatus);
-  };
+  //   if (balance.isZero()) {
+  //     setModalStatus(5);
+  //   } else {
+  //     if (allowance.isZero() || hasEnoughAllowance) {
+  //       setModalStatus(1);
+  //     } else {
+  //       setModalStatus(3);
+  //     }
+  //   }
+  //   console.log("view modal status ", modalStatus);
+  // };
 
   useEffect(() => {
-    console.log("stake amount ", stakeAmount);
-  }, [stakeAmount]);
+    console.log("changein allStakeAddresses ", allStakeAddresses);
+    console.log("changein allStakeAmounts ", allStakeAmounts);
+  }, [allStakeAddresses, allStakeAmounts]);
+
+  // Sums up all the stake amounts entered on screen
+  const getTotalAmountStaked = () => {
+    const amounts = Object.values(allStakeAmounts);
+    let total = 0;
+    amounts.forEach(amount => {
+      total += amount;
+    });
+    return total;
+  };
+
+  const getTotalNumberOfStakees = () => {
+    const stakees = Object.values(allStakeAddresses);
+    let total = 0;
+    stakees.forEach(stakee => {
+      if (stakee !== undefined) total++;
+    });
+    return total;
+  };
 
   const approveTokenAllowance = async () => {
     setModalStatus(2);
     await approve();
-    await refreshTokenDetails();
+    setModalStatus(3);
   };
 
-  const stake = async (id, amount) => {
-    console.log("stake starting ", id, typeof amount);
-    tx(writeContracts.IDStaking.stake(id + "", ethers.utils.parseUnits(amount)));
-  };
-
-  const stakeUsers = async (id, users, amounts) => {
+  const stakeUsers = async (id, amounts, users) => {
     let data = {};
 
     try {
+      console.log("start ", address, targetNetwork.chainId);
       const res = await axios({
         method: "POST",
         url: "https://id-staking-passport-api.vercel.app/api/passport/reader",
@@ -89,22 +109,51 @@ export default function CommunityStakingModalContent({
       });
 
       data = res.data;
-    } catch (error) {
-      // TODO : Throw notification error
+      console.log("success ", data);
+    } catch (e) {
+      notification.open({
+        message: "Staking unsuccessful",
+        description: `Error: ${e.message}`,
+      });
       return null;
     }
 
-    tx(writeContracts.IDStaking.stakeUsers(data.signature, data.nonce, data.timestamp, id + "", users, amounts));
+    tx(
+      writeContracts.IDStaking.stakeUsers(
+        data.signature,
+        data.nonce,
+        data.timestamp,
+        id + "",
+        JSON.stringify(users),
+        JSON.stringify(amounts),
+      ),
+    );
   };
 
-  const increaseStakeAmount = () => {
-    const newStakeAmount = parseFloat(stakeAmount.toString()) + 1.0;
-    setStakeAmount(parseFloat(newStakeAmount.toString()));
+  const increaseStakeAmount = index => {
+    const tempAllamounts = allStakeAmounts;
+    const newStakeAmount = allStakeAmounts[index] + 1.0;
+    tempAllamounts[index] = newStakeAmount;
+    setAllStakeAmounts(tempAllamounts);
+    console.log("increase amount ", index, allStakeAmounts);
   };
 
-  const decreaseStakeAmount = () => {
-    const newStakeAmount = parseFloat(stakeAmount.toString()) - 1.0;
-    setStakeAmount(parseFloat(newStakeAmount.toString()));
+  const decreaseStakeAmount = index => {
+    const tempAllamounts = allStakeAmounts;
+    const newStakeAmount = allStakeAmounts[index] - 1.0;
+    tempAllamounts[index] = newStakeAmount;
+    setAllStakeAmounts(tempAllamounts);
+    console.log("decrease amount ", index, allStakeAmounts);
+  };
+
+  const getStakeAmountAtIndex = index => {
+    return allStakeAmounts[index];
+  };
+
+  const getStakeAddressAtIndex = index => {
+    const addresslookup = allStakeAddresses[index];
+    let displayAddress = addresslookup?.substr(0, 5) + "..." + addresslookup?.substr(-4);
+    return displayAddress;
   };
 
   // Modal Visibility Functions
@@ -134,15 +183,24 @@ export default function CommunityStakingModalContent({
           Approve GTC
         </Button>,
         <Button
+          loading={modalStatus === 4}
           onClick={async () => {
             const amounts = Object.values(allStakeAmounts);
             const addresses = Object.values(allStakeAddresses);
-            console.log("all amounts ", amounts, "all addresses ", addresses);
-            if (amounts.length === address.length) {
-              // await stakeUsers(round.toString(), amounts, addresses);
+
+            // filter amounts for 0
+            const filteredAmounts = amounts.filter(amount => amount > 0);
+            // filter addresses for undefined
+            const filteredAddresses = addresses.filter(address => address !== undefined);
+
+            console.log("all amounts ", amounts, "all addresses ", addresses, targetNetwork.chainId);
+            if (filteredAmounts.length === filteredAddresses.length) {
+              setModalStatus(4);
+              await stakeUsers(round.toString(), filteredAmounts, filteredAddresses);
+              setModalStatus(3);
             }
           }}
-          disabled={modalStatus === 1 || !(stakeAmount > 0)}
+          disabled={modalStatus === 1 || getTotalAmountStaked() <= 0}
           key="Stake"
           style={{ backgroundColor: "#6F3FF5", color: "white" }}
         >
@@ -172,18 +230,19 @@ export default function CommunityStakingModalContent({
               />
             </Col>
             <Col className="gutter-row" span={10}>
-              <Button onClick={increaseStakeAmount}>+</Button>
+              <Button onClick={e => increaseStakeAmount(i)}>+</Button>
               <InputNumber
+                defaultValue={0}
+                value={getStakeAmountAtIndex(i)}
                 min={0}
                 onChange={e => {
                   const tempAllAmounts = allStakeAmounts;
                   tempAllAmounts[i] = e;
                   setAllStakeAmounts(tempAllAmounts);
                   console.log(`update-all amounts ${i}: ${e}, all: ${JSON.stringify(tempAllAmounts)}`);
-                  setStakeAmount(e);
                 }}
               />
-              <Button onClick={decreaseStakeAmount}>-</Button>
+              <Button onClick={e => decreaseStakeAmount(i)}>-</Button>
             </Col>
             <Col className="gutter-row" span={2}>
               <Button
@@ -221,20 +280,31 @@ export default function CommunityStakingModalContent({
           </Col>
         </Row>
 
-        {stakeAmount > 0 && (
-          <div className="border-2 border-gray-200 px-4 py-6 rounded-lg bg-yellow-200 mt-4">
-            <h1>Important!</h1>
-            <ul className="list-disc ml-4">
-              <li>
-                Your staked GTC will be locked when the grant round starts, and you will not be able to withdraw it
-                until two weeks after the round ends
-              </li>
-              <li>
-                The staking contract has been checked by our engineering team, but it has not been audited by a
-                professional audit firm. Please proceed with your own risk.
-              </li>
+        {getTotalAmountStaked() > 0 && (modalStatus === 3 || modalStatus === 4) && (
+          <>
+            <p className="mt-4">
+              You’ll be staking a total of <span className="font-bold">{getTotalAmountStaked()} GTC</span> on{" "}
+              {getTotalNumberOfStakees()} people.
+            </p>
+            <ul className="ml-4 list-disc">
+              {[...Array(numberOfCommunityStakes)].map((_, i) => (
+                <li>{`${allStakeAmounts[i]} GTC to ${getStakeAddressAtIndex(i)}`}</li>
+              ))}
             </ul>
-          </div>
+            <div className="border-2 border-gray-200 px-4 py-6 rounded-lg bg-yellow-200 mt-4">
+              <h1>Important!</h1>
+              <ul className="list-disc ml-4">
+                <li>
+                  Your staked GTC will be locked when the grant round starts, and you will not be able to withdraw it
+                  until two weeks after the round ends
+                </li>
+                <li>
+                  The staking contract has been checked by our engineering team, but it has not been audited by a
+                  professional audit firm. Please proceed with your own risk.
+                </li>
+              </ul>
+            </div>
+          </>
         )}
       </div>
 

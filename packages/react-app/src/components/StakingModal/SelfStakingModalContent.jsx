@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Button, Modal, InputNumber } from "antd";
+import { Button, Modal, InputNumber, notification } from "antd";
 import { ethers } from "ethers";
 
-import { ERC20ABI, appName, tokenAddress } from "./utils";
+import { ERC20ABI, tokenAddress } from "./utils";
 
 const token = "GTC";
 
@@ -54,7 +54,7 @@ export default function CommunityStakingModalContent({
   };
 
   useEffect(() => {
-    console.log("stake amount ", stakeAmount);
+    console.log("stake amount ", stakeAmount, modalStatus);
   }, [stakeAmount]);
 
   const approveTokenAllowance = async () => {
@@ -104,8 +104,21 @@ export default function CommunityStakingModalContent({
           Approve GTC
         </Button>,
         <Button
-          onClick={async () => await stake(round.toString(), stakeAmount.toString())}
+          onClick={async () => {
+            setModalStatus(4);
+            try {
+              await stake(round.toString(), stakeAmount.toString());
+            } catch (e) {
+              notification.open({
+                message: "Staking unsuccessful",
+                description: `Error: ${e.message}`,
+              });
+              return null;
+            }
+            setModalStatus(3);
+          }}
           disabled={modalStatus === 1 || !(stakeAmount > 0)}
+          loading={modalStatus === 4}
           key="Stake"
           style={{ backgroundColor: "#6F3FF5", color: "white" }}
         >
@@ -121,7 +134,7 @@ export default function CommunityStakingModalContent({
           <Button onClick={decreaseStakeAmount}>-</Button>
         </div>
 
-        {stakeAmount > 0 && (
+        {stakeAmount > 0 && (modalStatus === 3 || modalStatus === 4) && (
           <>
             <p className="mt-4">
               You’ll be staking <span className="font-bold">{stakeAmount} GTC</span> on yourself.
