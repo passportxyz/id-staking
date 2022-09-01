@@ -7,6 +7,9 @@ import { Rounds, Navbar } from "../components";
 import { STARTING_GRANTS_ROUND } from "../components/Rounds";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
+import { gql, useQuery } from "@apollo/client";
+
+import { getAmountStakedOnMe } from "../components/StakingModal/utils";
 
 import { Web3Context } from "../helpers/Web3Context";
 
@@ -61,36 +64,6 @@ function StakeDashboard({
     tx(writeContracts.Token.mintAmount(ethers.utils.parseUnits("1000")));
   };
 
-  const approve = async () => {
-    tx(writeContracts.Token.approve(readContracts.IDStaking.address, ethers.utils.parseUnits("10000000")));
-  };
-
-  const stake = async (id, amount) => {
-    tx(writeContracts.IDStaking.stake(id + "", ethers.utils.parseUnits(amount)));
-  };
-
-  const stakeUsers = async (id, users, amounts) => {
-    let data = {};
-
-    try {
-      const res = await axios({
-        method: "POST",
-        url: "https://id-staking-passport-api.vercel.app/api/passport/reader",
-        data: {
-          address,
-          domainChainId: targetNetwork.chainId,
-        },
-      });
-
-      data = res.data;
-    } catch (error) {
-      // TODO : Throw notification error
-      return null;
-    }
-
-    tx(writeContracts.IDStaking.stakeUsers(data.signature, data.nonce, data.timestamp, id + "", users, amounts));
-  };
-
   const unstake = async (id, amount) => {
     tx(writeContracts.IDStaking.unstake(id + "", ethers.utils.parseUnits(amount)));
   };
@@ -103,10 +76,34 @@ function StakeDashboard({
     tx(writeContracts.IDStaking.migrateStake(id + ""));
   };
 
-  const handleChange = value => {
-    console.log(`selected ${value}`);
-    setRoundInView(value);
-  };
+  // Populate Round Data
+  const query = gql(`
+  query User($address: String!, $round: BigInt!) {
+    user(id: $address) {
+      xstakeAggregates (where: { round: $round }) {
+        id
+        total
+      },
+      stakes(where: { round: $round }) {
+        stake
+        round {
+          id
+        }
+      },
+      xstakeTo(where: { round: $round }) {
+        amount
+      }
+    }
+  }
+`);
+
+  const { loading, data, error } = useQuery(query, {
+    pollInterval: 2500,
+    variables: {
+      address: address.toLowerCase(),
+      round: roundInView,
+    },
+  });
 
   return (
     <>
@@ -131,47 +128,6 @@ function StakeDashboard({
         loadWeb3Modal={loadWeb3Modal}
         blockExplorer={blockExplorer}
       />
-
-      {/*  Mint Tokens to be removed. These are here for examples */}
-      {/* <div
-        style={{
-          paddingBottom: "10px",
-          maxWidth: "600px",
-          margin: "6px auto 2px auto",
-        }}
-      >
-        <div style={{ marginTop: "30px" }}>
-          <Divider>GTC Token</Divider>
-          <div style={{ marginBottom: "10px" }}>
-            Token Balance: {tokenBalance} {tokenSymbol}
-          </div>
-
-          <div style={{ width: "100%" }}>
-            <Button style={{ marginRight: "10px" }} onClick={mintToken}>
-              Mint 1000 {tokenSymbol}
-            </Button>
-            <Button style={{ marginRight: "10px" }} onClick={approve}>
-              Approve Stake contract for GTC
-            </Button>
-          </div>
-        </div>
-      </div> */}
-
-      {/* Toggle through rounds. This is something we can use after GR15 to switch between grants rounds  */}
-      {/* <div className="flex flex-row p-10">
-        <p className="ml-10">Choose a round (placeholder to toggle through rounds)</p>
-        <Select
-          defaultValue={"Round..."}
-          style={{
-            width: 120,
-          }}
-          onChange={handleChange}
-        >
-          {rounds.map(r => (
-            <Option value={r}>{`Round: ${r + STARTING_GRANTS_ROUND}`}</Option>
-          ))}
-        </Select>
-      </div> */}
 
       {/* Grants Round Header */}
       <main className="container flex flex-1 flex-col px-8 md:mx-auto pb-10">
@@ -198,17 +154,18 @@ function StakeDashboard({
                     tx={tx}
                     key={roundInView}
                     round={roundInView}
-                    stake={stake}
                     unstake={unstake}
                     address={address}
                     migrate={migrate}
-                    stakeUsers={stakeUsers}
                     latestRound={latestRound}
                     tokenSymbol={tokenSymbol}
                     unstakeUsers={unstakeUsers}
                     readContracts={readContracts}
                     writeContracts={writeContracts}
                     mainnetProvider={mainnetProvider}
+                    userSigner={userSigner}
+                    targetNetwork={targetNetwork}
+                    roundData={data}
                   />
                 )}
               </div>
@@ -232,16 +189,29 @@ function StakeDashboard({
                   </svg>
                 </div>
                 <h2 className="text-gray-900 text-md text-left ml-4 mb-0">
-                  Get staked and receive the Community Staking stamp
+                  {getAmountStakedOnMe(data)
+                    ? "You’ve received stakes from the community"
+                    : "Get staked and receive the Community Staking stamp"}
                 </h2>
               </div>
 
               <div className="flex-grow mt-4">
-                <p className="leading-relaxed text-base text-left">
-                  Looks like no one has staked on you yet. Get people you know to stake on you and receive the community
-                  staking stamp on Gitcoin Passport.
-                </p>
-                <div className="mt-3 border-t border-divider">
+                {getAmountStakedOnMe(data) ? (
+                  <div className="flex flex-col">
+                    <p className="leading-relaxed text-base text-left font-libre-franklin">
+                      Some GTC have been staked on you by the community. You can now get the Community Staking stamp on
+                      Gitcoin Passport!
+                    </p>
+                    <p className="text-black text-left font-libre-franklin text-xl">{getAmountStakedOnMe(data)} GTC</p>
+                  </div>
+                ) : (
+                  <p className="leading-relaxed text-base text-left font-libre-franklin">
+                    Looks like no one has staked on you yet. Get people you know to stake on you and receive the
+                    community staking stamp on Gitcoin Passport.
+                  </p>
+                )}
+
+                <div className="mt-2 border-t border-divider">
                   <a href="#" className="mt-3 text-indigo-500 inline-flex items-center">
                     More Info
                   </a>

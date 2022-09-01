@@ -25,8 +25,11 @@ module.exports = {
         },
         green: {
           "050": "#6dc5a0",
-
           "dark-green": "#337062",
+        },
+        blue: {
+          alertBg: "#E6F7FF",
+          alertBorder: "#91D5FF",
         },
       },
     },
