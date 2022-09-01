@@ -25,8 +25,8 @@ export default function Navbar({
 }) {
   const { address, setAddress, currentNetwork } = useContext(Web3Context);
   return (
-    <div className="App md:pb-4 sm:pb-20 flex flex-col">
-      <div className="p-10 mx-auto flex flex-wrap w-full">
+    <nav className="App md:pb-4 sm:pb-20 flex flex-col">
+      <div className="p-4 mx-auto flex flex-wrap items-center w-full">
         <div className="invisible flex flex-wrap p-5 md:visible md:flex-row">
           <div className="float-right mb-4 flex flex-row items-center font-medium text-gray-900 md:mb-0">
             <img src="/gitcoinLogoDark.svg" alt="Gitcoin Logo" />
@@ -53,6 +53,6 @@ export default function Navbar({
           />
         </div>
       </div>
-    </div>
+    </nav>
   );
 }

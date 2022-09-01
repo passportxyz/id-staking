@@ -42,7 +42,7 @@ export default function Address(props) {
 
   const text = (
     <Text>
-      <a style={{ color: "black", fontSize: 20 }} target="_blank" href={etherscanLink} rel="noopener noreferrer">
+      <a style={{ color: "black" }} target="_blank" href={etherscanLink} rel="noopener noreferrer">
         {displayAddress}
       </a>
     </Text>
@@ -51,7 +51,14 @@ export default function Address(props) {
   return (
     <div style={{ padding: 2 }}>
       <Meta
-        avatar={<Blockies seed={address.toLowerCase()} size={5} scale={props.fontSize ? props.fontSize / 7 : 4} />}
+        avatar={
+          <Blockies
+            className="rounded-full"
+            seed={address.toLowerCase()}
+            size={5}
+            scale={props.fontSize ? props.fontSize / 7 : 4}
+          />
+        }
         title={text}
         description={props.extra}
         key="meta"

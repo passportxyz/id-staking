@@ -5,6 +5,7 @@ import { ethers } from "ethers";
 import { useState } from "react";
 import Address from "./Address";
 import AddressInput from "./AddressInput";
+import StakeItem from "./StakeItem";
 import StakingModal from "./StakingModal/StakingModal";
 import { gql, useQuery } from "@apollo/client";
 
@@ -106,74 +107,54 @@ const Rounds = ({
   return (
     <>
       <div className="text-gray-600 body-font">
-        <div className="container px-5 py-24 mx-auto">
-          <div className="flex items-center lg:w-4/5 mx-auto border-b pb-10 mb-10 border-gray-200 sm:flex-row flex-col">
-            <div className="w-20 h-20 sm:mr-10 inline-flex items-center justify-center rounded-full bg-indigo-100 text-indigo-500 flex-shrink-0">
-              <svg
-                fill="none"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                className="w-4 h-4"
-                viewBox="0 0 24 24"
-              >
-                <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
-              </svg>
-            </div>
-            <div className="flex-grow sm:text-left text-center mt-6 sm:mt-0">
-              <h2 className="text-gray-900 text-lg title-font font-medium mb-2">Stake on yourself</h2>
-              <p className="leading-relaxed text-base">Some explanation on what this means</p>
-            </div>
-            <div className="flex-grow sm:text-left text-center mt-6 sm:mt-0">
-              <h2 className="text-gray-900 text-lg title-font font-medium mb-2">0 GTC</h2>
-              <p className="leading-relaxed text-base">Staked</p>
-            </div>
-            <button
-              onClick={() => {
-                setStakingType("community");
-                setIsModalVisible(true);
-              }}
-              className="flex mx-auto text-white bg-purple-connectPurple border-0 py-2 px-20 focus:outline-none hover:bg-indigo-600 rounded-sm text-lg font-miriam-libre"
+        <StakeItem
+          icon={
+            <svg
+              fill="none"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              className="w-4 h-4"
+              viewBox="0 0 24 24"
             >
-              Stake
-            </button>
-          </div>
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+            </svg>
+          }
+          title="Stake on yourself"
+          description="Some explanation on what this means"
+          amount="0"
+          buttonText="Stake"
+          buttonHandler={() => {
+            setStakingType("community");
+            setIsModalVisible(true);
+          }}
+        />
 
-          <div className="flex items-center lg:w-4/5 mx-auto sm:flex-row flex-col">
-            <div className="w-20 h-20 sm:mr-10 inline-flex items-center justify-center rounded-full bg-indigo-100 text-indigo-500 flex-shrink-0">
-              <svg
-                fill="none"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                className="w-4 h-4"
-                viewBox="0 0 24 24"
-              >
-                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg>
-            </div>
-            <div className="flex-grow sm:text-left text-center mt-6 sm:mt-0">
-              <h2 className="text-gray-900 text-lg title-font font-medium mb-2">Stake on other people</h2>
-              <p className="leading-relaxed text-base">Some explanation on what this means</p>
-            </div>
-            <div className="flex-grow sm:text-left text-center mt-6 sm:mt-0">
-              <h2 className="text-gray-900 text-lg title-font font-medium mb-2">0 GTC</h2>
-              <p className="leading-relaxed text-base">Staked</p>
-            </div>
-            <button
-              onClick={() => {
-                setStakingType("self");
-                setIsModalVisible(true);
-              }}
-              className="flex mx-auto text-white bg-purple-connectPurple border-0 py-2 px-20 focus:outline-none hover:bg-indigo-600 rounded-sm text-lg font-miriam-libre"
+        <StakeItem
+          icon={
+            <svg
+              fill="none"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              className="w-4 h-4"
+              viewBox="0 0 24 24"
             >
-              Stake
-            </button>
-          </div>
-        </div>
+              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          }
+          title="Stake on other people"
+          description="Some explanation on what this means"
+          amount="0"
+          buttonText="Stake"
+          buttonHandler={() => {
+            setStakingType("self");
+            setIsModalVisible(true);
+          }}
+        />
       </div>
 
       {/* I commented this out so we have this example for reference. This will be removed.  */}

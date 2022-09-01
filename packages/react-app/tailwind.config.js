@@ -14,6 +14,9 @@ module.exports = {
       backgroundImage: {},
 
       colors: {
+        divider: "rgba(0, 0, 0, 0.06)",
+        asideBorder: "#D5BDFF",
+        asideBG: "#F6F0FF",
         orange: colors.orange,
         purple: {
           darkpurple: "#0E0333",
@@ -32,6 +35,11 @@ module.exports = {
       spacemono: ["Space Mono"],
 
       librefranklin: ["Libre Franklin"],
+    },
+
+    maxWidth: {
+      aside: "22rem",
+      button: "13rem",
     },
 
     minHeight: {

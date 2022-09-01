@@ -33,7 +33,6 @@ export default function TokenBalance({ contracts, name, address, balance, dollar
     <span
       style={{
         verticalAlign: "middle",
-        fontSize: 24,
         padding: 8,
         cursor: "pointer",
       }}
