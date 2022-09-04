@@ -5,6 +5,7 @@ import { Web3Context } from "../helpers/Web3Context";
 
 export default function Navbar({
   networkOptions,
+  readContracts,
   selectedNetwork,
   setSelectedNetwork,
   yourLocalBalance,
@@ -26,19 +27,20 @@ export default function Navbar({
   const { address, setAddress, currentNetwork } = useContext(Web3Context);
   return (
     <nav className="App md:pb-4 sm:pb-20 flex flex-col">
-      <div className="p-4 mx-auto flex flex-wrap items-center w-full">
-        <div className="invisible flex flex-wrap p-5 md:visible md:flex-row">
-          <div className="float-right mb-4 flex flex-row items-center font-medium text-gray-900 md:mb-0">
+      <div className="p-4 mx-auto flex items-center w-full">
+        <div className="flex flex-wrap md:flex-row">
+          <div className="float-right flex flex-row items-center font-medium text-gray-900">
             <img src="/gitcoinLogoDark.svg" alt="Gitcoin Logo" />
             <img className="ml-6 mr-6" src="/logoLine.svg" alt="Logo Line" />
             <img src="/greyEllipse.svg" alt="pPassport Logo" />
-            <span className="ml-6 text-grey-500 font-bold text-lg">IDENTITY STAKING</span>
+            <span className="ml-6 text-grey-500 font-bold text-lg hidden md:inline-flex">IDENTITY STAKING</span>
           </div>
         </div>
         <div className="ml-auto">
           <Account
             passport={passport}
             address={address}
+            readContracts={readContracts}
             localProvider={localProvider}
             userSigner={userSigner}
             mainnetProvider={mainnetProvider}

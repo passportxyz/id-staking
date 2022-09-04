@@ -1,6 +1,6 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { useThemeSwitcher } from "react-css-theme-switcher";
-import { Button, Menu, Dropdown, Space, Badge } from "antd";
+import { Menu, Dropdown, Space, Drawer } from "antd";
 import { DownOutlined, LogoutOutlined } from "@ant-design/icons";
 
 import Address from "./Address";
@@ -8,7 +8,6 @@ import AddressDropDown from "./AddressDropDown";
 import Balance from "./Balance";
 import Wallet from "./Wallet";
 import TokenBalance from "./TokenBalance";
-import NetworkSwitch from "./NetworkSwitch";
 
 import { Web3Context } from "../helpers/Web3Context";
 
@@ -25,6 +24,7 @@ export default function Account({
   logoutOfWeb3Modal,
   blockExplorer,
   isContract,
+  readContracts,
   networkDisplay,
   NETWORKCHECK,
   localChainId,
@@ -37,6 +37,7 @@ export default function Account({
 }) {
   const { currentNetwork } = useContext(Web3Context);
   const { currentTheme } = useThemeSwitcher();
+  const [openNavDrawer, setOpenNavDrawer] = useState(false);
   let accountButtonInfo;
   if (web3Modal?.cachedProvider && passport.expiryDate && passport.issuanceDate) {
     accountButtonInfo = { name: "Logout", action: logoutOfWeb3Modal };
@@ -80,6 +81,15 @@ export default function Account({
     </Menu>
   );
 
+  const addressComponent = (
+    <Space>
+      <AddressDropDown address={address} ensProvider={mainnetProvider} blockExplorer={blockExplorer} blockieSize={10} />
+      <div className="inline-flex">
+        <DownOutlined className="inline-flex" />
+      </div>
+    </Space>
+  );
+
   return (
     <div className="flex">
       {!web3Modal?.cachedProvider && (
@@ -96,43 +106,99 @@ export default function Account({
             <>
               <span className="mr-5 hover:text-gray-900">
                 <TokenBalance
-                  contracts={"0xde30da39c46104798bb5aa3fe8b9e0e1f348163f"}
+                  contracts={readContracts}
                   img={"./gtcTokenLogo.svg"}
-                  name={"GTC"}
+                  name={"Token"}
                   address={address}
                   dollarMultiplier={null}
-                  balance={undefined}
                 />
               </span>
-              <a
-                className="mr-5 hover:text-gray-900 flex flex-row"
-                target="_blank"
-                rel="noopener noreferrer"
-                href="https://passport.gitcoin.co/"
-              >
-                <img src={"./passportLogo.svg"} alt={"Passport Navbar Badge"} className="mr-2 h-6" /> Gitcoin Passport{" "}
-                <img
-                  src={passport?.expiryDate && passport?.issuanceDate ? "./greenEllipse.svg" : "./redEllipse.svg"}
-                  alt="passport status dot"
-                  className="ml-2"
-                />
-              </a>
-              <span className="mr-5 hover:text-gray-900 capitalize flex flex-row">
-                {" "}
-                <img className="mr-2 h-5" src={"./ethDiamondBlackIcon.svg"} alt="eth icon" /> {currentNetwork?.name}
-              </span>
+              <div className="hidden md:inline-flex">
+                <a
+                  className="mr-5 hover:text-gray-900 flex flex-row"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href="https://passport.gitcoin.co/"
+                >
+                  <img src={"./passportLogo.svg"} alt={"Passport Navbar Badge"} className="mr-2 h-6" /> Gitcoin Passport{" "}
+                  <img
+                    src={passport?.expiryDate && passport?.issuanceDate ? "./greenEllipse.svg" : "./redEllipse.svg"}
+                    alt="passport status dot"
+                    className="ml-2"
+                  />
+                </a>
+                <span className="mr-5 hover:text-gray-900 capitalize flex flex-row">
+                  {" "}
+                  <img className="mr-2 h-5" src={"./ethDiamondBlackIcon.svg"} alt="eth icon" /> {currentNetwork?.name}
+                </span>
+              </div>
             </>
-            <Dropdown overlay={menu} icon={<DownOutlined />} trigger={["click"]}>
-              <Space>
-                <AddressDropDown
-                  address={address}
-                  ensProvider={mainnetProvider}
-                  blockExplorer={blockExplorer}
-                  blockieSize={10}
-                />
-                <DownOutlined />
-              </Space>
-            </Dropdown>
+            <div className="md:hidden inline-flex">
+              <div
+                onClick={e => {
+                  e.preventDefault();
+
+                  console.log("Open sidebar");
+
+                  setOpenNavDrawer(true);
+                }}
+              >
+                {addressComponent}
+              </div>
+              <Drawer
+                title={null}
+                placement="right"
+                width="70%"
+                closable={false}
+                onClose={() => setOpenNavDrawer(false)}
+                visible={openNavDrawer}
+              >
+                <div className="flex flex-1 flex-col items-center mt-8 justify-center">
+                  <div className="mb-10">
+                    <AddressDropDown
+                      address={address}
+                      ensProvider={mainnetProvider}
+                      blockExplorer={blockExplorer}
+                      blockieSize={10}
+                    />
+                  </div>
+                  <div className="mb-10">
+                    <a
+                      className="hover:text-gray-900 flex flex-row"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      href="https://passport.gitcoin.co/"
+                    >
+                      <img src={"./passportLogo.svg"} alt={"Passport Navbar Badge"} className="mr-2 h-6" /> Gitcoin
+                      Passport{" "}
+                      <img
+                        src={passport?.expiryDate && passport?.issuanceDate ? "./greenEllipse.svg" : "./redEllipse.svg"}
+                        alt="passport status dot"
+                        className="ml-2"
+                      />
+                    </a>
+                  </div>
+                  <div className="mt-4">
+                    <a
+                      href="/"
+                      onClick={e => {
+                        e.preventDefault();
+
+                        logoutOfWeb3Modal();
+                      }}
+                      className="text-signout"
+                    >
+                      Sign Out
+                    </a>
+                  </div>
+                </div>
+              </Drawer>
+            </div>
+            <div className="hidden md:inline-flex">
+              <Dropdown overlay={menu} icon={<DownOutlined />} trigger={["click"]}>
+                {addressComponent}
+              </Dropdown>
+            </div>
           </div>
         </>
       )}

@@ -18,6 +18,7 @@ module.exports = {
         asideBorder: "#D5BDFF",
         asideBG: "#F6F0FF",
         orange: colors.orange,
+        signout: "#FF4D4F",
         purple: {
           darkpurple: "#0E0333",
           connectPurple: "#6F3FF5",
