@@ -9,8 +9,6 @@ export default function TokenBalance({ contracts, name, address, balance, dollar
   const tokenContract = contracts && contracts[name];
   const getBalance = useTokenBalance(tokenContract, address);
 
-  console.log({ tokenContract, getBalance, balance, address });
-
   let floatBalance = parseFloat("0.00");
 
   let usingBalance = getBalance;
