@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Button, Modal, Input, Form, Row, Col, notification } from "antd";
+import { Button, Modal, Input, Row, Col, notification } from "antd";
+import { WarningOutlined, CheckOutlined } from "@ant-design/icons";
 import { ethers } from "ethers";
 import axios from "axios";
 import AddressInput from "../AddressInput";
 
-import { ERC20ABI, appName, tokenAddress } from "./utils";
-
-const token = "GTC";
+import { ERC20ABI } from "./utils";
 
 // starting all stake amounts
 const initialStakeAmounts = {
@@ -54,34 +53,6 @@ export default function CommunityStakingModalContent({
   4) Staking
   */
 
-  // const refreshTokenDetails = async () => {
-  //   const readUpdate = new ethers.Contract(tokenAddress, ERC20ABI, userSigner);
-  //   const decimals = await readUpdate.decimals();
-  //   const allowance = await readUpdate.allowance(address, writeContracts?.IDStaking?.address);
-  //   const balance = await readUpdate.balanceOf(address);
-
-  //   const adjustedAmount = ethers.utils.parseUnits(stakeAmount.toString() || "0", decimals);
-  //   const hasEnoughAllowance = allowance.lt(adjustedAmount);
-
-  //   setTokenInfo({ ...tokenInfo, [token]: { decimals, allowance, tokenAddress, balance } });
-
-  //   if (balance.isZero()) {
-  //     setModalStatus(5);
-  //   } else {
-  //     if (allowance.isZero() || hasEnoughAllowance) {
-  //       setModalStatus(1);
-  //     } else {
-  //       setModalStatus(3);
-  //     }
-  //   }
-  //   console.log("view modal status ", modalStatus);
-  // };
-
-  useEffect(() => {
-    console.log("changein allStakeAddresses ", allStakeAddresses);
-    console.log("changein allStakeAmounts ", allStakeAmounts);
-  }, [allStakeAddresses, allStakeAmounts]);
-
   // Sums up all the stake amounts entered on screen
   const getTotalAmountStaked = () => {
     const amounts = Object.values(allStakeAmounts);
@@ -101,6 +72,36 @@ export default function CommunityStakingModalContent({
     return total;
   };
 
+  // Modal button should be hidden if user already approved tokens
+  useEffect(() => {
+    const refreshApprovalStatus = async () => {
+      // prevents function form running on render before usersigner and address can load
+      if (userSigner && address) {
+        const readUpdate = new ethers.Contract(readContracts?.Token?.address, ERC20ABI, userSigner);
+        const decimals = await readUpdate?.decimals();
+        const allowance = await readUpdate?.allowance(address, writeContracts?.IDStaking?.address);
+        const balance = await readUpdate?.balanceOf(address);
+
+        const total = getTotalAmountStaked();
+        const adjustedAmount = ethers.utils.parseUnits(total.toString() || "0", decimals);
+        const hasEnoughAllowance = allowance.lt(adjustedAmount);
+
+        if (balance.isZero()) {
+          notification.open({
+            message: "Not Enough Balance",
+          });
+        } else {
+          if (allowance.isZero() || hasEnoughAllowance) {
+            setModalStatus(1);
+          } else {
+            setModalStatus(3);
+          }
+        }
+      }
+    };
+    refreshApprovalStatus();
+  }, [userSigner]);
+
   const approveTokenAllowance = async () => {
     setModalStatus(2);
     await approve();
@@ -111,7 +112,6 @@ export default function CommunityStakingModalContent({
     let data = {};
 
     try {
-      console.log("start ", address, targetNetwork.chainId);
       const res = await axios({
         method: "POST",
         url: "https://id-staking-passport-api.vercel.app/api/passport/reader",
@@ -120,9 +120,7 @@ export default function CommunityStakingModalContent({
           domainChainId: targetNetwork.chainId,
         },
       });
-
       data = res.data;
-      console.log("success ", data);
     } catch (e) {
       notification.open({
         message: "Staking unsuccessful",
@@ -134,6 +132,7 @@ export default function CommunityStakingModalContent({
     tx(writeContracts.IDStaking.stakeUsers(data.signature, data.nonce, data.timestamp, id + "", users, amounts));
   };
 
+  // Allows the user to change stake amount
   const increaseStakeAmount = index => {
     const newStakeAmount = parseFloat(allStakeAmounts[index]) + 1.0;
     setAllStakeAmounts({
@@ -141,7 +140,6 @@ export default function CommunityStakingModalContent({
       [index]: newStakeAmount.toString(),
     });
   };
-
   const decreaseStakeAmount = index => {
     const newStakeAmount = parseFloat(allStakeAmounts[index]) - 1.0;
     if (newStakeAmount >= 0) {
@@ -152,13 +150,15 @@ export default function CommunityStakingModalContent({
     }
   };
 
+  // This loads the address for stake amount displayed below the inputs
   const getStakeAddressAtIndex = index => {
     const addresslookup = allStakeAddresses[index];
+    if (!addresslookup) return "unknown";
     let displayAddress = addresslookup?.substr(0, 5) + "..." + addresslookup?.substr(-4);
     return displayAddress;
   };
 
-  // Modal Visibility Functions
+  // User approves usage of token
   const approve = async () => {
     await tx(writeContracts.Token.approve(readContracts.IDStaking.address, ethers.utils.parseUnits("10000000")));
   };
@@ -218,20 +218,40 @@ export default function CommunityStakingModalContent({
           onClick={async () => {
             const amounts = Object.values(allStakeAmounts);
             const addresses = Object.values(allStakeAddresses);
+            let canStake = true;
 
             // filter amounts for 0
             const filteredAmounts = amounts.filter(amount => parseFloat(amount) > 0);
             // filter addresses for undefined
             const filteredAddresses = addresses.filter(address => address !== undefined);
 
-            console.log("all amounts ", amounts, "all addresses ", addresses, targetNetwork.chainId);
-            if (filteredAmounts.length === filteredAddresses.length) {
+            // Check if any of the addresses
+            filteredAddresses.forEach(filteredAddress => {
+              if (filteredAddress === address) {
+                canStake = false;
+                return notification.open({
+                  message: "User Address found in Community Stake",
+                  description: "Please remove your address as one of the staked address",
+                  icon: <WarningOutlined style={{ color: "#FFA500" }} />,
+                });
+              }
+            });
+
+            // Final check before allowing user to stake
+            if (filteredAmounts.length === filteredAddresses.length && canStake) {
               setModalStatus(4);
               await stakeUsers(round.toString(), filteredAmounts, filteredAddresses);
               setModalStatus(3);
               notification.open({
                 message: "Staking Successful",
+                icon: <CheckOutlined style={{ color: "#00FF00" }} />,
               });
+
+              // reset modal values
+              setAllStakeAddresses(initialStakeAddresses);
+              setAllStakeAmounts(initialStakeAmounts);
+
+              // close the modal
               setIsModalVisible(false);
             }
           }}
@@ -251,14 +271,13 @@ export default function CommunityStakingModalContent({
           <Col span={12}>Amount(GTC)</Col>
         </Row>
         {[...Array(numberOfCommunityStakes)].map((_, i) => (
-          <Row gutter={20} style={{ paddingTop: "10px", paddingBottom: "10px" }}>
+          <Row gutter={20} style={{ paddingTop: "10px", paddingBottom: "10px" }} key={i}>
             <Col className="gutter-row" span={12}>
               <AddressInput
                 onChange={e => {
                   const tempAllAddresses = allStakeAddresses;
                   tempAllAddresses[i] = e;
                   setAllStakeAddresses(tempAllAddresses);
-                  console.log(`update-all address ${i}: ${e}, all: ${JSON.stringify(tempAllAddresses)}`);
                 }}
                 ensProvider={mainnetProvider}
                 placeholder="Address of user"
@@ -276,7 +295,6 @@ export default function CommunityStakingModalContent({
                     ...allStakeAmounts,
                     [i]: newAmount,
                   });
-                  console.log(`update-all amounts ${i}: ${e}, all: ${JSON.stringify(newAmount)}`);
                 }}
               />
               <Button onClick={e => increaseStakeAmount(i)}>+</Button>

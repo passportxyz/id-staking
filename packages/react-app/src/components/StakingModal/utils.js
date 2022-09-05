@@ -1,10 +1,6 @@
 // ----- Ethers library
 import { ethers } from "ethers";
 
-export const appName = "Staking App";
-export const tokenAddress = "0x03512692B5612F637275C8A81186fCa084698108";
-// GTC MAINNET ADDRESS = "0xde30da39c46104798bb5aa3fe8b9e0e1f348163f";
-
 // ERC20 ABI
 export const ERC20ABI = [
   {

@@ -2,9 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Button, Modal, Input, notification } from "antd";
 import { ethers } from "ethers";
 
-import { ERC20ABI, tokenAddress } from "./utils";
-
-const token = "GTC";
+import { ERC20ABI } from "./utils";
 
 export default function CommunityStakingModalContent({
   writeContracts,
@@ -28,50 +26,50 @@ export default function CommunityStakingModalContent({
   4) Staking
   */
 
-  const [tokenInfo, setTokenInfo] = useState({});
-
-  const refreshTokenDetails = async () => {
-    const readUpdate = new ethers.Contract(tokenAddress, ERC20ABI, userSigner);
-    const decimals = await readUpdate.decimals();
-    const allowance = await readUpdate.allowance(address, writeContracts?.IDStaking?.address);
-    const balance = await readUpdate.balanceOf(address);
-
-    const adjustedAmount = ethers.utils.parseUnits(stakeAmount.toString() || "0", decimals);
-    const hasEnoughAllowance = allowance.lt(adjustedAmount);
-
-    setTokenInfo({ ...tokenInfo, [token]: { decimals, allowance, tokenAddress, balance } });
-
-    if (balance.isZero()) {
-      setModalStatus(5);
-    } else {
-      if (allowance.isZero() || hasEnoughAllowance) {
-        setModalStatus(1);
-      } else {
-        setModalStatus(3);
-      }
-    }
-    console.log("view modal status ", modalStatus);
-  };
-
-  useEffect(() => {
-    console.log("stake amount ", stakeAmount, modalStatus);
-  }, [stakeAmount]);
-
   const approveTokenAllowance = async () => {
     setModalStatus(2);
     await approve();
-    await refreshTokenDetails();
+    setModalStatus(3);
   };
 
   const stake = async (id, amount) => {
     tx(writeContracts.IDStaking.stake(id + "", ethers.utils.parseUnits(amount)));
   };
 
+  // Modal button should be hidden if user already approved tokens
+  useEffect(() => {
+    const refreshApprovalStatus = async () => {
+      // prevents function form running on render before usersigner and address can load
+      if (userSigner && address) {
+        const readUpdate = new ethers.Contract(readContracts?.Token?.address, ERC20ABI, userSigner);
+        const decimals = await readUpdate?.decimals();
+        const allowance = await readUpdate?.allowance(address, writeContracts?.IDStaking?.address);
+        const balance = await readUpdate?.balanceOf(address);
+
+        const adjustedAmount = ethers.utils.parseUnits(stakeAmount.toString() || "0", decimals);
+        const hasEnoughAllowance = allowance.lt(adjustedAmount);
+
+        if (balance.isZero()) {
+          notification.open({
+            message: "Not Enough Balance",
+          });
+        } else {
+          if (allowance.isZero() || hasEnoughAllowance) {
+            setModalStatus(1);
+          } else {
+            setModalStatus(3);
+          }
+        }
+      }
+    };
+    refreshApprovalStatus();
+  }, [userSigner]);
+
+  // Allows the user to change stake amount
   const increaseStakeAmount = () => {
     const newStakeAmount = parseFloat(stakeAmount) + 1.0;
     setStakeAmount(newStakeAmount.toString());
   };
-
   const decreaseStakeAmount = () => {
     const newStakeAmount = parseFloat(stakeAmount) - 1.0;
     if (newStakeAmount >= 0) {
@@ -79,7 +77,7 @@ export default function CommunityStakingModalContent({
     }
   };
 
-  // Modal Visibility Functions
+  // User approves usage of token
   const approve = async () => {
     await tx(writeContracts.Token.approve(readContracts.IDStaking.address, ethers.utils.parseUnits("10000000")));
   };
@@ -121,6 +119,11 @@ export default function CommunityStakingModalContent({
             notification.open({
               message: "Staking Successful",
             });
+
+            // reset modal values
+            setStakeAmount("0");
+
+            // close the modal
             setIsModalVisible(false);
           }}
           disabled={modalStatus === 1 || !(parseFloat(stakeAmount) > 0)}

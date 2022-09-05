@@ -41,7 +41,10 @@ export default function TokenBalance({ contracts, name, address, balance, dollar
         setDollarMode(!dollarMode);
       }}
     >
-      <img src={img} alt={name} className="mr-2 h-6" /> {displayBalance} {name}
+      <img src={img} alt={name} className="mr-2 h-6" />{" "}
+      <span className="text-black">
+        {displayBalance} {name}
+      </span>
     </span>
   );
 }

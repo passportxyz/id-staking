@@ -1,12 +1,15 @@
 import React, { useCallback, useEffect, useState, useRef, useMemo, createContext } from "react";
 
+// Context starting state
 const startingState = {
-  setAddress: () => {},
+  setAddress: string => {},
   address: undefined,
   currentNetwork: "",
   setCurrentNetwork: () => {},
   roundInView: 1,
   setRoundInView: () => {},
+  setLoggedIn: boolean => {},
+  loggedIn: false,
 };
 
 // create our app context
@@ -16,14 +19,16 @@ export function Web3Provider({ children, network = "localhost", DEBUG = false, N
   const [address, setAddress] = useState("");
   const [currentNetwork, setCurrentNetwork] = useState("");
   const [roundInView, setRoundInView] = useState(1);
+  const [loggedIn, setLoggedIn] = useState(false);
 
   const stateMemo = useMemo(
     () => ({
       address,
       currentNetwork,
       roundInView,
+      loggedIn,
     }),
-    [address, currentNetwork, roundInView],
+    [address, currentNetwork, roundInView, loggedIn],
   );
 
   // use props as a way to pass configuration values
@@ -34,6 +39,8 @@ export function Web3Provider({ children, network = "localhost", DEBUG = false, N
     setCurrentNetwork,
     roundInView,
     setRoundInView,
+    setLoggedIn,
+    loggedIn,
   };
 
   return <Web3Context.Provider value={providerProps}>{children}</Web3Context.Provider>;
