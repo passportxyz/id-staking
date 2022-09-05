@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Modal, InputNumber, Input, Form, Row, Col, notification } from "antd";
+import { Button, Modal, Input, Form, Row, Col, notification } from "antd";
 import { ethers } from "ethers";
 import axios from "axios";
 import AddressInput from "../AddressInput";
@@ -7,6 +7,26 @@ import AddressInput from "../AddressInput";
 import { ERC20ABI, appName, tokenAddress } from "./utils";
 
 const token = "GTC";
+
+// starting all stake amounts
+const initialStakeAmounts = {
+  0: "0",
+  1: "0",
+  2: "0",
+  3: "0",
+  4: "0",
+  5: "0",
+};
+
+// starting all stake addresses
+const initialStakeAddresses = {
+  0: undefined,
+  1: undefined,
+  2: undefined,
+  3: undefined,
+  4: undefined,
+  5: undefined,
+};
 
 export default function CommunityStakingModalContent({
   writeContracts,
@@ -22,15 +42,8 @@ export default function CommunityStakingModalContent({
 }) {
   const [modalStatus, setModalStatus] = useState(1);
   const [numberOfCommunityStakes, setNumberOfCommunityStakes] = useState(1);
-  const [allStakeAmounts, setAllStakeAmounts] = useState({ 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 });
-  const [allStakeAddresses, setAllStakeAddresses] = useState({
-    0: undefined,
-    1: undefined,
-    2: undefined,
-    3: undefined,
-    4: undefined,
-    5: undefined,
-  });
+  const [allStakeAmounts, setAllStakeAmounts] = useState(initialStakeAmounts);
+  const [allStakeAddresses, setAllStakeAddresses] = useState(initialStakeAddresses);
 
   /*
   Modal Status
@@ -74,7 +87,7 @@ export default function CommunityStakingModalContent({
     const amounts = Object.values(allStakeAmounts);
     let total = 0;
     amounts.forEach(amount => {
-      total += amount;
+      total += parseFloat(amount);
     });
     return total;
   };
@@ -118,36 +131,25 @@ export default function CommunityStakingModalContent({
       return null;
     }
 
-    tx(
-      writeContracts.IDStaking.stakeUsers(
-        data.signature,
-        data.nonce,
-        data.timestamp,
-        id + "",
-        JSON.stringify(users),
-        JSON.stringify(amounts),
-      ),
-    );
+    tx(writeContracts.IDStaking.stakeUsers(data.signature, data.nonce, data.timestamp, id + "", users, amounts));
   };
 
   const increaseStakeAmount = index => {
-    const tempAllamounts = allStakeAmounts;
-    const newStakeAmount = allStakeAmounts[index] + 1.0;
-    tempAllamounts[index] = newStakeAmount;
-    setAllStakeAmounts(tempAllamounts);
-    console.log("increase amount ", index, allStakeAmounts);
+    const newStakeAmount = parseFloat(allStakeAmounts[index]) + 1.0;
+    setAllStakeAmounts({
+      ...allStakeAmounts,
+      [index]: newStakeAmount.toString(),
+    });
   };
 
   const decreaseStakeAmount = index => {
-    const tempAllamounts = allStakeAmounts;
-    const newStakeAmount = allStakeAmounts[index] - 1.0;
-    tempAllamounts[index] = newStakeAmount;
-    setAllStakeAmounts(tempAllamounts);
-    console.log("decrease amount ", index, allStakeAmounts);
-  };
-
-  const getStakeAmountAtIndex = index => {
-    return allStakeAmounts[index];
+    const newStakeAmount = parseFloat(allStakeAmounts[index]) - 1.0;
+    if (newStakeAmount >= 0) {
+      setAllStakeAmounts({
+        ...allStakeAmounts,
+        [index]: newStakeAmount.toString(),
+      });
+    }
   };
 
   const getStakeAddressAtIndex = index => {
@@ -163,6 +165,35 @@ export default function CommunityStakingModalContent({
 
   const handleCancel = () => {
     setIsModalVisible(false);
+  };
+
+  // used to remove either address or amount from an index
+  const removeItemAtIndex = (arrayOfVal, index, nullVal, initial) => {
+    const allValues = Object.values(arrayOfVal);
+    let newVal = [];
+
+    // create new array of numbers
+    if (index === 0) {
+      allValues.shift();
+      newVal = allValues.concat(nullVal);
+    } else if (index === arrayOfVal.length) {
+      allValues.pop();
+      newVal = allValues.concat(nullVal);
+    } else {
+      const start = allValues.slice(0, index);
+      const end = allValues.slice(index + 1, allValues.length);
+      newVal = start.concat(end, nullVal);
+    }
+
+    // copy initial object to update
+    const newValues = initial;
+
+    // create new array objects
+    newVal.forEach((amount, i) => {
+      newValues[i] = amount;
+    });
+
+    return newValues;
   };
 
   return (
@@ -189,7 +220,7 @@ export default function CommunityStakingModalContent({
             const addresses = Object.values(allStakeAddresses);
 
             // filter amounts for 0
-            const filteredAmounts = amounts.filter(amount => amount > 0);
+            const filteredAmounts = amounts.filter(amount => parseFloat(amount) > 0);
             // filter addresses for undefined
             const filteredAddresses = addresses.filter(address => address !== undefined);
 
@@ -198,6 +229,10 @@ export default function CommunityStakingModalContent({
               setModalStatus(4);
               await stakeUsers(round.toString(), filteredAmounts, filteredAddresses);
               setModalStatus(3);
+              notification.open({
+                message: "Staking Successful",
+              });
+              setIsModalVisible(false);
             }
           }}
           disabled={modalStatus === 1 || getTotalAmountStaked() <= 0}
@@ -230,31 +265,31 @@ export default function CommunityStakingModalContent({
               />
             </Col>
             <Col className="gutter-row" span={10}>
-              <Button onClick={e => increaseStakeAmount(i)}>+</Button>
-              <InputNumber
+              <Button onClick={e => decreaseStakeAmount(i)}>-</Button>
+              <Input
+                style={{ width: "50%" }}
                 defaultValue={0}
-                value={getStakeAmountAtIndex(i)}
-                min={0}
+                value={allStakeAmounts[i]}
                 onChange={e => {
-                  const tempAllAmounts = allStakeAmounts;
-                  tempAllAmounts[i] = e;
-                  setAllStakeAmounts(tempAllAmounts);
-                  console.log(`update-all amounts ${i}: ${e}, all: ${JSON.stringify(tempAllAmounts)}`);
+                  const newAmount = e.target.value;
+                  setAllStakeAmounts({
+                    ...allStakeAmounts,
+                    [i]: newAmount,
+                  });
+                  console.log(`update-all amounts ${i}: ${e}, all: ${JSON.stringify(newAmount)}`);
                 }}
               />
-              <Button onClick={e => decreaseStakeAmount(i)}>-</Button>
+              <Button onClick={e => increaseStakeAmount(i)}>+</Button>
             </Col>
             <Col className="gutter-row" span={2}>
               <Button
                 style={{ border: "0px" }}
                 onClick={() => {
                   //Remove from allStakeAddresses
-                  const tempAllAddresses = allStakeAddresses;
-                  tempAllAddresses[i] = undefined;
+                  const tempAllAddresses = removeItemAtIndex(allStakeAddresses, i, undefined, initialStakeAddresses);
                   setAllStakeAddresses(tempAllAddresses);
                   //Remove from allStakeAmounts
-                  const tempAllAmounts = allStakeAmounts;
-                  tempAllAmounts[i] = undefined;
+                  const tempAllAmounts = removeItemAtIndex(allStakeAmounts, i, "0", initialStakeAmounts);
                   setAllStakeAmounts(tempAllAmounts);
                   // Decrease number of stake inputs
                   setNumberOfCommunityStakes(numberOfCommunityStakes - 1);
