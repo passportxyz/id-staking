@@ -8,7 +8,7 @@ import AddressDropDown from "./AddressDropDown";
 import Balance from "./Balance";
 import Wallet from "./Wallet";
 import TokenBalance from "./TokenBalance";
-import NetworkSwitch from "./NetworkSwitch";
+import NetworkDisplay from "./NetworkDisplay";
 
 import { Web3Context } from "../helpers/Web3Context";
 
@@ -121,6 +121,17 @@ export default function Account({
                 {" "}
                 <img className="mr-2 h-5" src={"./ethDiamondBlackIcon.svg"} alt="eth icon" /> {currentNetwork?.name}
               </span>
+              <div>
+                {
+                  <NetworkDisplay
+                    NETWORKCHECK={NETWORKCHECK}
+                    localChainId={localChainId}
+                    selectedChainId={selectedChainId}
+                    targetNetwork={targetNetwork}
+                    USE_NETWORK_SELECTOR={USE_NETWORK_SELECTOR}
+                  />
+                }
+              </div>
             </>
             <Dropdown overlay={menu} icon={<DownOutlined />} trigger={["click"]}>
               <Space>
