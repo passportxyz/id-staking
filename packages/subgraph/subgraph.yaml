@@ -4,11 +4,10 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: IDStaking
-    network: goerli
+    network: mainnet
     source:
       abi: IDStaking
-      address: '0x5acEfAC466Fa29579C462F84e9F2D8892df2b12F'
-      startBlock: 7346553
+      address: "0x49e401841D0B4f5884131D634C1d17A1F7371E41"
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
