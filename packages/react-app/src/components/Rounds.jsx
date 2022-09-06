@@ -9,7 +9,7 @@ import { getSelfStakeAmount, getCommunityStakeAmount } from "./StakingModal/util
 
 const zero = ethers.BigNumber.from("0");
 
-export const STARTING_GRANTS_ROUND = 11;
+export const STARTING_GRANTS_ROUND = 14;
 
 const Rounds = ({
   tx,
