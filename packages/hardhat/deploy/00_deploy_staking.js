@@ -9,18 +9,16 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
   const { deployer } = await getNamedAccounts();
   const chainId = await getChainId();
 
-  // const admin = "0x77B8A624b2e8f6772C0f20c683b075E2bf778d64";
-  const admin = "0xcF300CE817E25b4F784bC1e24c9A99A525fEC50f";
-  // const trustedSigner = "0x7ba1e5E9d013EaE624D274bfbAC886459F291081";
+  const admin = "0x26c958dee4D9CcA4C106cb0D20F1DAcFbDCD5fd2";
   const trustedSigner = "0xb9598Aca9eDA4e229924726A11b38d8073184899";
 
-  await deploy("Token", {
-    from: deployer,
-    log: true,
-    waitConfirmations: 5,
-  });
+  // const Token = await deploy("Token", {
+  //   from: deployer,
+  //   log: true,
+  //   waitConfirmations: 5,
+  // });
 
-  const Token = await ethers.getContract("Token", deployer);
+  const Token = { address: "0xDe30da39c46104798bB5aA3fe8B9e0e1F348163F" };
 
   const stakingArgs = [Token.address, trustedSigner];
 
