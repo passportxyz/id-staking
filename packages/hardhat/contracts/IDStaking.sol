@@ -85,8 +85,8 @@ contract IDStaking is Staking, EIP712, Ownable {
     function createRound(
         uint256 start,
         uint256 duration,
-        string memory meta
-    ) public onlyOwner {
+        string calldata meta
+    ) external onlyOwner {
         if (latestRound > 0) {
             require(
                 start >
@@ -95,20 +95,22 @@ contract IDStaking is Staking, EIP712, Ownable {
             );
         }
 
-        require(start > block.timestamp, "new rounds should be in the future");
+        require(start >= block.timestamp, "new rounds should be in the future");
 
         latestRound++;
 
-        rounds[latestRound].start = start;
-        rounds[latestRound].duration = duration;
-        rounds[latestRound].meta = meta;
+        uint256 currentRound = latestRound;
 
-        emit roundCreated(latestRound);
+        rounds[currentRound].start = start;
+        rounds[currentRound].duration = duration;
+        rounds[currentRound].meta = meta;
+
+        emit roundCreated(currentRound);
     }
 
     // stake
     function stake(uint256 roundId, uint256 amount)
-        public
+        external
         canStakeRound(roundId)
     {
         _stake(roundId, amount);
@@ -120,7 +122,7 @@ contract IDStaking is Staking, EIP712, Ownable {
 
     // unstake
     function unstake(uint256 roundId, uint256 amount)
-        public
+        external
         canUnstakeRound(roundId)
     {
         require(
@@ -137,13 +139,13 @@ contract IDStaking is Staking, EIP712, Ownable {
 
     // stakeUser
     function stakeUsers(
-        bytes memory signature,
-        string memory nonce,
+        bytes calldata signature,
+        string calldata nonce,
         uint256 timestamp,
         uint256 roundId,
-        address[] memory users,
-        uint256[] memory amounts
-    ) public canStakeRound(roundId) {
+        address[] calldata users,
+        uint256[] calldata amounts
+    ) external canStakeRound(roundId) {
         require(users.length == amounts.length, "Unequal users and amount");
         require(timestamp > block.timestamp, "Signature timestamp is expired");
 
@@ -164,9 +166,6 @@ contract IDStaking is Staking, EIP712, Ownable {
         require(!usedDigest[digest], "This signature has been used");
 
         address signer = ECDSA.recover(digest, signature);
-
-        console.log("Decoded signer: ", signer);
-        console.log("trusted Signer: ", trustedSigner);
 
         require(signer == trustedSigner, "Signature not from a trusted signer");
 
@@ -190,32 +189,33 @@ contract IDStaking is Staking, EIP712, Ownable {
             emit xStake(roundId, msg.sender, user, amount, true);
         }
 
-        token.transferFrom(msg.sender, address(this), totalAmount);
+        require(
+            token.transferFrom(msg.sender, address(this), totalAmount),
+            "unable to stake users"
+        );
 
         rounds[roundId].tvl += totalAmount;
     }
 
     // unstakeUser
-    function unstakeUsers(uint256 roundId, address[] memory users)
-        public
+    function unstakeUsers(uint256 roundId, address[] calldata users)
+        external
         canUnstakeRound(roundId)
     {
-        uint256 totalAmount;
+        uint256 totalAmount = 0;
 
         for (uint256 i = 0; i < users.length; i++) {
-            require(address(0) != users[i], "can't stake the zero address");
+            require(address(0) != users[i], "can't unstake the zero address");
             require(
                 users[i] != msg.sender,
-                "You can't stake on your address here"
+                "You can't unstake on your address here"
             );
 
             bytes32 stakeId = getStakeId(msg.sender, users[i]);
             uint256 unstakeBalance = xStakes[roundId][stakeId];
 
             if (unstakeBalance > 0) {
-                xStakes[roundId][
-                    getStakeId(msg.sender, users[i])
-                ] -= unstakeBalance;
+                xStakes[roundId][stakeId] -= unstakeBalance;
 
                 totalAmount += unstakeBalance;
 
@@ -230,12 +230,20 @@ contract IDStaking is Staking, EIP712, Ownable {
         }
 
         rounds[roundId].tvl -= totalAmount;
-        token.transfer(msg.sender, totalAmount);
+        require(
+            token.transfer(msg.sender, totalAmount),
+            "unable to unstake users"
+        );
     }
 
     // migrateStake
-    function migrateStake(uint256 fromRound) public canUnstakeRound(fromRound) {
-        require(fromRound < latestRound, "Can't migrate from an active round");
+    function migrateStake(uint256 fromRound)
+        external
+        canUnstakeRound(fromRound)
+    {
+        uint256 toRound = latestRound;
+
+        require(fromRound < toRound, "Can't migrate from an active round");
 
         uint256 balance = stakes[fromRound][msg.sender];
 
@@ -243,12 +251,12 @@ contract IDStaking is Staking, EIP712, Ownable {
 
         rounds[fromRound].tvl -= balance;
         stakes[fromRound][msg.sender] = 0;
-        rounds[latestRound].tvl += balance;
-        stakes[latestRound][msg.sender] = balance;
+        rounds[toRound].tvl += balance;
+        stakes[toRound][msg.sender] = balance;
 
         emit selfStake(fromRound, msg.sender, balance, false);
-        emit selfStake(latestRound, msg.sender, balance, true);
-        emit tokenMigrated(msg.sender, balance, fromRound, latestRound);
+        emit selfStake(toRound, msg.sender, balance, true);
+        emit tokenMigrated(msg.sender, balance, fromRound, toRound);
     }
 
     // VIEW
@@ -291,11 +299,11 @@ contract IDStaking is Staking, EIP712, Ownable {
         return _getUserStakeForRound(roundId, user);
     }
 
-    function _getUserXStakeForRound(
+    function getUserXStakeForRound(
         uint256 roundId,
         address staker,
         address user
-    ) internal view returns (uint256) {
+    ) external view returns (uint256) {
         return xStakes[roundId][getStakeId(staker, user)];
     }
 

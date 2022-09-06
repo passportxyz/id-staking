@@ -10,7 +10,10 @@ contract Staking {
 
     // stake
     function _stake(uint256 roundId, uint256 amount) internal {
-        token.transferFrom(msg.sender, address(this), amount);
+        require(
+            token.transferFrom(msg.sender, address(this), amount),
+            "unable to stake amount"
+        );
 
         stakes[roundId][msg.sender] += amount;
     }
@@ -19,7 +22,7 @@ contract Staking {
     function _unstake(uint256 roundId, uint256 amount) internal {
         stakes[roundId][msg.sender] -= amount;
 
-        token.transfer(msg.sender, amount);
+        require(token.transfer(msg.sender, amount), "unable to unstake amount");
     }
 
     function _getUserStakeForRound(uint256 roundId, address user)
