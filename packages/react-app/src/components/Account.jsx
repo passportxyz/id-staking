@@ -114,6 +114,25 @@ export default function Account({
                   dollarMultiplier={null}
                 />
               </span>
+              <div className="hidden md:inline-flex">
+                <a
+                  className="mr-5 hover:text-gray-900 flex flex-row"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href="https://passport.gitcoin.co/"
+                >
+                  <img src={"./passportLogo.svg"} alt={"Passport Navbar Badge"} className="mr-2 h-6" /> Gitcoin Passport{" "}
+                  <img
+                    src={passport?.expiryDate && passport?.issuanceDate ? "./greenEllipse.svg" : "./redEllipse.svg"}
+                    alt="passport status dot"
+                    className="ml-2"
+                  />
+                </a>
+                <span className="mr-5 hover:text-gray-900 capitalize flex flex-row">
+                  {" "}
+                  <img className="mr-2 h-5" src={"./ethDiamondBlackIcon.svg"} alt="eth icon" /> {currentNetwork?.name}
+                </span>
+              </div>
               <div>
                 {
                   <NetworkDisplay
