@@ -52,6 +52,14 @@ export default function Navbar({
             minimized={undefined}
             isContract={undefined}
             networkOptions={networkOptions}
+            NETWORKCHECK={NETWORKCHECK}
+            localChainId={localChainId}
+            selectedChainId={selectedChainId}
+            targetNetwork={targetNetwork}
+            USE_NETWORK_SELECTOR={USE_NETWORK_SELECTOR}
+            networkDisplay={undefined}
+            selectedNetwork={undefined}
+            setSelectedNetwork={undefined}
           />
         </div>
       </div>

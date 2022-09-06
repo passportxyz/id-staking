@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Modal, InputNumber, notification } from "antd";
+import { Button, Modal, Input, notification } from "antd";
 import { ethers } from "ethers";
 
 import { ERC20ABI, tokenAddress } from "./utils";
@@ -16,7 +16,7 @@ export default function CommunityStakingModalContent({
   userSigner,
   round,
 }) {
-  const [stakeAmount, setStakeAmount] = useState(0);
+  const [stakeAmount, setStakeAmount] = useState("0");
   const [modalStatus, setModalStatus] = useState(1);
 
   /*
@@ -68,13 +68,15 @@ export default function CommunityStakingModalContent({
   };
 
   const increaseStakeAmount = () => {
-    const newStakeAmount = parseFloat(stakeAmount.toString()) + 1.0;
-    setStakeAmount(parseFloat(newStakeAmount.toString()));
+    const newStakeAmount = parseFloat(stakeAmount) + 1.0;
+    setStakeAmount(newStakeAmount.toString());
   };
 
   const decreaseStakeAmount = () => {
-    const newStakeAmount = parseFloat(stakeAmount.toString()) - 1.0;
-    setStakeAmount(parseFloat(newStakeAmount.toString()));
+    const newStakeAmount = parseFloat(stakeAmount) - 1.0;
+    if (newStakeAmount >= 0) {
+      setStakeAmount(newStakeAmount.toString());
+    }
   };
 
   // Modal Visibility Functions
@@ -116,8 +118,12 @@ export default function CommunityStakingModalContent({
               return null;
             }
             setModalStatus(3);
+            notification.open({
+              message: "Staking Successful",
+            });
+            setIsModalVisible(false);
           }}
-          disabled={modalStatus === 1 || !(stakeAmount > 0)}
+          disabled={modalStatus === 1 || !(parseFloat(stakeAmount) > 0)}
           loading={modalStatus === 4}
           key="Stake"
           style={{ backgroundColor: "#6F3FF5", color: "white" }}
@@ -129,12 +135,15 @@ export default function CommunityStakingModalContent({
       <p>Your stake amount (in GTC)</p>
       <div>
         <div className="flex flex-row justify-center">
-          <Button onClick={increaseStakeAmount}>+</Button>
-          <InputNumber min={0} onChange={e => setStakeAmount(e)} style={{ borderRight: "0px", borderLeft: "0px" }} />
-          <Button onClick={decreaseStakeAmount}>-</Button>
+          <Button onClick={() => decreaseStakeAmount()}>-</Button>
+          <Input
+            value={stakeAmount}
+            onChange={e => setStakeAmount(e.target.value)}
+            style={{ borderRight: "0px", borderLeft: "0px", maxWidth: "30%" }}
+          />
+          <Button onClick={() => increaseStakeAmount()}>+</Button>
         </div>
-
-        {stakeAmount > 0 && (modalStatus === 3 || modalStatus === 4) && (
+        {parseFloat(stakeAmount) > 0 && (modalStatus === 3 || modalStatus === 4) && (
           <>
             <p className="mt-4">
               You’ll be staking <span className="font-bold">{stakeAmount} GTC</span> on yourself.

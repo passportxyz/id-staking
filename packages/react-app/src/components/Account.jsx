@@ -8,6 +8,7 @@ import AddressDropDown from "./AddressDropDown";
 import Balance from "./Balance";
 import Wallet from "./Wallet";
 import TokenBalance from "./TokenBalance";
+import NetworkDisplay from "./NetworkDisplay";
 
 import { Web3Context } from "../helpers/Web3Context";
 
@@ -113,24 +114,16 @@ export default function Account({
                   dollarMultiplier={null}
                 />
               </span>
-              <div className="hidden md:inline-flex">
-                <a
-                  className="mr-5 hover:text-gray-900 flex flex-row"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  href="https://passport.gitcoin.co/"
-                >
-                  <img src={"./passportLogo.svg"} alt={"Passport Navbar Badge"} className="mr-2 h-6" /> Gitcoin Passport{" "}
-                  <img
-                    src={passport?.expiryDate && passport?.issuanceDate ? "./greenEllipse.svg" : "./redEllipse.svg"}
-                    alt="passport status dot"
-                    className="ml-2"
+              <div>
+                {
+                  <NetworkDisplay
+                    NETWORKCHECK={NETWORKCHECK}
+                    localChainId={localChainId}
+                    selectedChainId={selectedChainId}
+                    targetNetwork={targetNetwork}
+                    USE_NETWORK_SELECTOR={USE_NETWORK_SELECTOR}
                   />
-                </a>
-                <span className="mr-5 hover:text-gray-900 capitalize flex flex-row">
-                  {" "}
-                  <img className="mr-2 h-5" src={"./ethDiamondBlackIcon.svg"} alt="eth icon" /> {currentNetwork?.name}
-                </span>
+                }
               </div>
             </>
             <div className="md:hidden inline-flex">
