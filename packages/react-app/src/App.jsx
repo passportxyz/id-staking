@@ -4,7 +4,7 @@ import { useExchangeEthPrice } from "eth-hooks/dapps/dex";
 import React, { useCallback, useEffect, useState, useContext } from "react";
 import { Route, Routes } from "react-router-dom";
 import "./App.css";
-import { Contract, ThemeSwitch } from "./components";
+import { Contract } from "./components";
 import { NETWORKS, ALCHEMY_KEY } from "./constants";
 import externalContracts from "./contracts/external_contracts";
 // contracts
@@ -45,7 +45,7 @@ const initialNetwork = NETWORKS.localhost; // <------- select your target fronte
 // 😬 Sorry for all the console logging
 const DEBUG = true;
 const NETWORKCHECK = true;
-const USE_BURNER_WALLET = true; // toggle burner wallet feature
+const USE_BURNER_WALLET = false; // toggle burner wallet feature
 const USE_NETWORK_SELECTOR = false;
 
 const web3Modal = Web3ModalSetup();
@@ -58,6 +58,8 @@ const providers = [
 ];
 
 function App(props) {
+  //User Context
+  const { address, setAddress, setCurrentNetwork } = useContext(Web3Context);
   // specify all the chains your app is available on. Eg: ['localhost', 'mainnet', ...otherNetworks ]
   // reference './constants.js' for other networks
   const networkOptions = [initialNetwork.name, "mainnet", "rinkeby", "goerli"];
@@ -78,9 +80,6 @@ function App(props) {
     process.env.REACT_APP_PROVIDER ? process.env.REACT_APP_PROVIDER : targetNetwork.rpcUrl,
   ]);
   const mainnetProvider = useStaticJsonRPC(providers);
-
-  //User Context
-  const { address, setAddress, currentNetwork, setCurrentNetwork } = useContext(Web3Context);
 
   if (DEBUG) console.log(`Using ${selectedNetwork} network`);
 

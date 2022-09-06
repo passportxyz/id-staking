@@ -13,9 +13,14 @@ import { getAmountStakedOnMe } from "../components/StakingModal/utils";
 
 import { Web3Context } from "../helpers/Web3Context";
 
+// --- sdk import
+import { PassportReader } from "@gitcoinco/passport-sdk-reader";
+
 const { Option } = Select;
 
 const zero = ethers.BigNumber.from("0");
+// Update Passport on address change
+const reader = new PassportReader();
 
 function StakeDashboard({
   tx,
@@ -41,7 +46,7 @@ function StakeDashboard({
   loadWeb3Modal,
   blockExplorer,
 }) {
-  const { roundInView, setRoundInView } = useContext(Web3Context);
+  const { roundInView, setRoundInView, loggedIn, setLoggedIn } = useContext(Web3Context);
   const navigate = useNavigate();
   // Route user to dashboard when wallet is connected
   useEffect(() => {
@@ -49,6 +54,24 @@ function StakeDashboard({
       navigate("/");
     }
   }, [web3Modal?.cachedProvider]);
+
+  // Logout user if they do not have a passport
+  // Route user to dashboard when wallet is connected
+  useEffect(() => {
+    console.log("wallet changed");
+    async function getPassport() {
+      if (userSigner) {
+        const newAddress = await userSigner.getAddress();
+        const newPassport = await reader.getPassport(newAddress);
+        const hasPassport = newPassport && newPassport.expiryDate && newPassport.issuanceDate;
+        if (!hasPassport) {
+          navigate("/");
+          setLoggedIn(false);
+        }
+      }
+    }
+    getPassport();
+  }, [address]);
 
   const [start, duration, tvl] = useContractReader(readContracts, "IDStaking", "fetchRoundMeta", [roundInView]) || [];
 
@@ -180,9 +203,9 @@ function StakeDashboard({
                   <svg
                     fill="none"
                     stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
                     className="w-4 h-4"
                     viewBox="0 0 24 24"
                   >
@@ -225,9 +248,9 @@ function StakeDashboard({
                   <svg
                     fill="none"
                     stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
                     className="w-4 h-4"
                     viewBox="0 0 24 24"
                   >

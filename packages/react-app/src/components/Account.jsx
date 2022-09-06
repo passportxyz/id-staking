@@ -36,7 +36,7 @@ export default function Account({
   setSelectedNetwork,
   networkOptions,
 }) {
-  const { currentNetwork } = useContext(Web3Context);
+  const { currentNetwork, loggedIn } = useContext(Web3Context);
   const { currentTheme } = useThemeSwitcher();
   const [openNavDrawer, setOpenNavDrawer] = useState(false);
   let accountButtonInfo;
@@ -45,31 +45,6 @@ export default function Account({
   } else {
     accountButtonInfo = { name: "Connect Wallet", action: loadWeb3Modal };
   }
-
-  const display = !minimized && (
-    <span>
-      {passport.expiryDate && passport.issuanceDate && (
-        <span className="mr-6">
-          {address && (
-            <Address address={address} ensProvider={mainnetProvider} blockExplorer={blockExplorer} fontSize={20} />
-          )}
-          {<Balance address={address} provider={localProvider} price={price} size={20} />}
-          {!isContract && (
-            <Wallet
-              address={address}
-              provider={localProvider}
-              signer={userSigner}
-              ensProvider={mainnetProvider}
-              price={price}
-              color={currentTheme === "light" ? "#1890ff" : "#2caad9"}
-              size={22}
-              padding={"0px"}
-            />
-          )}
-        </span>
-      )}
-    </span>
-  );
 
   const menu = (
     <Menu>
@@ -130,7 +105,8 @@ export default function Account({
                 </a>
                 <span className="mr-5 hover:text-gray-900 capitalize flex flex-row">
                   {" "}
-                  <img className="mr-2 h-5" src={"./ethDiamondBlackIcon.svg"} alt="eth icon" /> {currentNetwork?.name}
+                  <img className="mr-2 h-5" src={"./ethDiamondBlackIcon.svg"} alt="eth icon" />{" "}
+                  <span className="text-black">{currentNetwork?.name}</span>
                 </span>
               </div>
               <div>

@@ -4,6 +4,9 @@ import { ExportOutlined } from "@ant-design/icons";
 import { Navbar, Account, AccountHomePage } from "../components";
 import { useNavigate } from "react-router-dom";
 
+// --- sdk import
+import { PassportReader } from "@gitcoinco/passport-sdk-reader";
+
 import { Web3Context } from "../helpers/Web3Context";
 
 function Home({
@@ -30,20 +33,35 @@ function Home({
   networkOptions,
 }) {
   const navigate = useNavigate();
+  const { address, loggedIn, setLoggedIn } = useContext(Web3Context);
+
+  // Update Passport on address change
+  const reader = new PassportReader();
+
   // Route user to dashboard when wallet is connected
   useEffect(() => {
-    if (web3Modal?.cachedProvider) {
-      navigate("/StakeDashboard");
+    async function getPassport() {
+      if (userSigner) {
+        const newAddress = await userSigner.getAddress();
+        const newPassport = await reader.getPassport(newAddress);
+        const hasPassport = newPassport && newPassport.expiryDate && newPassport.issuanceDate;
+        if (web3Modal?.cachedProvider && hasPassport) {
+          navigate("/StakeDashboard");
+          setLoggedIn(true);
+        } else if (!loggedIn) {
+          showModal();
+        }
+      }
     }
-  }, [web3Modal?.cachedProvider]);
+    getPassport();
+  }, [userSigner, web3Modal?.cachedProvider]);
 
-  useEffect(() => {
-    if (!passport.expiryDate && !passport.issuanceDate && web3Modal?.cachedProvider) {
-      showModal();
-    }
-  }, [passport]);
-
-  const { address, setAddress } = useContext(Web3Context);
+  // useEffect(() => {
+  //   console.log("no passport check ", passport, web3Modal?.cachedProvider);
+  //   if (!passport.expiryDate && !passport.issuanceDate && web3Modal?.cachedProvider) {
+  //     showModal();
+  //   }
+  // }, [userSigner]);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -122,17 +140,9 @@ function Home({
             <div className="mt-4 w-full sm:mt-10 sm:w-1/2 md:mt-10 md:block md:w-1/2">
               <AccountHomePage
                 passport={passport}
-                address={address}
-                localProvider={localProvider}
-                userSigner={userSigner}
-                mainnetProvider={mainnetProvider}
-                price={price}
                 web3Modal={web3Modal}
                 loadWeb3Modal={loadWeb3Modal}
                 logoutOfWeb3Modal={logoutOfWeb3Modal}
-                blockExplorer={blockExplorer}
-                minimized={undefined}
-                isContract={undefined}
               />
             </div>
           </div>

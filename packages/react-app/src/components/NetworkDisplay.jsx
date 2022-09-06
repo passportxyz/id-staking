@@ -4,7 +4,6 @@ import React from "react";
 import { NETWORK } from "../constants";
 
 function NetworkDisplay({ NETWORKCHECK, localChainId, selectedChainId, targetNetwork, USE_NETWORK_SELECTOR }) {
-  console.log("Network Display ", NETWORKCHECK, localChainId, selectedChainId, targetNetwork, USE_NETWORK_SELECTOR);
   let networkDisplay = <></>;
   if (NETWORKCHECK && localChainId && selectedChainId && localChainId !== selectedChainId) {
     const networkSelected = NETWORK(selectedChainId);
@@ -46,7 +45,6 @@ function NetworkDisplay({ NETWORKCHECK, localChainId, selectedChainId, targetNet
                         blockExplorerUrls: [targetNetwork.blockExplorer],
                       },
                     ];
-                    console.log("data", data);
 
                     let switchTx;
                     // https://docs.metamask.io/guide/rpc-api.html#other-rpc-methods
