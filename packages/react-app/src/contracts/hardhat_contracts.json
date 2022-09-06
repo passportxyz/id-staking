@@ -569,7 +569,7 @@
       "chainId": "5",
       "contracts": {
         "IDStaking": {
-          "address": "0xe55A55bb5041D6A9E5478A0F3eDF665E6bD83796",
+          "address": "0xA9757F8bA79341553D6728080A352EB8281d47eF",
           "abi": [
             {
               "inputs": [
@@ -826,6 +826,35 @@
                 }
               ],
               "name": "getUserStakeForRound",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "roundId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "address",
+                  "name": "staker",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "user",
+                  "type": "address"
+                }
+              ],
+              "name": "getUserXStakeForRound",
               "outputs": [
                 {
                   "internalType": "uint256",
