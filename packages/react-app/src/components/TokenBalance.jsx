@@ -7,7 +7,7 @@ export default function TokenBalance({ contracts, name, address, balance, dollar
   const [dollarMode, setDollarMode] = useState(true);
 
   const tokenContract = contracts && contracts[name];
-  const getBalance = useTokenBalance(contracts, address, 0);
+  const getBalance = useTokenBalance(tokenContract, address);
 
   let floatBalance = parseFloat("0.00");
 
@@ -23,7 +23,7 @@ export default function TokenBalance({ contracts, name, address, balance, dollar
     floatBalance = parseFloat(etherBalance);
   }
 
-  let displayBalance = floatBalance.toFixed(4);
+  let displayBalance = floatBalance.toFixed(2);
 
   if (dollarMultiplier && dollarMode) {
     displayBalance = "$" + (floatBalance * dollarMultiplier).toFixed(2);

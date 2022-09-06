@@ -108,6 +108,7 @@ function StakeDashboard({
   return (
     <>
       <Navbar
+        readContracts={readContracts}
         networkOptions={networkOptions}
         selectedNetwork={selectedNetwork}
         setSelectedNetwork={setSelectedNetwork}
