@@ -4,6 +4,7 @@ import { ethers } from "ethers";
 import { useState } from "react";
 import StakeItem from "./StakeItem";
 import StakingModal from "./StakingModal/StakingModal";
+import { UsergroupAddOutlined, UserOutlined } from "@ant-design/icons";
 
 import { getSelfStakeAmount, getCommunityStakeAmount } from "./StakingModal/utils";
 
@@ -38,23 +39,11 @@ const Rounds = ({
     <>
       <div className="text-gray-600 body-font">
         <StakeItem
-          icon={
-            <svg
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              className="w-4 h-4"
-              viewBox="0 0 24 24"
-            >
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
-            </svg>
-          }
-          title="Stake on yourself"
-          description="Some explanation on what this means"
+          icon={<UserOutlined style={{ fontSize: "25px" }} />}
+          title="Self Staking"
+          description="Stake GTC on yourself"
           amount={getSelfStakeAmount(roundData)}
-          buttonText="Stake"
+          buttonText={getSelfStakeAmount(roundData) ? "Modify Stake" : "Stake"}
           buttonHandler={() => {
             setStakingType("self");
             setIsModalVisible(true);
@@ -62,24 +51,11 @@ const Rounds = ({
         />
 
         <StakeItem
-          icon={
-            <svg
-              fill="none"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              className="w-4 h-4"
-              viewBox="0 0 24 24"
-            >
-              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path>
-              <circle cx="12" cy="7" r="4"></circle>
-            </svg>
-          }
-          title="Stake on other people"
-          description="Some explanation on what this means"
+          icon={<UsergroupAddOutlined style={{ fontSize: "25px" }} />}
+          title="Community Staking"
+          description="Stake GTC on other people"
           amount={getCommunityStakeAmount(roundData)}
-          buttonText="Stake"
+          buttonText={getSelfStakeAmount(roundData) ? "Modify Stake" : "Stake"}
           buttonHandler={() => {
             setStakingType("community");
             setIsModalVisible(true);

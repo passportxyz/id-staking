@@ -8,6 +8,7 @@ import { STARTING_GRANTS_ROUND } from "../components/Rounds";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
 import { gql, useQuery } from "@apollo/client";
+import { UsergroupAddOutlined, LockOutlined } from "@ant-design/icons";
 
 import { getAmountStakedOnMe } from "../components/StakingModal/utils";
 
@@ -200,22 +201,12 @@ function StakeDashboard({
             <div className="border border-asideBorder px-4 py-6 rounded-lg bg-asideBG">
               <div className="flex flex-row items-center">
                 <div className="w-10 h-10 inline-flex items-center justify-center rounded-full bg-indigo-100 text-indigo-500 flex-shrink-0">
-                  <svg
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    className="w-4 h-4"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
-                  </svg>
+                  <UsergroupAddOutlined style={{ fontSize: "25px" }} />
                 </div>
                 <h2 className="text-gray-900 text-md text-left ml-4 mb-0">
                   {getAmountStakedOnMe(data)
-                    ? "You’ve received stakes from the community"
-                    : "Get staked and receive the Community Staking stamp"}
+                    ? "People from your community have staked on your identity!"
+                    : "Collect a Community Staking stamp when other people stake on your identity."}
                 </h2>
               </div>
 
@@ -223,8 +214,7 @@ function StakeDashboard({
                 {getAmountStakedOnMe(data) ? (
                   <div className="flex flex-col">
                     <p className="leading-relaxed text-base text-left font-libre-franklin">
-                      Some GTC have been staked on you by the community. You can now get the Community Staking stamp on
-                      Gitcoin Passport!
+                      You can now collect a Community Staking stamp on your Passport - visit Passport to do so now!
                     </p>
                     <p className="text-black text-left font-libre-franklin text-xl">{getAmountStakedOnMe(data)} GTC</p>
                   </div>
@@ -236,7 +226,12 @@ function StakeDashboard({
                 )}
 
                 <div className="mt-2 border-t border-divider">
-                  <a href="#" className="mt-3 text-indigo-500 inline-flex items-center">
+                  <a
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href="https://passport.gitcoin.co/"
+                    className="mt-3 text-indigo-500 inline-flex items-center"
+                  >
                     More Info
                   </a>
                 </div>
@@ -245,27 +240,25 @@ function StakeDashboard({
             <div className="border border-asideBorder px-4 py-6 rounded-lg mt-6 bg-asideBG">
               <div className="flex flex-row items-center">
                 <div className="w-10 h-10 inline-flex items-center justify-center rounded-full bg-indigo-100 text-indigo-500 flex-shrink-0">
-                  <svg
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    className="w-4 h-4"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
-                  </svg>
+                  <LockOutlined style={{ fontSize: "25px" }} />
                 </div>
-                <h2 className="text-gray-900 text-md text-left ml-4 mb-0">Useful Info 1</h2>
+                <h2 className="text-gray-900 text-md text-left ml-4 mb-0">
+                  Stakings are locked through the duration of the Round.
+                </h2>
               </div>
 
               <div className="flex-grow mt-4">
                 <p className="leading-relaxed text-base text-left">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+                  In order to prevent users from sybil attacking through staking their GTC and moving it across multiple
+                  passports during a Grants Round, all GTC staked is locked through the duration of Grants Round 15.
                 </p>
                 <div className="mt-3 border-t border-divider">
-                  <a href="#" className="mt-3 text-indigo-500 inline-flex items-center">
+                  <a
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href="https://gitcoin.notion.site/About-Staking-on-Grants-Round-15-768f88d430ff4335ba23b17876b6e981"
+                    className="mt-3 text-indigo-500 inline-flex items-center"
+                  >
                     More Info
                   </a>
                 </div>

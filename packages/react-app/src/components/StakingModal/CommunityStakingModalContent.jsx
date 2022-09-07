@@ -4,6 +4,7 @@ import { WarningOutlined, CheckOutlined } from "@ant-design/icons";
 import { ethers } from "ethers";
 import axios from "axios";
 import AddressInput from "../AddressInput";
+import DisplayAddressEns from "../DisplayAddressEns";
 
 import { ERC20ABI } from "./utils";
 
@@ -205,7 +206,7 @@ export default function CommunityStakingModalContent({
       footer={[
         <Button
           onClick={async () => await approveTokenAllowance()}
-          hidden={modalStatus === 3}
+          hidden={modalStatus === 3 || modalStatus === 4}
           key="Approve GTC"
           loading={modalStatus === 2}
           className="rounded-sm rounded bg-purple-connectPurple py-2 px-10 text-white"
@@ -242,10 +243,6 @@ export default function CommunityStakingModalContent({
               setModalStatus(4);
               await stakeUsers(round.toString(), filteredAmounts, filteredAddresses);
               setModalStatus(3);
-              notification.open({
-                message: "Staking Successful",
-                icon: <CheckOutlined style={{ color: "#00FF00" }} />,
-              });
 
               // reset modal values
               setAllStakeAddresses(initialStakeAddresses);
@@ -341,7 +338,10 @@ export default function CommunityStakingModalContent({
             </p>
             <ul className="ml-4 list-disc">
               {[...Array(numberOfCommunityStakes)].map((_, i) => (
-                <li>{`${allStakeAmounts[i]} GTC to ${getStakeAddressAtIndex(i)}`}</li>
+                <li>
+                  {`${allStakeAmounts[i]} GTC on `}
+                  <DisplayAddressEns address={allStakeAddresses[i]} ensProvider={mainnetProvider} />
+                </li>
               ))}
             </ul>
             <div className="border-2 border-gray-200 px-4 py-6 rounded-lg bg-yellow-200 mt-4">
@@ -349,11 +349,11 @@ export default function CommunityStakingModalContent({
               <ul className="list-disc ml-4">
                 <li>
                   Your staked GTC will be locked when the grant round starts, and you will not be able to withdraw it
-                  until two weeks after the round ends
+                  until after the round ends.
                 </li>
                 <li>
                   The staking contract has been checked by our engineering team, but it has not been audited by a
-                  professional audit firm. Please proceed with your own risk.
+                  professional audit firm.
                 </li>
               </ul>
             </div>
@@ -363,7 +363,9 @@ export default function CommunityStakingModalContent({
 
       {modalStatus === 1 && (
         <div className="mt-4 border-2 border-blue-alertBorder px-4 py-6 rounded-md bg-blue-alertBg font-libre-franklin">
-          To get started, you first need to approve GTC for Identity Staking.
+          In order to stake any GTC (self or community) on a Passport, you must first send a one-time transaction
+          approving the use of your GTC with the Smart Contract. (This is standard for smart contract engagement, token
+          approval must be stored on-chain.)
         </div>
       )}
     </Modal>
