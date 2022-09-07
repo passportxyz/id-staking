@@ -29,3 +29,4 @@ export { default as AddressDropDown } from "./AddressDropDown";
 export { default as AccountHomePage } from "./AccountHomePage";
 export { default as StakingModal } from "./StakingModal/StakingModal";
 export { default as DisplayAddressEns } from "./DisplayAddressEns";
+export { default as StakeItemCommunity } from "./StakeItemCommunity";

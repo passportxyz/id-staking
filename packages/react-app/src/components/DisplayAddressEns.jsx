@@ -34,7 +34,12 @@ export default function DisplayAddressEns(props) {
   const etherscanLink = blockExplorerLink(address, props.blockExplorer);
 
   return (
-    <a style={{ color: "black", fontWeight: "bold" }} target="_blank" href={etherscanLink} rel="noopener noreferrer">
+    <a
+      style={props.style ? props.style : { color: "black", fontWeight: "bold" }}
+      target="_blank"
+      href={etherscanLink}
+      rel="noopener noreferrer"
+    >
       {displayAddress}
     </a>
   );
