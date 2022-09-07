@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import { useContractReader } from "eth-hooks";
 import { ethers } from "ethers";
-import { Button, Divider, Select, Modal } from "antd";
-import axios from "axios";
+import { Select } from "antd";
 import { Rounds, Navbar } from "../components";
 import { STARTING_GRANTS_ROUND } from "../components/Rounds";
 import { useNavigate } from "react-router-dom";
@@ -115,7 +114,10 @@ function StakeDashboard({
         }
       },
       xstakeTo(where: { round: $round }) {
-        amount
+        amount,
+        to {
+          address
+        }
       }
     }
   }

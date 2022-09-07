@@ -68,8 +68,8 @@ export const getSelfStakeAmount = data => {
   if (!stake) {
     return 0;
   }
-  const stakeAmountFormatted = ethers.utils.formatUnits(stake.toString(), 18);
-  return stakeAmountFormatted;
+  const stakeAmountFormatted = parseFloat(ethers.utils.formatUnits(stake.toString(), 18));
+  return stakeAmountFormatted.toFixed(2).toString();
 };
 
 export const getCommunityStakeAmount = data => {
@@ -78,12 +78,11 @@ export const getCommunityStakeAmount = data => {
   if (xstakes.length < 1) {
     return 0;
   }
-  let total = 0;
+  let total = 0.0;
   xstakes.forEach(element => {
-    total += element.amount;
+    total += parseFloat(ethers.utils.formatUnits(element.amount.toString(), 18));
   });
-  const stakeAmountFormatted = ethers.utils.formatUnits(total.toString(), 18);
-  return stakeAmountFormatted;
+  return total.toFixed(2).toString();
 };
 
 export const getAmountStakedOnMe = data => {
@@ -92,6 +91,11 @@ export const getAmountStakedOnMe = data => {
   if (!stake) {
     return 0;
   }
-  const stakeAmountFormatted = ethers.utils.formatUnits(stake.toString(), 18);
-  return stakeAmountFormatted;
+  const stakeAmountFormatted = parseFloat(ethers.utils.formatUnits(stake.toString(), 18));
+  return stakeAmountFormatted.toFixed(2).toString();
+};
+
+export const formatAmountUnits = data => {
+  const formattedAmount = parseFloat(ethers.utils.formatUnits(data.toString(), 18));
+  return formattedAmount.toFixed(2).toString();
 };
