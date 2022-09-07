@@ -17,7 +17,8 @@ const themes = {
 const prevTheme = window.localStorage.getItem("theme");
 
 // const subgraphUri = "http://localhost:8000/subgraphs/name/scaffold-eth/your-contract";
-const subgraphUri = "https://api.thegraph.com/subgraphs/name/moonshotcollective/id-staking";
+const subgraphUri =
+  process.env.REACT_APP_SUBGRAPH_URL || "https://api.thegraph.com/subgraphs/name/moonshotcollective/id-staking";
 
 const client = new ApolloClient({
   uri: subgraphUri,

@@ -4,7 +4,7 @@ const StakeItem = ({ icon, title, description, amount, buttonText, buttonHandler
   return (
     <div className="flex items-start md:items-center mx-auto border-b pb-10 mb-10 border-divider flex-col md:flex-row">
       <div className="flex flex-row items-center justify-start">
-        <div className="w-20 h-20 mr-5 inline-flex items-center justify-center rounded-full bg-indigo-100 text-indigo-500 flex-shrink-0">
+        <div className="w-20 h-20 mr-5 inline-flex items-center justify-center rounded-full bg-indigo-100 text-indigo-500">
           {icon}
         </div>
         <div className="flex-col text-left">
