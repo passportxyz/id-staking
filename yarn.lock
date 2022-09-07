@@ -3292,13 +3292,13 @@
     "@ethersproject/properties" "^5.6.0"
     "@ethersproject/strings" "^5.6.1"
 
-"@gitcoinco/passport-sdk-reader@^0.1.3":
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/@gitcoinco/passport-sdk-reader/-/passport-sdk-reader-0.1.3.tgz#ba067d07ecb67c6e2da27dde6e8a6047e3b12e04"
-  integrity sha512-aqveS57apSCN2kEAZMgH3bNMossx2AN2psl6aEexK6HI/Th75v8cjRjql2J1NdXoXujPcdqXONqxtQNmgCj5JA==
+"@gitcoinco/passport-sdk-reader@^0.1.4":
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/@gitcoinco/passport-sdk-reader/-/passport-sdk-reader-0.1.4.tgz#875ee9cc421c6f93e97fcba6d530b5c1882ce71f"
+  integrity sha512-MRZ+p3ZdBz7/7U7/+3/LnwU4nXMeWGwPWakvPLTXL0ys74jmIrn0b1j2uh0D8EsdstoAnksbO9wEBRED40wHAg==
   dependencies:
     "@gitcoinco/passport-sdk-types" "^0.2.0"
-    tulons "^0.0.6"
+    tulons "^0.0.7"
 
 "@gitcoinco/passport-sdk-types@^0.2.0":
   version "0.2.0"
@@ -22883,10 +22883,10 @@ tty-browserify@0.0.0:
   resolved "https://registry.npmjs.org/tty-browserify/-/tty-browserify-0.0.0.tgz"
   integrity sha1-oVe6QC2iTpv5V/mqadUk7tQpAaY=
 
-tulons@^0.0.6:
-  version "0.0.6"
-  resolved "https://registry.npmjs.org/tulons/-/tulons-0.0.6.tgz"
-  integrity sha512-IFHKA9iNIR6evE9xmYR46BRTr05rAGrR/UMJ8bTmD7FY19kRm3gr7zTN/h9oDVumFiQ/ib9iJaT6dFAXaanMQw==
+tulons@^0.0.7:
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/tulons/-/tulons-0.0.7.tgz#31677402ab51dc51478d375f90df76ea2ca8cbb9"
+  integrity sha512-JyL9Vn4PPG2TTEJS35yqQgAMLd3IX9pFIlbiLmv47HuHTo2F3ihYg2yfMqde4hqGY1nGk77iJ/lvsTbAURJ8rg==
   dependencies:
     axios "^0.27.2"
 
