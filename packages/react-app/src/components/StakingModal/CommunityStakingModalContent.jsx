@@ -226,6 +226,12 @@ export default function CommunityStakingModalContent({
             // filter addresses for undefined
             const filteredAddresses = addresses.filter(address => address !== undefined);
 
+            //Parse units on amounts
+            const parsedAmounts = [];
+            filteredAmounts.forEach(amount => {
+              parsedAmounts.push(ethers.utils.parseUnits(amount));
+            });
+
             // Check if any of the addresses
             filteredAddresses.forEach(filteredAddress => {
               if (filteredAddress === address) {
@@ -239,9 +245,9 @@ export default function CommunityStakingModalContent({
             });
 
             // Final check before allowing user to stake
-            if (filteredAmounts.length === filteredAddresses.length && canStake) {
+            if (parsedAmounts.length === filteredAddresses.length && canStake) {
               setModalStatus(4);
-              await stakeUsers(round.toString(), filteredAmounts, filteredAddresses);
+              await stakeUsers(round.toString(), parsedAmounts, filteredAddresses);
               setModalStatus(3);
 
               // reset modal values

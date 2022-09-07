@@ -3,6 +3,7 @@ import { Form } from "antd";
 import { ethers } from "ethers";
 import { useState } from "react";
 import StakeItem from "./StakeItem";
+import StakeItemCommunity from "./StakeItemCommunity";
 import StakingModal from "./StakingModal/StakingModal";
 import { UsergroupAddOutlined, UserOutlined } from "@ant-design/icons";
 
@@ -50,7 +51,7 @@ const Rounds = ({
           }}
         />
 
-        <StakeItem
+        <StakeItemCommunity
           icon={<UsergroupAddOutlined style={{ fontSize: "25px" }} />}
           title="Community Staking"
           description="Stake GTC on other people"
@@ -60,6 +61,8 @@ const Rounds = ({
             setStakingType("community");
             setIsModalVisible(true);
           }}
+          roundData={roundData?.user?.xstakeTo}
+          mainnetProvider={mainnetProvider}
         />
       </div>
 
