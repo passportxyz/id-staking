@@ -55,7 +55,7 @@ const Rounds = ({
           title="Community Staking"
           description="Stake GTC on other people"
           amount={getCommunityStakeAmount(roundData)}
-          buttonText={getSelfStakeAmount(roundData) ? "Modify Stake" : "Stake"}
+          buttonText={getCommunityStakeAmount(roundData) ? "Modify Stake" : "Stake"}
           buttonHandler={() => {
             setStakingType("community");
             setIsModalVisible(true);
