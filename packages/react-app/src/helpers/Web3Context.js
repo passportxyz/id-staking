@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState, useRef, useMemo, createContext } from "react";
+import React, { useState, useMemo, createContext } from "react";
 
 // Context starting state
 const startingState = {

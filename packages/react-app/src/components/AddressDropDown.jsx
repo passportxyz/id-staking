@@ -1,6 +1,5 @@
 import { Skeleton, Typography, Card } from "antd";
 import React from "react";
-import { useThemeSwitcher } from "react-css-theme-switcher";
 import Blockies from "react-blockies";
 import { useLookupAddress } from "eth-hooks/dapps/ens";
 const { Meta } = Card;
@@ -14,8 +13,6 @@ export default function Address(props) {
   const address = props.value || props.address;
 
   const ens = useLookupAddress(props.ensProvider, address);
-
-  const { currentTheme } = useThemeSwitcher();
 
   if (!address) {
     return (
