@@ -133,9 +133,10 @@ function Home({
               </p>
             </div>
             <div className="text-left mt-0 text-lg text-gray-900 sm:text-xl md:mt-10 md:pr-20 md:text-xl">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
-              dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex
-              ea commodo consequat.
+              Identity Staking is a mechanism that allows you to stake your own identity or stake on somebody else's. We
+              use GTC to stake, and each staking is associated with a Passport. By staking, the profile of stamps in the
+              Passport becomes more unique, which will likely result in a stronger Trust Bonus score for Grants Round
+              15.
             </div>
             <div className="mt-4 w-full sm:mt-10 sm:w-1/2 md:mt-10 md:block md:w-1/2">
               <AccountHomePage

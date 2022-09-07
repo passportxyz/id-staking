@@ -62,12 +62,14 @@ function App(props) {
   const { address, setAddress, setCurrentNetwork } = useContext(Web3Context);
   // specify all the chains your app is available on. Eg: ['localhost', 'mainnet', ...otherNetworks ]
   // reference './constants.js' for other networks
-  const networkOptions = [initialNetwork.name, "mainnet", "rinkeby", "goerli"];
+  const networkOptions = [initialNetwork.name, "mainnet", "goerli"];
 
   const [injectedProvider, setInjectedProvider] = useState();
   // const [address, setAddress] = useState("");
   // Set Goerli as default
-  const [selectedNetwork, setSelectedNetwork] = useState(networkOptions[3]);
+  const [selectedNetwork, setSelectedNetwork] = useState(
+    networkOptions[process.env.REACT_APP_NETWORK_OPTIONS_NUMBER || 1],
+  );
   const [passport, setPassport] = useState({});
 
   const targetNetwork = NETWORKS[selectedNetwork];
