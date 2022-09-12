@@ -17,7 +17,7 @@ const StakeItemCommunity = ({
   return (
     <div className="border-divider border-b">
       <div className="flex items-start md:items-center mx-auto pb-4 flex-col md:flex-row">
-        <div className="flex flex-row items-center justify-start">
+        <div className="flex flex-1 items-center justify-start">
           <div className="w-20 h-20 mr-5 inline-flex items-center justify-center rounded-full bg-indigo-100 text-indigo-500">
             {icon}
           </div>
@@ -37,24 +37,19 @@ const StakeItemCommunity = ({
           <span>{buttonText}</span>
         </button>
       </div>
+
       {/* List all users staked on  */}
-      <div className="flex items-start md:items-center mx-auto  flex-col md:flex-row">
-        <ul>
-          {roundData &&
-            roundData.map(data => (
-              <li className="flex flex-row">
-                <div className="mx-10 md:mx-28 text-xl grid grid-col-2 grid-flow-col gap-20 md:gap-60 mb-2">
-                  <DisplayAddressEns
-                    style={{ color: "black" }}
-                    address={data.to.address}
-                    ensProvider={mainnetProvider}
-                  />
-                  {formatAmountUnits(data.amount)} GTC
-                </div>
-              </li>
-            ))}
-        </ul>
-      </div>
+      <ul className="flex flex-col w-full">
+        {roundData &&
+          roundData.map(data => (
+            <li className="flex flex-grow ml-24">
+              <div className="text-xl flex flex-1">
+                <DisplayAddressEns style={{ color: "black" }} address={data.to.address} ensProvider={mainnetProvider} />
+              </div>
+              <div className="text-xl flex flex-1">{formatAmountUnits(data.amount)} GTC</div>
+            </li>
+          ))}
+      </ul>
     </div>
   );
 };
