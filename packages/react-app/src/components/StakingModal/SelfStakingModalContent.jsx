@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Button, Modal, Input, notification } from "antd";
 import { ethers } from "ethers";
 import Loading from "../Loading";
+import { getSelfStakeAmount } from "./utils";
 
 export default function CommunityStakingModalContent({
+  roundData,
   writeContracts,
   readContracts,
   tx,
@@ -12,9 +14,11 @@ export default function CommunityStakingModalContent({
   setIsModalVisible,
   round,
 }) {
-  const [stakeAmount, setStakeAmount] = useState("0");
+  const [stakeAmount, setStakeAmount] = useState("0.00");
   const [modalStatus, setModalStatus] = useState(1);
   const [loading, setLoading] = useState(true);
+  // amount loaded from an existing stake
+  const [loadedAmount, setLoadedAmount] = useState("0.00");
 
   /*
   Modal Status
@@ -25,15 +29,14 @@ export default function CommunityStakingModalContent({
   4) Staking
   */
 
-  const approveTokenAllowance = async () => {
-    setModalStatus(2);
-    await approve();
-    setModalStatus(3);
-  };
-
-  const stake = async (id, amount) => {
-    tx(writeContracts.IDStaking.stake(id + "", ethers.utils.parseUnits(amount)));
-  };
+  // set starting amount on modal open
+  useEffect(() => {
+    const selfStakeAmount = getSelfStakeAmount(roundData);
+    if (isModalVisible && selfStakeAmount && parseFloat(selfStakeAmount) > 0) {
+      setStakeAmount(selfStakeAmount);
+      setLoadedAmount(selfStakeAmount);
+    }
+  }, [isModalVisible]);
 
   // Modal button should be hidden if user already approved tokens
   useEffect(() => {
@@ -69,13 +72,19 @@ export default function CommunityStakingModalContent({
   // Allows the user to change stake amount
   const increaseStakeAmount = () => {
     const newStakeAmount = parseFloat(stakeAmount) + 1.0;
-    setStakeAmount(newStakeAmount.toString());
+    setStakeAmount(newStakeAmount.toFixed(2).toString());
   };
   const decreaseStakeAmount = () => {
     const newStakeAmount = parseFloat(stakeAmount) - 1.0;
-    if (newStakeAmount >= 0) {
-      setStakeAmount(newStakeAmount.toString());
+    if (newStakeAmount >= parseFloat(loadedAmount)) {
+      setStakeAmount(newStakeAmount.toFixed(2).toString());
     }
+  };
+
+  const approveTokenAllowance = async () => {
+    setModalStatus(2);
+    await approve();
+    setModalStatus(3);
   };
 
   // User approves usage of token
@@ -83,7 +92,15 @@ export default function CommunityStakingModalContent({
     await tx(writeContracts.Token.approve(readContracts.IDStaking.address, ethers.utils.parseUnits("10000000")));
   };
 
+  const stake = async (id, amount) => {
+    tx(writeContracts.IDStaking.stake(id + "", ethers.utils.parseUnits(amount)));
+  };
+
   const handleCancel = () => {
+    // reset values
+    setStakeAmount("0.00");
+    setLoadedAmount("0.00");
+    // close modal
     setIsModalVisible(false);
   };
 
@@ -112,7 +129,12 @@ export default function CommunityStakingModalContent({
                 onClick={async () => {
                   setModalStatus(4);
                   try {
-                    await stake(round.toString(), stakeAmount.toString());
+                    let tempAmount = parseFloat(stakeAmount);
+                    const loadedValue = parseFloat(loadedAmount);
+                    if (loadedValue > 0 && tempAmount > loadedValue) {
+                      tempAmount = tempAmount - loadedValue;
+                    }
+                    await stake(round.toString(), tempAmount.toString());
                   } catch (e) {
                     notification.open({
                       message: "Staking unsuccessful",

@@ -1,5 +1,4 @@
 import React from "react";
-import { Form } from "antd";
 import { ethers } from "ethers";
 import { useState } from "react";
 import StakeItem from "./StakeItem";
@@ -29,7 +28,6 @@ const Rounds = ({
   targetNetwork,
   roundData,
 }) => {
-  const [form] = Form.useForm();
   // Set to visibility of Staking Modal
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [stakingType, setStakingType] = useState("self");
@@ -67,6 +65,7 @@ const Rounds = ({
       </div>
 
       <StakingModal
+        roundData={roundData}
         isModalVisible={isModalVisible}
         setIsModalVisible={setIsModalVisible}
         stakingType={stakingType}
