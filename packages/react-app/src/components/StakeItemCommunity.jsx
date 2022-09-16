@@ -3,17 +3,26 @@ import React from "react";
 // Format User Address
 import DisplayAddressEns from "./DisplayAddressEns";
 import { formatAmountUnits } from "./StakingModal/utils";
+import UnstakeButton from "./UnstakeButton";
 
 const StakeItemCommunity = ({
   icon,
   title,
+  roundEnded,
   description,
   amount,
+  unstakeUsers,
   buttonText,
   buttonHandler,
   roundData,
   mainnetProvider,
 }) => {
+  const unstakeHandler = async () => {
+    const users = roundData.map(i => i?.to?.address);
+
+    await unstakeUsers(users);
+  };
+
   return (
     <div className="border-divider border-b">
       <div className="flex items-start md:items-center mx-auto pb-4 flex-col md:flex-row">
@@ -30,12 +39,16 @@ const StakeItemCommunity = ({
           <h2 className="text-gray-900 text-lg title-font font-medium mb-0">{amount} GTC</h2>
           <span className="leading-relaxed text-base">Staked</span>
         </div>
-        <button
-          onClick={buttonHandler}
-          className="flex md:max-w-button w-full justify-center text-white text-center bg-purple-connectPurple border-0 py-2 focus:outline-none hover:bg-indigo-600 rounded-sm text-lg font-miriam-libre"
-        >
-          <span>{buttonText}</span>
-        </button>
+        {roundEnded ? (
+          <UnstakeButton amount={amount} handler={unstakeHandler} />
+        ) : (
+          <button
+            onClick={buttonHandler}
+            className="flex md:max-w-button w-full justify-center text-white text-center bg-purple-connectPurple border-0 py-2 focus:outline-none hover:bg-indigo-600 rounded-sm text-lg font-miriam-libre"
+          >
+            <span>{buttonText}</span>
+          </button>
+        )}
       </div>
 
       {/* List all users staked on  */}
