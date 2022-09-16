@@ -1,6 +1,7 @@
 import React from "react";
+import UnstakeButton from "./UnstakeButton";
 
-const StakeItem = ({ icon, title, description, amount, buttonText, buttonHandler }) => {
+const StakeItem = ({ icon, roundEnded, unstake, title, description, amount, buttonText, buttonHandler }) => {
   return (
     <div className="flex items-start md:items-center mx-auto border-b pb-10 mb-10 border-divider flex-col md:flex-row">
       <div className="flex flex-1 items-center justify-start">
@@ -16,12 +17,16 @@ const StakeItem = ({ icon, title, description, amount, buttonText, buttonHandler
         <h2 className="text-gray-900 text-lg title-font font-medium mb-0">{amount} GTC</h2>
         <span className="leading-relaxed text-base">Staked</span>
       </div>
-      <button
-        onClick={buttonHandler}
-        className="flex md:max-w-button w-full justify-center text-white text-center bg-purple-connectPurple border-0 py-2 focus:outline-none hover:bg-indigo-600 rounded-sm text-lg font-miriam-libre"
-      >
-        <span>{buttonText}</span>
-      </button>
+      {roundEnded ? (
+        <UnstakeButton amount={amount} handler={() => unstake(amount)} />
+      ) : (
+        <button
+          onClick={buttonHandler}
+          className="flex md:max-w-button w-full justify-center text-white text-center bg-purple-connectPurple border-0 py-2 focus:outline-none hover:bg-indigo-600 rounded-sm text-lg font-miriam-libre"
+        >
+          <span>{buttonText}</span>
+        </button>
+      )}
     </div>
   );
 };
