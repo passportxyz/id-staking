@@ -20,8 +20,6 @@ const StakeItemCommunity = ({
   const unstakeHandler = async () => {
     const users = roundData.map(i => i?.to?.address);
 
-    console.log({ users });
-
     await unstakeUsers(users);
   };
 
