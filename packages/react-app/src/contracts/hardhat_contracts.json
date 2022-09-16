@@ -569,7 +569,7 @@
       "chainId": "5",
       "contracts": {
         "IDStaking": {
-          "address": "0xA9757F8bA79341553D6728080A352EB8281d47eF",
+          "address": "0xe3d7684C87c6dD50602B34D3CDAc99752950c1a1",
           "abi": [
             {
               "inputs": [
