@@ -124,7 +124,7 @@ function StakeDashboard({
   });
 
   const roundEndTimestamp = moment.unix((start || zero).add(duration || zero).toString());
-  const roundEnded = moment.unix(moment().toString()).unix() >= roundEndTimestamp.unix();
+  const roundEnded = moment().unix() >= roundEndTimestamp.unix();
 
   return (
     <>
