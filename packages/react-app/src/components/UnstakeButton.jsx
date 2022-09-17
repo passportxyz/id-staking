@@ -1,7 +1,7 @@
 import React from "react";
 
 const UnstakeButton = ({ amount = 0, handler }) => {
-  const noBalance = amount === 0;
+  const noBalance = parseInt(amount) === 0;
 
   return (
     <button
