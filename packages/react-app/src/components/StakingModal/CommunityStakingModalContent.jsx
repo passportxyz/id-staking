@@ -268,7 +268,7 @@ export default function CommunityStakingModalContent({
 
   return (
     <Modal
-      title={<span className="font-libre-franklin">Stake on other people</span>}
+      title={"Stake on other people"}
       visible={isModalVisible}
       onCancel={handleCancel}
       okText={`Create a Passport`}
@@ -367,7 +367,7 @@ export default function CommunityStakingModalContent({
           <p>Your stake amount (in GTC)</p>
 
           <div className="flex flex-col justify-center overflow--auto">
-            <Row gutter={20} style={{ paddingBottom: "20px" }}>
+            <Row gutter={20} style={{ paddingBottom: "10px" }}>
               <Col span={12}>Address</Col>
               <Col span={12}>Amount(GTC)</Col>
             </Row>
@@ -431,7 +431,7 @@ export default function CommunityStakingModalContent({
                 </Col>
               </Row>
             ))}
-            <Row>
+            <Row style={{ paddingTop: "10px" }}>
               <Col span={24}>
                 <Button
                   onClick={() => {

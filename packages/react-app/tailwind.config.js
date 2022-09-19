@@ -39,8 +39,9 @@ module.exports = {
 
     fontFamily: {
       spacemono: ["Space Mono"],
-
-      librefranklin: ["Libre Franklin"],
+      librefranklin: ["Libre Franklin", "Miriam Libre"],
+      display: ["Libre Franklin", "Miriam Libre"],
+      body: ["Libre Franklin", "Miriam Libre"],
     },
 
     maxWidth: {

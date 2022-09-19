@@ -33,7 +33,7 @@ export default function Navbar({
             <img src="/gitcoinLogoDark.svg" alt="Gitcoin Logo" />
             <img className="ml-6 mr-6" src="/logoLine.svg" alt="Logo Line" />
             <img src="/gtcStakingLogoIcon.svg" alt="Passport Logo" />
-            <span className="ml-6 text-grey-500 font-bold text-lg hidden md:inline-flex">IDENTITY STAKING</span>
+            <span className="ml-6 text-grey-500 text-lg hidden md:inline-flex">IDENTITY STAKING</span>
           </div>
         </div>
         <div className="ml-auto">

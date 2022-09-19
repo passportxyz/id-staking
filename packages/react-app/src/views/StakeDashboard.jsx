@@ -154,12 +154,12 @@ function StakeDashboard({
       {/* Grants Round Header */}
       <main className="container flex flex-1 flex-col px-8 md:mx-auto pb-10">
         <div className="mt-8">
-          <p className="font-miriam-libre text-3xl text-left">
+          <p className="mb-0 text-3xl text-left">
             Gitcoin Round {roundInView ? STARTING_GRANTS_ROUND + roundInView : "Not Found"}{" "}
             {/*{round} of {latestRound}*/}
           </p>
           {roundInView ? (
-            <p className="font-miriam-libre text-base text-left mb-4">
+            <p className="text-base text-left mb-4">
               {moment.unix((start || zero).toString()).format("MMMM Do YYYY (h:mm:ss a)")} {" - "}
               {roundEndTimestamp.format("MMMM Do YYYY (h:mm:ss a)")}
             </p>
@@ -209,13 +209,13 @@ function StakeDashboard({
               <div className="flex-grow mt-4">
                 {getAmountStakedOnMe(data) ? (
                   <div className="flex flex-col">
-                    <p className="leading-relaxed text-base text-left font-libre-franklin">
+                    <p className="leading-relaxed text-base text-left">
                       You can now collect a Community Staking stamp on your Passport - visit Passport to do so now!
                     </p>
-                    <p className="text-black text-left font-libre-franklin text-xl">{getAmountStakedOnMe(data)} GTC</p>
+                    <p className="text-black text-left text-xl">{getAmountStakedOnMe(data)} GTC</p>
                   </div>
                 ) : (
-                  <p className="leading-relaxed text-base text-left font-libre-franklin">
+                  <p className="leading-relaxed text-base text-left">
                     Looks like no one has staked on you yet. Get people you know to stake on you and receive the
                     community staking stamp on Gitcoin Passport.
                   </p>
