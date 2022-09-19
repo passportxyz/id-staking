@@ -9,7 +9,7 @@ const StakeItem = ({ icon, roundEnded, unstake, title, description, amount, butt
           {icon}
         </div>
         <div className="flex-col text-left">
-          <h2 className="text-gray-900 text-lg title-font font-medium mb-0">{title}</h2>
+          <h2 className="text-gray-900 text-lg mb-0">{title}</h2>
           <div className="leading-relaxed text-base">{description}</div>
         </div>
       </div>
@@ -22,7 +22,7 @@ const StakeItem = ({ icon, roundEnded, unstake, title, description, amount, butt
       ) : (
         <button
           onClick={buttonHandler}
-          className="flex md:max-w-button w-full justify-center text-white text-center bg-purple-connectPurple border-0 py-2 focus:outline-none hover:bg-indigo-600 rounded-sm text-lg font-miriam-libre"
+          className="flex md:max-w-button w-full justify-center text-white text-center bg-purple-connectPurple border-0 py-2 focus:outline-none hover:bg-indigo-600 rounded-sm text-lg"
         >
           <span>{buttonText}</span>
         </button>

@@ -49,8 +49,8 @@ export default function Account({
   const menu = (
     <Menu>
       <Menu.ItemGroup key="2">
-        <a key="logoutbutton" size={"medium"} onClick={logoutOfWeb3Modal}>
-          <LogoutOutlined />
+        <a key="logoutbutton" size="medium" style={{ color: "red" }} onClick={logoutOfWeb3Modal}>
+          <LogoutOutlined style={{ color: "red" }} />
           {` Logout`}
         </a>
       </Menu.ItemGroup>
@@ -69,10 +69,7 @@ export default function Account({
   return (
     <div className="flex">
       {!web3Modal?.cachedProvider && (
-        <button
-          className="rounded-sm bg-purple-connectPurple py-4 px-10 text-white text-base"
-          onClick={accountButtonInfo.action}
-        >
+        <button className="rounded-sm bg-purple-connectPurple py-4 px-10 text-white" onClick={accountButtonInfo.action}>
           {accountButtonInfo.name}
         </button>
       )}
@@ -84,7 +81,7 @@ export default function Account({
                 <TokenBalance
                   contracts={readContracts}
                   img={"./gtcTokenLogo.svg"}
-                  name={"Token"}
+                  name={"GTC"}
                   address={address}
                   dollarMultiplier={null}
                 />
