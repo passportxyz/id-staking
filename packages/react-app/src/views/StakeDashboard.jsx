@@ -87,14 +87,6 @@ function StakeDashboard({
     tx(writeContracts.Token.mintAmount(ethers.utils.parseUnits("1000")));
   };
 
-  const unstake = async (id, amount) => {
-    tx(writeContracts.IDStaking.unstake(id + "", ethers.utils.parseUnits(amount)));
-  };
-
-  const unstakeUsers = async (id, users) => {
-    tx(writeContracts.IDStaking.unstakeUsers(id + "", users));
-  };
-
   const migrate = async id => {
     tx(writeContracts.IDStaking.migrateStake(id + ""));
   };
@@ -131,6 +123,9 @@ function StakeDashboard({
     },
   });
 
+  const roundEndTimestamp = moment.unix((start || zero).add(duration || zero).toString());
+  const roundEnded = moment().unix() >= roundEndTimestamp.unix();
+
   return (
     <>
       <Navbar
@@ -166,7 +161,7 @@ function StakeDashboard({
           {roundInView ? (
             <p className="font-miriam-libre text-base text-left mb-4">
               {moment.unix((start || zero).toString()).format("MMMM Do YYYY (h:mm:ss a)")} {" - "}
-              {moment.unix((start || zero).add(duration || zero).toString()).format("MMMM Do YYYY (h:mm:ss a)")}
+              {roundEndTimestamp.format("MMMM Do YYYY (h:mm:ss a)")}
             </p>
           ) : (
             <></>
@@ -181,12 +176,11 @@ function StakeDashboard({
                     tx={tx}
                     key={roundInView}
                     round={roundInView}
-                    unstake={unstake}
                     address={address}
                     migrate={migrate}
+                    roundEnded={roundEnded}
                     latestRound={latestRound}
                     tokenSymbol={tokenSymbol}
-                    unstakeUsers={unstakeUsers}
                     readContracts={readContracts}
                     writeContracts={writeContracts}
                     mainnetProvider={mainnetProvider}

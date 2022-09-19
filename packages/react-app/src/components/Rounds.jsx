@@ -1,5 +1,4 @@
 import React from "react";
-import { Form } from "antd";
 import { ethers } from "ethers";
 import { useState } from "react";
 import StakeItem from "./StakeItem";
@@ -19,22 +18,26 @@ const Rounds = ({
   address,
   readContracts,
   writeContracts,
-  unstake,
   migrate,
   round,
   latestRound,
+  roundEnded,
   mainnetProvider,
-  unstakeUsers,
   userSigner,
   targetNetwork,
   roundData,
 }) => {
-  const [form] = Form.useForm();
   // Set to visibility of Staking Modal
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [stakingType, setStakingType] = useState("self");
 
-  // console.log("view new data ", data, error);
+  const unstake = async amount => {
+    tx(writeContracts.IDStaking.unstake(round + "", ethers.utils.parseUnits(amount)));
+  };
+
+  const unstakeUsers = async users => {
+    tx(writeContracts.IDStaking.unstakeUsers(round + "", users));
+  };
 
   return (
     <>
@@ -42,6 +45,8 @@ const Rounds = ({
         <StakeItem
           icon={<UserOutlined style={{ fontSize: "25px" }} />}
           title="Self Staking"
+          roundEnded={roundEnded}
+          unstake={unstake}
           description="Stake GTC on yourself"
           amount={getSelfStakeAmount(roundData)}
           buttonText={getSelfStakeAmount(roundData) ? "Modify Stake" : "Stake"}
@@ -53,6 +58,8 @@ const Rounds = ({
 
         <StakeItemCommunity
           icon={<UsergroupAddOutlined style={{ fontSize: "25px" }} />}
+          roundEnded={roundEnded}
+          unstakeUsers={unstakeUsers}
           title="Community Staking"
           description="Stake GTC on other people"
           amount={getCommunityStakeAmount(roundData)}
@@ -67,6 +74,7 @@ const Rounds = ({
       </div>
 
       <StakingModal
+        roundData={roundData}
         isModalVisible={isModalVisible}
         setIsModalVisible={setIsModalVisible}
         stakingType={stakingType}
