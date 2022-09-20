@@ -79,7 +79,7 @@ function Home({
   };
 
   return (
-    <div className="font-miriam-libre min-h-max min-h-default bg-landingPageBackground bg-cover bg-no-repeat text-gray-100 md:bg-center">
+    <div className="min-h-max min-h-default bg-landingPageBackground bg-cover bg-no-repeat text-gray-100 md:bg-center">
       <Modal
         title="Create a Passport to Get Started"
         visible={isModalVisible}
@@ -126,7 +126,7 @@ function Home({
       <div className="container mx-auto px-5 py-2">
         <div className="mx-auto flex flex-wrap">
           <div className="mt-0 md:ml-4 w-full pb-6 text-white sm:mt-40 sm:w-1/2 md:mt-40 md:w-1/2 md:pt-6">
-            <div className="font-miriam-libre leading-relaxed">
+            <div className="leading-relaxed">
               <p className="text-2xl sm:text-xl md:text-xl text-black text-left">Identity Staking</p>
               <p className="text-2xl sm:text-3xl md:text-3xl text-black text-left">
                 Defend against sybil by staking on your identity

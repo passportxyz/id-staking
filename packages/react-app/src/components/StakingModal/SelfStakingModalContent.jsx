@@ -106,7 +106,7 @@ export default function CommunityStakingModalContent({
 
   return (
     <Modal
-      title={<span className="font-libre-franklin">Stake on yourself</span>}
+      title={"Stake on yourself"}
       visible={isModalVisible}
       onCancel={handleCancel}
       okText={`Create a Passport`}

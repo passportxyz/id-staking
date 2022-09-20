@@ -13,7 +13,7 @@ body {
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+  font-family: "Libre Franklin" !important;
 }
 
 .font-miriam-libre {
@@ -21,7 +21,7 @@ code {
 }
 
 .font-libre-franklin {
-  font-family: "Libre Franklin";
+  font-family: "Libre Franklin" !important;
 }
 
 .ant-btn[disabled] {

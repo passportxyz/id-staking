@@ -44,7 +44,7 @@ const StakeItemCommunity = ({
         ) : (
           <button
             onClick={buttonHandler}
-            className="flex md:max-w-button w-full justify-center text-white text-center bg-purple-connectPurple border-0 py-2 focus:outline-none hover:bg-indigo-600 rounded-sm text-lg font-miriam-libre"
+            className="flex md:max-w-button w-full justify-center text-white text-center bg-purple-connectPurple border-0 py-2 focus:outline-none hover:bg-indigo-600 rounded-sm text-lg"
           >
             <span>{buttonText}</span>
           </button>
