@@ -139,37 +139,11 @@ contract IDStaking is Staking, EIP712, Ownable {
 
     // stakeUser
     function stakeUsers(
-        bytes calldata signature,
-        string calldata nonce,
-        uint256 timestamp,
         uint256 roundId,
         address[] calldata users,
         uint256[] calldata amounts
     ) external canStakeRound(roundId) {
         require(users.length == amounts.length, "Unequal users and amount");
-        require(timestamp > block.timestamp, "Signature timestamp is expired");
-
-        // TODO : validate signature here
-        bytes32 digest = _hashTypedDataV4(
-            keccak256(
-                abi.encode(
-                    keccak256(
-                        "Data(string nonce,uint256 timestamp,address user)"
-                    ),
-                    keccak256(bytes(nonce)),
-                    timestamp,
-                    msg.sender
-                )
-            )
-        );
-
-        require(!usedDigest[digest], "This signature has been used");
-
-        address signer = ECDSA.recover(digest, signature);
-
-        require(signer == trustedSigner, "Signature not from a trusted signer");
-
-        usedDigest[digest] = true;
 
         uint256 totalAmount;
 

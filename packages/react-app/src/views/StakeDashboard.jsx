@@ -63,8 +63,7 @@ function StakeDashboard({
       if (userSigner) {
         const newAddress = await userSigner.getAddress();
         const newPassport = await reader.getPassport(newAddress);
-        const hasPassport = newPassport && newPassport.expiryDate && newPassport.issuanceDate;
-        if (!hasPassport) {
+        if (!newPassport) {
           navigate("/");
           setLoggedIn(false);
         }
@@ -243,22 +242,25 @@ function StakeDashboard({
                 </h2>
               </div>
 
-              <div className="flex-grow mt-4">
-                <p className="leading-relaxed text-base text-left">
-                  In order to prevent users from sybil attacking through staking their GTC and moving it across multiple
-                  passports during a Grants Round, all GTC staked is locked through the duration of Grants Round 15.
-                </p>
-                <div className="mt-3 border-t border-divider">
-                  <a
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    href="https://gitcoin.notion.site/About-Staking-on-Grants-Round-15-768f88d430ff4335ba23b17876b6e981"
-                    className="mt-3 text-indigo-500 inline-flex items-center"
-                  >
-                    More Info
-                  </a>
+              {roundEnded && (
+                <div className="flex-grow mt-4">
+                  <p className="leading-relaxed text-base text-left">
+                    In order to prevent users from sybil attacking through staking their GTC and moving it across
+                    multiple passports during a Grants Round, all GTC staked is locked through the duration of the
+                    current Grants Round.
+                  </p>
+                  <div className="mt-3 border-t border-divider">
+                    <a
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      href="https://gitcoin.notion.site/About-Staking-on-Grants-Round-15-768f88d430ff4335ba23b17876b6e981"
+                      className="mt-3 text-indigo-500 inline-flex items-center"
+                    >
+                      More Info
+                    </a>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </aside>
         </div>

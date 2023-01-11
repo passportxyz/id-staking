@@ -40,7 +40,7 @@ export default function Account({
   const { currentTheme } = useThemeSwitcher();
   const [openNavDrawer, setOpenNavDrawer] = useState(false);
   let accountButtonInfo;
-  if (web3Modal?.cachedProvider && passport.expiryDate && passport.issuanceDate) {
+  if (web3Modal?.cachedProvider && passport) {
     accountButtonInfo = { name: "Logout", action: logoutOfWeb3Modal };
   } else {
     accountButtonInfo = { name: "Connect Wallet", action: loadWeb3Modal };
@@ -95,7 +95,7 @@ export default function Account({
                 >
                   <img src={"./passportLogo.svg"} alt={"Passport Navbar Badge"} className="mr-2 h-6" /> Gitcoin Passport{" "}
                   <img
-                    src={passport?.expiryDate && passport?.issuanceDate ? "./greenEllipse.svg" : "./redEllipse.svg"}
+                    src={passport ? "./greenEllipse.svg" : "./redEllipse.svg"}
                     alt="passport status dot"
                     className="ml-2"
                   />
@@ -157,7 +157,7 @@ export default function Account({
                       <img src={"./passportLogo.svg"} alt={"Passport Navbar Badge"} className="mr-2 h-6" /> Gitcoin
                       Passport{" "}
                       <img
-                        src={passport?.expiryDate && passport?.issuanceDate ? "./greenEllipse.svg" : "./redEllipse.svg"}
+                        src={passport ? "./greenEllipse.svg" : "./redEllipse.svg"}
                         alt="passport status dot"
                         className="ml-2"
                       />

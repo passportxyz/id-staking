@@ -379,21 +379,6 @@
   {
     "inputs": [
       {
-        "internalType": "bytes",
-        "name": "signature",
-        "type": "bytes"
-      },
-      {
-        "internalType": "string",
-        "name": "nonce",
-        "type": "string"
-      },
-      {
-        "internalType": "uint256",
-        "name": "timestamp",
-        "type": "uint256"
-      },
-      {
         "internalType": "uint256",
         "name": "roundId",
         "type": "uint256"

@@ -35,17 +35,16 @@ function Home({
   const navigate = useNavigate();
   const { address, loggedIn, setLoggedIn } = useContext(Web3Context);
 
-  // Update Passport on address change
-  const reader = new PassportReader();
-
   // Route user to dashboard when wallet is connected
   useEffect(() => {
     async function getPassport() {
       if (userSigner) {
+        // Update Passport on address change
+        const reader = new PassportReader();
+
         const newAddress = await userSigner.getAddress();
         const newPassport = await reader.getPassport(newAddress);
-        const hasPassport = newPassport && newPassport.expiryDate && newPassport.issuanceDate;
-        if (web3Modal?.cachedProvider && hasPassport) {
+        if (web3Modal?.cachedProvider && newPassport) {
           navigate("/StakeDashboard");
           setLoggedIn(true);
         } else if (!loggedIn) {

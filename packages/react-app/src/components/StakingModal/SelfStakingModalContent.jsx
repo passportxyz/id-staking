@@ -41,7 +41,7 @@ export default function CommunityStakingModalContent({
   // Modal button should be hidden if user already approved tokens
   useEffect(() => {
     const refreshApprovalStatus = async () => {
-      if (address && readContracts?.Token) {
+      if (address && readContracts?.Token && readContracts?.IDStaking) {
         const readUpdate = readContracts?.Token;
         const decimals = await readUpdate?.decimals();
         const allowance = await readUpdate?.allowance(address, readContracts?.IDStaking?.address);
