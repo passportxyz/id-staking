@@ -166,26 +166,6 @@ export default function CommunityStakingModalContent({
   };
 
   const stakeUsers = async (id, amounts, users) => {
-    let data = {};
-
-    try {
-      const res = await axios({
-        method: "POST",
-        url: "https://id-staking-passport-api.vercel.app/api/passport/reader",
-        data: {
-          address,
-          domainChainId: targetNetwork.chainId,
-        },
-      });
-      data = res.data;
-    } catch (e) {
-      notification.open({
-        message: "Staking unsuccessful",
-        description: `Error: ${e.message}`,
-      });
-      return null;
-    }
-
     tx(writeContracts.IDStaking.stakeUsers(id + "", users, amounts));
   };
 
