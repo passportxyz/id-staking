@@ -3,22 +3,23 @@
 const { ethers } = require("hardhat");
 
 const localChainId = "31337";
+const mainnetChainId = "1";
 
 module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
   const { deploy } = deployments;
   const { deployer } = await getNamedAccounts();
   const chainId = await getChainId();
 
-  const { ADMIN_ADDRESS, TRUSTED_SIGNER_ADDRESS, USER_ADDRESS } = process.env;
+  const { ADMIN_ADDRESS, USER_ADDRESS } = process.env;
 
-  if (!ADMIN_ADDRESS || !TRUSTED_SIGNER_ADDRESS) {
-    throw Error(
-      "Must define ADMIN_ADDRESS and TRUSTED_SIGNER_ADDRESS in the env"
-    );
+  if (!ADMIN_ADDRESS) {
+    throw Error("Must define ADMIN_ADDRESS in the env");
   }
 
   let TokenDeployment;
-  if (chainId === localChainId) {
+  if (chainId === mainnetChainId) {
+    TokenDeployment = { address: "0xDe30da39c46104798bB5aA3fe8B9e0e1F348163F" };
+  } else {
     TokenDeployment = await deploy("Token", {
       from: deployer,
       log: true,
@@ -29,11 +30,9 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
       await Token.mint();
       await Token.transfer(USER_ADDRESS, ethers.utils.parseEther("100"));
     }
-  } else {
-    TokenDeployment = { address: "0xDe30da39c46104798bB5aA3fe8B9e0e1F348163F" };
   }
 
-  const stakingArgs = [TokenDeployment.address, TRUSTED_SIGNER_ADDRESS];
+  const stakingArgs = [TokenDeployment.address];
 
   await deploy("IDStaking", {
     // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
@@ -45,7 +44,8 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
 
   // Getting a previously deployed contract
   const IDStaking = await ethers.getContract("IDStaking", deployer);
-  await IDStaking.transferOwnership(ADMIN_ADDRESS);
+  await IDStaking.addAdmin(ADMIN_ADDRESS);
+  await IDStaking.removeAdmin(deployer);
 
   // Verify from the command line by running `yarn verify`
 

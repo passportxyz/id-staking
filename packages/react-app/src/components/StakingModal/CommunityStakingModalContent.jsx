@@ -186,7 +186,7 @@ export default function CommunityStakingModalContent({
       return null;
     }
 
-    tx(writeContracts.IDStaking.stakeUsers(data.signature, data.nonce, data.timestamp, id + "", users, amounts));
+    tx(writeContracts.IDStaking.stakeUsers(id + "", users, amounts));
   };
 
   // Allows the user to change stake amount
@@ -289,6 +289,7 @@ export default function CommunityStakingModalContent({
               <Button
                 loading={modalStatus === 4}
                 onClick={async () => {
+                  // TODO This code does not work as intended for updating existing lines. Refactor this
                   const amounts = Object.values(allStakeAmounts);
                   let copiedAddresses = allStakeAddresses;
                   let canStake = true;

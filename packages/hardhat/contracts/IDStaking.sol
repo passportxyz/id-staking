@@ -2,12 +2,12 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import {Staking} from "./Staking.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
 
-contract IDStaking is Staking, EIP712, Ownable {
+contract IDStaking is Staking, EIP712, AccessControl {
     uint256 public latestRound;
 
     // 0x7ba1e5E9d013EaE624D274bfbAC886459F291081
@@ -24,7 +24,6 @@ contract IDStaking is Staking, EIP712, Ownable {
     mapping(uint256 => Round) rounds;
     mapping(bytes32 => bool) usedDigest;
 
-    event signerUpdated(address signer);
     event roundCreated(uint256 id);
     event selfStake(
         uint256 roundId,
@@ -69,24 +68,26 @@ contract IDStaking is Staking, EIP712, Ownable {
         _;
     }
 
-    constructor(IERC20 _token, address _trustedSigner)
+    constructor(IERC20 _token)
         EIP712("IDStaking", "1.0")
     {
+        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         token = _token;
-        updateSigner(_trustedSigner);
     }
 
-    function updateSigner(address signer) public onlyOwner {
-        trustedSigner = signer;
+    function addAdmin(address admin) public {
+        grantRole(DEFAULT_ADMIN_ROLE, admin);
+    }
 
-        emit signerUpdated(signer);
+    function removeAdmin(address admin) public {
+        revokeRole(DEFAULT_ADMIN_ROLE, admin);
     }
 
     function createRound(
         uint256 start,
         uint256 duration,
         string calldata meta
-    ) external onlyOwner {
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         if (latestRound > 0) {
             require(
                 start >

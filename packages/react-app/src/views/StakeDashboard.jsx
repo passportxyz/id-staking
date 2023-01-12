@@ -153,10 +153,7 @@ function StakeDashboard({
       {/* Grants Round Header */}
       <main className="container flex flex-1 flex-col px-8 md:mx-auto pb-10">
         <div className="mt-8">
-          <p className="mb-0 text-3xl text-left">
-            Gitcoin Round {roundInView ? STARTING_GRANTS_ROUND + roundInView : "Not Found"}{" "}
-            {/*{round} of {latestRound}*/}
-          </p>
+          <p className="mb-0 text-3xl text-left">Gitcoin Grants Alpha Round</p>
           {roundInView ? (
             <p className="text-base text-left mb-4">
               {moment.unix((start || zero).toString()).format("MMMM Do YYYY (h:mm:ss a)")} {" - "}
@@ -232,17 +229,17 @@ function StakeDashboard({
                 </div>
               </div>
             </div>
-            <div className="border border-asideBorder px-4 py-6 rounded-lg mt-6 bg-asideBG">
-              <div className="flex flex-row items-center">
-                <div className="w-10 h-10 inline-flex items-center justify-center rounded-full bg-indigo-100 text-indigo-500 flex-shrink-0">
-                  <LockOutlined style={{ fontSize: "25px" }} />
+            {roundEnded && (
+              <div className="border border-asideBorder px-4 py-6 rounded-lg mt-6 bg-asideBG">
+                <div className="flex flex-row items-center">
+                  <div className="w-10 h-10 inline-flex items-center justify-center rounded-full bg-indigo-100 text-indigo-500 flex-shrink-0">
+                    <LockOutlined style={{ fontSize: "25px" }} />
+                  </div>
+                  <h2 className="text-gray-900 text-md text-left ml-4 mb-0">
+                    Stakings are locked through the duration of the Round.
+                  </h2>
                 </div>
-                <h2 className="text-gray-900 text-md text-left ml-4 mb-0">
-                  Stakings are locked through the duration of the Round.
-                </h2>
-              </div>
 
-              {roundEnded && (
                 <div className="flex-grow mt-4">
                   <p className="leading-relaxed text-base text-left">
                     In order to prevent users from sybil attacking through staking their GTC and moving it across
@@ -260,8 +257,8 @@ function StakeDashboard({
                     </a>
                   </div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </aside>
         </div>
       </main>
