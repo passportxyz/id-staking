@@ -27,8 +27,10 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
     });
     if (USER_ADDRESS) {
       const Token = await ethers.getContract("Token", deployer);
-      await Token.mint();
-      await Token.transfer(USER_ADDRESS, ethers.utils.parseEther("100"));
+      let tx = await Token.mint();
+      await tx.wait();
+      tx = await Token.transfer(USER_ADDRESS, ethers.utils.parseEther("100"));
+      await tx.wait();
     }
   }
 
@@ -44,7 +46,8 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
 
   // Getting a previously deployed contract
   const IDStaking = await ethers.getContract("IDStaking", deployer);
-  await IDStaking.addAdmin(ADMIN_ADDRESS);
+  const tx = await IDStaking.addAdmin(ADMIN_ADDRESS);
+  await tx.wait();
   await IDStaking.removeAdmin(deployer);
 
   // Verify from the command line by running `yarn verify`
