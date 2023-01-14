@@ -155,13 +155,17 @@ function StakeDashboard({
         <div className="mt-8">
           <p className="mb-0 text-3xl text-left">Gitcoin Grants Alpha Round</p>
           {roundInView ? (
-            <p className="text-base text-left mb-4">
+            <p className="text-base text-left mb-0">
               {moment.unix((start || zero).toString()).format("MMMM Do YYYY (h:mm:ss a)")} {" - "}
               {roundEndTimestamp.format("MMMM Do YYYY (h:mm:ss a)")}
             </p>
           ) : (
             <></>
           )}
+          <p className="text-base text-left mb-0">
+            Staking only affects your Passport score when GTC is staked for an active round
+          </p>
+          <p className="text-base text-left mb-4">Once the round completes, GTC may be unstaked</p>
         </div>
         <div className="flex flex-1 md:flex-row flex-col">
           <section className="w-full border-t mr-8 mb-2">
