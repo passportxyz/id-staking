@@ -128,7 +128,7 @@ function StakeDashboard({
     setTimeout(() => {
       getData();
       setPending(false);
-    }, 5000);
+    }, 7000);
   };
 
   const roundEndTimestamp = moment.unix((start || zero).add(duration || zero).toString());
@@ -183,7 +183,7 @@ function StakeDashboard({
             className="rounded-sm rounded bg-purple-connectPurple py-2 px-10 text-white"
             style={{ backgroundColor: "#6F3FF5", color: "white" }}
           >
-            ↻ {pending ? "Pending Transaction..." : "Refresh Data"}
+            ↻ {pending ? "Pending Transaction Finality..." : "Refresh Data"}
           </Button>
         </div>
         <div className="flex flex-1 md:flex-row flex-col">

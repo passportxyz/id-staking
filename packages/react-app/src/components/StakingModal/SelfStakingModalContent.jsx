@@ -3,7 +3,6 @@ import { Button, Modal, Input, notification } from "antd";
 import { ethers } from "ethers";
 import Loading from "../Loading";
 import { getSelfStakeAmount } from "./utils";
-import { FieldTimeOutlined } from "@ant-design/icons";
 
 export default function CommunityStakingModalContent({
   roundData,
