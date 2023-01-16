@@ -14,18 +14,17 @@ export const STARTING_GRANTS_ROUND = 14;
 
 const Rounds = ({
   tx,
-  tokenSymbol,
   address,
   readContracts,
   writeContracts,
   migrate,
   round,
-  latestRound,
   roundEnded,
   mainnetProvider,
   userSigner,
   targetNetwork,
   roundData,
+  handleStakingTransaction,
 }) => {
   // Set to visibility of Staking Modal
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -86,6 +85,7 @@ const Rounds = ({
         round={round}
         targetNetwork={targetNetwork}
         mainnetProvider={mainnetProvider}
+        handleStakingTransaction={handleStakingTransaction}
       />
     </>
   );

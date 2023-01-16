@@ -3,10 +3,18 @@ import React, { useState } from "react";
 
 import { utils } from "ethers";
 
-export default function TokenBalance({ contracts, name, address, balance, dollarMultiplier, img }) {
+export default function TokenBalance({
+  contracts,
+  contractName,
+  displayName,
+  address,
+  balance,
+  dollarMultiplier,
+  img,
+}) {
   const [dollarMode, setDollarMode] = useState(true);
 
-  const tokenContract = contracts && contracts[name];
+  const tokenContract = contracts && contracts[contractName];
   const getBalance = useTokenBalance(tokenContract, address);
 
   let floatBalance = parseFloat("0.00");
@@ -41,9 +49,9 @@ export default function TokenBalance({ contracts, name, address, balance, dollar
         setDollarMode(!dollarMode);
       }}
     >
-      <img src={img} alt={name} className="mr-2 h-6" />{" "}
+      <img src={img} alt={displayName} className="mr-2 h-6" />{" "}
       <span className="text-black">
-        {displayBalance} {name}
+        {displayBalance} {displayName}
       </span>
     </span>
   );

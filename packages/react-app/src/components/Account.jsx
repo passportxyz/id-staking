@@ -81,7 +81,8 @@ export default function Account({
                 <TokenBalance
                   contracts={readContracts}
                   img={"./gtcTokenLogo.svg"}
-                  name={"GTC"}
+                  contractName={"Token"}
+                  displayName={"GTC"}
                   address={address}
                   dollarMultiplier={null}
                 />
@@ -107,15 +108,13 @@ export default function Account({
                 </span>
               </div>
               <div>
-                {
-                  <NetworkDisplay
-                    NETWORKCHECK={NETWORKCHECK}
-                    localChainId={localChainId}
-                    selectedChainId={selectedChainId}
-                    targetNetwork={targetNetwork}
-                    USE_NETWORK_SELECTOR={USE_NETWORK_SELECTOR}
-                  />
-                }
+                <NetworkDisplay
+                  NETWORKCHECK={NETWORKCHECK}
+                  localChainId={localChainId}
+                  selectedChainId={selectedChainId}
+                  targetNetwork={targetNetwork}
+                  USE_NETWORK_SELECTOR={USE_NETWORK_SELECTOR}
+                />
               </div>
             </>
             <div className="md:hidden inline-flex">

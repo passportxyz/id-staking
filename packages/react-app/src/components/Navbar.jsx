@@ -6,9 +6,6 @@ import { Web3Context } from "../helpers/Web3Context";
 export default function Navbar({
   networkOptions,
   readContracts,
-  selectedNetwork,
-  setSelectedNetwork,
-  yourLocalBalance,
   USE_NETWORK_SELECTOR,
   localProvider,
   targetNetwork,

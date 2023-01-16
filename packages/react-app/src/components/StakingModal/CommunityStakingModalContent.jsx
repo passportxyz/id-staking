@@ -51,6 +51,7 @@ export default function CommunityStakingModalContent({
   round,
   mainnetProvider,
   targetNetwork,
+  handleStakingTransaction,
 }) {
   const [loading, setLoading] = useState(true);
   const [modalStatus, setModalStatus] = useState(1);
@@ -166,7 +167,8 @@ export default function CommunityStakingModalContent({
   };
 
   const stakeUsers = async (id, amounts, users) => {
-    tx(writeContracts.IDStaking.stakeUsers(id + "", users, amounts));
+    const stakeTx = tx(writeContracts.IDStaking.stakeUsers(id + "", users, amounts));
+    handleStakingTransaction(stakeTx);
   };
 
   // Allows the user to change stake amount

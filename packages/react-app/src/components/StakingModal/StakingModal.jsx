@@ -15,6 +15,7 @@ export default function StakingModal({
   round,
   mainnetProvider,
   targetNetwork,
+  handleStakingTransaction,
 }) {
   return (
     <div>
@@ -29,6 +30,7 @@ export default function StakingModal({
           setIsModalVisible={setIsModalVisible}
           userSigner={userSigner}
           round={round}
+          handleStakingTransaction={handleStakingTransaction}
         />
       )}
       {stakingType === "community" && (
@@ -44,6 +46,7 @@ export default function StakingModal({
           round={round}
           mainnetProvider={mainnetProvider}
           targetNetwork={targetNetwork}
+          handleStakingTransaction={handleStakingTransaction}
         />
       )}
     </div>

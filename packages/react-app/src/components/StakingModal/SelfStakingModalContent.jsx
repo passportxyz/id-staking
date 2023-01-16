@@ -3,6 +3,7 @@ import { Button, Modal, Input, notification } from "antd";
 import { ethers } from "ethers";
 import Loading from "../Loading";
 import { getSelfStakeAmount } from "./utils";
+import { FieldTimeOutlined } from "@ant-design/icons";
 
 export default function CommunityStakingModalContent({
   roundData,
@@ -13,6 +14,7 @@ export default function CommunityStakingModalContent({
   isModalVisible,
   setIsModalVisible,
   round,
+  handleStakingTransaction,
 }) {
   const [stakeAmount, setStakeAmount] = useState("0.00");
   const [modalStatus, setModalStatus] = useState(1);
@@ -93,7 +95,8 @@ export default function CommunityStakingModalContent({
   };
 
   const stake = async (id, amount) => {
-    tx(writeContracts.IDStaking.stake(id + "", ethers.utils.parseUnits(amount)));
+    const stakeTx = tx(writeContracts.IDStaking.stake(id + "", ethers.utils.parseUnits(amount)));
+    handleStakingTransaction(stakeTx);
   };
 
   const handleCancel = () => {

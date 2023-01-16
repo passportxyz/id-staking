@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
+import { Button } from "antd";
 import { useContractReader } from "eth-hooks";
 import { ethers } from "ethers";
 import { Select } from "antd";
@@ -6,7 +7,7 @@ import { Rounds, Navbar } from "../components";
 import { STARTING_GRANTS_ROUND } from "../components/Rounds";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
-import { gql, useQuery } from "@apollo/client";
+import { gql, useLazyQuery } from "@apollo/client";
 import { UsergroupAddOutlined, LockOutlined } from "@ant-design/icons";
 
 import { getAmountStakedOnMe } from "../components/StakingModal/utils";
@@ -46,7 +47,10 @@ function StakeDashboard({
   loadWeb3Modal,
   blockExplorer,
 }) {
-  const { roundInView, setRoundInView, loggedIn, setLoggedIn } = useContext(Web3Context);
+  const [pending, setPending] = useState(false);
+
+  // Round in view is actually not currently set dynamically
+  const { roundInView, setLoggedIn } = useContext(Web3Context);
   const navigate = useNavigate();
   // Route user to dashboard when wallet is connected
   useEffect(() => {
@@ -72,15 +76,8 @@ function StakeDashboard({
     getPassport();
   }, [address]);
 
-  const [start, duration, tvl] = useContractReader(readContracts, "IDStaking", "fetchRoundMeta", [roundInView]) || [];
-
-  const tokenBalance = ethers.utils.formatUnits(
-    useContractReader(readContracts, "Token", "balanceOf", [address]) || zero,
-  );
-  const tokenSymbol = useContractReader(readContracts, "Token", "symbol");
-  const latestRound = (useContractReader(readContracts, "IDStaking", "latestRound", []) || zero).toNumber();
-
-  const rounds = [...Array(latestRound).keys()].map(i => i + 1).reverse();
+  const [start, duration, tvl] =
+    useContractReader(readContracts, "IDStaking", "fetchRoundMeta", [roundInView], 1000000) || [];
 
   const mintToken = async () => {
     tx(writeContracts.Token.mintAmount(ethers.utils.parseUnits("1000")));
@@ -114,13 +111,25 @@ function StakeDashboard({
   }
 `);
 
-  const { loading, data, error } = useQuery(query, {
-    pollInterval: 2500,
+  const [getData, { loading, data, error }] = useLazyQuery(query, {
     variables: {
       address: address.toLowerCase(),
       round: roundInView,
     },
+    fetchPolicy: "network-only",
   });
+
+  useEffect(() => address && getData(), [getData, address]);
+
+  const awaitTransactionThenRefreshData = async asyncFunc => {
+    setPending(true);
+    await asyncFunc;
+    // Wait for subgraph to update
+    setTimeout(() => {
+      getData();
+      setPending(false);
+    }, 5000);
+  };
 
   const roundEndTimestamp = moment.unix((start || zero).add(duration || zero).toString());
   const roundEnded = moment().unix() >= roundEndTimestamp.unix();
@@ -152,20 +161,30 @@ function StakeDashboard({
 
       {/* Grants Round Header */}
       <main className="container flex flex-1 flex-col px-8 md:mx-auto pb-10">
-        <div className="mt-8">
-          <p className="mb-0 text-3xl text-left">Gitcoin Grants Alpha Round</p>
-          {roundInView ? (
+        <div className="mt-8 flex items-center justify-between">
+          <div>
+            <p className="mb-0 text-3xl text-left">Gitcoin Grants Alpha Round</p>
+            {roundInView ? (
+              <p className="text-base text-left mb-0">
+                {moment.unix((start || zero).toString()).format("MMMM Do YYYY (h:mm:ss a)")} {" - "}
+                {roundEndTimestamp.format("MMMM Do YYYY (h:mm:ss a)")}
+              </p>
+            ) : (
+              <></>
+            )}
             <p className="text-base text-left mb-0">
-              {moment.unix((start || zero).toString()).format("MMMM Do YYYY (h:mm:ss a)")} {" - "}
-              {roundEndTimestamp.format("MMMM Do YYYY (h:mm:ss a)")}
+              Staking only affects your Passport score when GTC is staked for an active round
             </p>
-          ) : (
-            <></>
-          )}
-          <p className="text-base text-left mb-0">
-            Staking only affects your Passport score when GTC is staked for an active round
-          </p>
-          <p className="text-base text-left mb-4">Once the round completes, GTC may be unstaked</p>
+            <p className="text-base text-left mb-4">Once the round completes, GTC may be unstaked</p>
+          </div>
+          <Button
+            disabled={pending}
+            onClick={getData}
+            className="rounded-sm rounded bg-purple-connectPurple py-2 px-10 text-white"
+            style={{ backgroundColor: "#6F3FF5", color: "white" }}
+          >
+            ↻ {pending ? "Pending Transaction..." : "Refresh Data"}
+          </Button>
         </div>
         <div className="flex flex-1 md:flex-row flex-col">
           <section className="w-full border-t mr-8 mb-2">
@@ -179,14 +198,13 @@ function StakeDashboard({
                     address={address}
                     migrate={migrate}
                     roundEnded={roundEnded}
-                    latestRound={latestRound}
-                    tokenSymbol={tokenSymbol}
                     readContracts={readContracts}
                     writeContracts={writeContracts}
                     mainnetProvider={mainnetProvider}
                     userSigner={userSigner}
                     targetNetwork={targetNetwork}
                     roundData={data}
+                    handleStakingTransaction={awaitTransactionThenRefreshData}
                   />
                 )}
               </div>
