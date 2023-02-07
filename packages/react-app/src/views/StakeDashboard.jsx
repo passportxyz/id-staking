@@ -62,18 +62,20 @@ function StakeDashboard({
   // Logout user if they do not have a passport
   // Route user to dashboard when wallet is connected
   useEffect(() => {
-    console.log("wallet changed");
-    async function getPassport() {
-      if (userSigner) {
-        const newAddress = await userSigner.getAddress();
-        const newPassport = await reader.getPassport(newAddress);
-        if (!newPassport) {
-          navigate("/");
-          setLoggedIn(false);
+    if (process.env.REACT_APP_REQUIRE_USER_HAS_PASSPORT === "true") {
+      console.log("wallet changed");
+      async function getPassport() {
+        if (userSigner) {
+          const newAddress = await userSigner.getAddress();
+          const newPassport = await reader.getPassport(newAddress);
+          if (!newPassport) {
+            navigate("/");
+            setLoggedIn(false);
+          }
         }
       }
+      getPassport();
     }
-    getPassport();
   }, [address]);
 
   const [start, duration, tvl] =

@@ -39,19 +39,23 @@ function Home({
   useEffect(() => {
     async function getPassport() {
       if (userSigner) {
-        // Update Passport on address change
-        const reader = new PassportReader();
+        if (process.env.REACT_APP_REQUIRE_USER_HAS_PASSPORT === "true") {
+          // Update Passport on address change
+          const reader = new PassportReader();
 
-        const newAddress = await userSigner.getAddress();
-        let newPassport;
-        try {
-          newPassport = await reader.getPassport(newAddress);
-        } catch {}
-        if (web3Modal?.cachedProvider && newPassport) {
+          const newAddress = await userSigner.getAddress();
+          let newPassport;
+          try {
+            newPassport = await reader.getPassport(newAddress);
+          } catch {}
+          if (web3Modal?.cachedProvider && newPassport) {
+            navigate("/StakeDashboard");
+            setLoggedIn(true);
+          } else if (!loggedIn) {
+            showModal();
+          }
+        } else {
           navigate("/StakeDashboard");
-          setLoggedIn(true);
-        } else if (!loggedIn) {
-          showModal();
         }
       }
     }
