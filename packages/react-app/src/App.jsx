@@ -115,17 +115,20 @@ function App(props) {
   }, [targetNetwork]);
 
   useEffect(() => {
-    async function getAddress() {
+    (async () => {
       if (userSigner) {
         const newAddress = await userSigner.getAddress();
         setAddress(newAddress);
-        const newPassport = await reader.getPassport(newAddress);
-        setPassport(newPassport);
+        if (process.env.REACT_APP_REQUIRE_USER_HAS_PASSPORT === "true") {
+          const newPassport = await reader.getPassport(newAddress);
+          setPassport(newPassport);
+        } else {
+          setPassport({});
+        }
       } else {
         setPassport({});
       }
-    }
-    getAddress();
+    })();
   }, [userSigner]);
 
   // You can warn the user if you would like them to be on a specific network
