@@ -11,6 +11,7 @@ import { gql, useLazyQuery } from "@apollo/client";
 import { UsergroupAddOutlined, LockOutlined } from "@ant-design/icons";
 
 import { getAmountStakedOnMe } from "../components/StakingModal/utils";
+import RoundSelector from "../components/RoundSelector";
 
 import { Web3Context } from "../helpers/Web3Context";
 
@@ -190,6 +191,7 @@ function StakeDashboard({
         </div>
         <div className="flex flex-1 md:flex-row flex-col">
           <section className="w-full border-t mr-8 mb-2">
+            <RoundSelector />
             <div className="py-2 mt-6 w-full">
               <div className="text-gray-600 body-font w-full">
                 {roundInView && (
