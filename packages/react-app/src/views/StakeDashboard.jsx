@@ -165,7 +165,7 @@ function StakeDashboard({
       <main className="container flex flex-1 flex-col px-8 md:mx-auto pb-10">
         <div className="mt-8 flex items-center justify-between">
           <div>
-            <p className="mb-0 text-3xl text-left">Gitcoin Grants Alpha Round</p>
+            <p className="mb-0 text-3xl text-left">Gitcoin Grants Beta Round</p>
             {roundInView ? (
               <p className="text-base text-left mb-0">
                 {moment.unix((start || zero).toString()).format("MMMM Do YYYY (h:mm:ss a)")} {" - "}
@@ -286,6 +286,21 @@ function StakeDashboard({
           </aside>
         </div>
       </main>
+            <footer className="p-4 mt-4 text-center">
+        {readContracts && readContracts.IDStaking && (
+          <p>
+            Identity Staking Contract:{" "}
+            <a
+              href={`${blockExplorer}/address/${readContracts.IDStaking.address}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 underline"
+            >
+              {readContracts.IDStaking.address}
+            </a>
+          </p>
+        )}
+      </footer>
     </>
   );
 }
