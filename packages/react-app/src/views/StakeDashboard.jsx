@@ -78,7 +78,7 @@ function StakeDashboard({
     }
   }, [address]);
 
-  const [start, duration, tvl] =
+  const [start, duration, _tvl, meta] =
     useContractReader(readContracts, "IDStaking", "fetchRoundMeta", [roundInView], 1000000) || [];
 
   const mintToken = async () => {
@@ -137,7 +137,7 @@ function StakeDashboard({
   const roundEnded = moment().unix() >= roundEndTimestamp.unix();
 
   return (
-    <>
+    <div className="min-h-screen flex flex-col">
       <Navbar
         readContracts={readContracts}
         networkOptions={networkOptions}
@@ -165,7 +165,7 @@ function StakeDashboard({
       <main className="container flex flex-1 flex-col px-8 md:mx-auto pb-10">
         <div className="mt-8 flex items-center justify-between">
           <div>
-            <p className="mb-0 text-3xl text-left">Gitcoin Grants Beta Round</p>
+            <p className="mb-0 text-3xl text-left">Gitcoin Grants {meta} Round</p>
             {roundInView ? (
               <p className="text-base text-left mb-0">
                 {moment.unix((start || zero).toString()).format("MMMM Do YYYY (h:mm:ss a)")} {" - "}
@@ -182,7 +182,7 @@ function StakeDashboard({
           <Button
             disabled={pending}
             onClick={getData}
-            className="rounded-sm rounded bg-purple-connectPurple py-2 px-10 text-white"
+            className="rounded-sm bg-purple-connectPurple py-2 px-10 text-white"
             style={{ backgroundColor: "#6F3FF5", color: "white" }}
           >
             ↻ {pending ? "Pending Transaction Finality..." : "Refresh Data"}
@@ -286,7 +286,7 @@ function StakeDashboard({
           </aside>
         </div>
       </main>
-            <footer className="p-4 mt-4 text-center">
+      <footer className="p-4 mt-4 text-center h-16">
         {readContracts && readContracts.IDStaking && (
           <p>
             Identity Staking Contract:{" "}
@@ -301,7 +301,7 @@ function StakeDashboard({
           </p>
         )}
       </footer>
-    </>
+    </div>
   );
 }
 

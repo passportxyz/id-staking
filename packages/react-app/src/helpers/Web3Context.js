@@ -1,12 +1,14 @@
 import React, { useState, useMemo, createContext } from "react";
 
+const CURRENT_ROUND = process.env.REACT_APP_CURRENT_ROUND || 1;
+
 // Context starting state
 const startingState = {
   setAddress: string => {},
   address: undefined,
   currentNetwork: "",
   setCurrentNetwork: () => {},
-  roundInView: 1,
+  roundInView: CURRENT_ROUND,
   setRoundInView: () => {},
   setLoggedIn: boolean => {},
   loggedIn: false,
@@ -18,20 +20,9 @@ export const Web3Context = createContext(startingState);
 export function Web3Provider({ children, network = "localhost", DEBUG = false, NETWORKCHECK = true, ...props }) {
   const [address, setAddress] = useState("");
   const [currentNetwork, setCurrentNetwork] = useState("");
-  const [roundInView, setRoundInView] = useState(1);
+  const [roundInView, setRoundInView] = useState(CURRENT_ROUND);
   const [loggedIn, setLoggedIn] = useState(false);
 
-  const stateMemo = useMemo(
-    () => ({
-      address,
-      currentNetwork,
-      roundInView,
-      loggedIn,
-    }),
-    [address, currentNetwork, roundInView, loggedIn],
-  );
-
-  // use props as a way to pass configuration values
   const providerProps = {
     address,
     setAddress,
