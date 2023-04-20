@@ -49,6 +49,9 @@ function StakeDashboard({
   blockExplorer,
 }) {
   const [pending, setPending] = useState(false);
+  const [start, setStart] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [name, setName] = useState("");
 
   // Round in view is actually not currently set dynamically
   const { roundInView, setLoggedIn } = useContext(Web3Context);
@@ -79,8 +82,18 @@ function StakeDashboard({
     }
   }, [address]);
 
-  const [start, duration, _tvl, meta] =
-    useContractReader(readContracts, "IDStaking", "fetchRoundMeta", [roundInView], 1000000) || [];
+  useEffect(
+    () =>
+      (async () => {
+        if (roundInView && readContracts?.IDStaking) {
+          const [start, duration, _tvl, meta] = await readContracts.IDStaking.fetchRoundMeta(roundInView);
+          setStart(start);
+          setDuration(duration);
+          setName(meta);
+        }
+      })(),
+    [roundInView, readContracts?.IDStaking],
+  );
 
   const mintToken = async () => {
     tx(writeContracts.Token.mintAmount(ethers.utils.parseUnits("1000")));
@@ -122,7 +135,7 @@ function StakeDashboard({
     fetchPolicy: "network-only",
   });
 
-  useEffect(() => address && getData(), [getData, address]);
+  useEffect(() => address && getData(), [getData, address, roundInView]);
 
   const awaitTransactionThenRefreshData = async asyncFunc => {
     setPending(true);
@@ -166,8 +179,8 @@ function StakeDashboard({
       <main className="container flex flex-1 flex-col px-8 md:mx-auto pb-10">
         <div className="mt-8 flex items-center justify-between">
           <div>
-            <p className="mb-0 text-3xl text-left">Gitcoin Grants {meta} Round</p>
-            {roundInView ? (
+            <p className="mb-0 text-3xl text-left">Gitcoin Grants {name} Round</p>
+            {roundInView && start ? (
               <p className="text-base text-left mb-0">
                 {moment.unix((start || zero).toString()).format("MMMM Do YYYY (h:mm:ss a)")} {" - "}
                 {roundEndTimestamp.format("MMMM Do YYYY (h:mm:ss a)")}
@@ -191,7 +204,6 @@ function StakeDashboard({
         </div>
         <div className="flex flex-1 md:flex-row flex-col">
           <section className="w-full border-t mr-8 mb-2">
-            <RoundSelector />
             <div className="py-2 mt-6 w-full">
               <div className="text-gray-600 body-font w-full">
                 {roundInView && (
@@ -255,22 +267,18 @@ function StakeDashboard({
                 </div>
               </div>
             </div>
-            {roundEnded && (
+            {roundEnded || (
               <div className="border border-asideBorder px-4 py-6 rounded-lg mt-6 bg-asideBG">
                 <div className="flex flex-row items-center">
                   <div className="w-10 h-10 inline-flex items-center justify-center rounded-full bg-indigo-100 text-indigo-500 flex-shrink-0">
                     <LockOutlined style={{ fontSize: "25px" }} />
                   </div>
-                  <h2 className="text-gray-900 text-md text-left ml-4 mb-0">
-                    Stakings are locked through the duration of the Round.
-                  </h2>
+                  <h2 className="text-gray-900 text-md text-left ml-4 mb-0">When can I unstake?</h2>
                 </div>
 
                 <div className="flex-grow mt-4">
                   <p className="leading-relaxed text-base text-left">
-                    In order to prevent users from sybil attacking through staking their GTC and moving it across
-                    multiple passports during a Grants Round, all GTC staked is locked through the duration of the
-                    current Grants Round.
+                    In order to prevent sybil attacks, staked GTC will be locked until the end of the round.
                   </p>
                   <div className="mt-3 border-t border-divider">
                     <a
@@ -289,6 +297,12 @@ function StakeDashboard({
         </div>
       </main>
       <footer className="p-4 mt-4 text-center h-16">
+        <div>
+          Viewing Stake for Round:
+          <span className="ml-2">
+            <RoundSelector />
+          </span>
+        </div>
         {readContracts && readContracts.IDStaking && (
           <p>
             Identity Staking Contract:{" "}
