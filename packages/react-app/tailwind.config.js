@@ -2,8 +2,7 @@ const colors = require("tailwindcss/colors");
 
 module.exports = {
   purge: {
-    content: ["./src/**/*.{js,jsx}", "./public/index.html"],
-
+    content: ["./src/components/**/*.jsx", "./src/views/**/*.jsx", "./src/*.jsx"],
     options: {},
   },
 
@@ -63,6 +62,7 @@ module.exports = {
       intro: "890px",
 
       "intro-mobile": "450px",
+      screen: "100vh",
     },
   },
 
