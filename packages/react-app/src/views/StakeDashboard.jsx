@@ -296,7 +296,7 @@ function StakeDashboard({
           </aside>
         </div>
       </main>
-      <footer className="p-4 mt-4 text-center h-16">
+      <footer className="p-4 mt-4 text-center">
         <div>
           Viewing Stake for Round:
           <span className="ml-2">
