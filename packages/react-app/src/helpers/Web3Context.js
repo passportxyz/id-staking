@@ -1,4 +1,4 @@
-import React, { useState, useMemo, createContext } from "react";
+import React, { useState, createContext } from "react";
 
 const CURRENT_ROUND = process.env.REACT_APP_CURRENT_ROUND || 1;
 
