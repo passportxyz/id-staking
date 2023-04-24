@@ -191,7 +191,7 @@ function App(props) {
   }, [loadWeb3Modal]);
 
   //intercom intergration app id
-  const INTERCOM_APP_ID = "xaafeyri"; //process.env.REACT_APP_INTERCOM_APP_ID || "";
+  const INTERCOM_APP_ID = process.env.REACT_APP_INTERCOM_APP_ID || "";
 
   //intercom widget integration
   useEffect(() => {
