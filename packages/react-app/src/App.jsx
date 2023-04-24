@@ -201,7 +201,7 @@ function App(props) {
         app_id: INTERCOM_APP_ID,
       };
       (function () {
-        var w: any = window;
+        var w = window;
         var ic = w.Intercom;
         if (typeof ic === "function") {
           ic("reattach_activator");
