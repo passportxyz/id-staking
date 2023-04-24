@@ -209,14 +209,10 @@ function App(props) {
         } else {
           var d = document;
           var i = function () {
-            // @ts-ignore
             i.c(arguments);
           };
-          // @ts-ignore
           i.q = [];
-          // @ts-ignore
           i.c = function (args) {
-            // @ts-ignore
             i.q.push(args);
           };
           w.Intercom = i;
