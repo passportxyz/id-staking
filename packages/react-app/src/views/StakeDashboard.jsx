@@ -259,7 +259,7 @@ function StakeDashboard({
                   <a
                     target="_blank"
                     rel="noopener noreferrer"
-                    href="https://passport.gitcoin.co/"
+                    href="https://support.gitcoin.co/gitcoin-knowledge-base/gitcoin-passport/identity-staking-questions#what-is-community-staking"
                     className="mt-3 text-indigo-500 inline-flex items-center"
                   >
                     More Info
