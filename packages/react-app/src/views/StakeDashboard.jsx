@@ -11,6 +11,7 @@ import { gql, useLazyQuery } from "@apollo/client";
 import { UsergroupAddOutlined, LockOutlined } from "@ant-design/icons";
 
 import { getAmountStakedOnMe } from "../components/StakingModal/utils";
+import StakingDoneNotificationModal from "../components/StakingModal/StakingDoneNotificationModal";
 import RoundSelector from "../components/RoundSelector";
 
 import { Web3Context } from "../helpers/Web3Context";
@@ -52,6 +53,7 @@ function StakeDashboard({
   const [start, setStart] = useState(0);
   const [duration, setDuration] = useState(0);
   const [name, setName] = useState("");
+  const [stakingDoneNotificationModalVisible, setStakingDoneNotificationModalVisible] = useState(false);
 
   // Round in view is actually not currently set dynamically
   const { roundInView, setLoggedIn } = useContext(Web3Context);
@@ -144,6 +146,8 @@ function StakeDashboard({
     setTimeout(() => {
       getData();
       setPending(false);
+      setStakingDoneNotificationModalVisible(true);
+      // Wait for subgraph to update
     }, 7000);
   };
 
@@ -175,6 +179,12 @@ function StakeDashboard({
         blockExplorer={blockExplorer}
       />
 
+      <StakingDoneNotificationModal
+        visible={stakingDoneNotificationModalVisible}
+        onClose={() => {
+          setStakingDoneNotificationModalVisible(false);
+        }}
+      />
       {/* Grants Round Header */}
       <main className="container flex flex-1 flex-col px-8 md:mx-auto pb-10">
         <div className="mt-8 flex items-center justify-between">
