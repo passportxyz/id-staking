@@ -69,7 +69,7 @@ export default function StakingDoneNotificationModal({ onClose, visible }) {
         <div className="flex flex-row justify-center">
           <div className="py-4 rounded-md font-libre-franklin text-center text-gray-500 text-lg">
             Please note that it might take up to five minutes for your staking activity to be recognized in the Passport
-            app and claim your stamp. We appreciate your patience!
+            app to allow you to claim your stamp. We appreciate your patience!
           </div>
         </div>
       </div>

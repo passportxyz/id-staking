@@ -88,10 +88,14 @@ function StakeDashboard({
     () =>
       (async () => {
         if (roundInView && readContracts?.IDStaking) {
-          const [start, duration, _tvl, meta] = await readContracts.IDStaking.fetchRoundMeta(roundInView);
-          setStart(start);
-          setDuration(duration);
-          setName(meta);
+          try {
+            const [start, duration, _tvl, meta] = await readContracts.IDStaking.fetchRoundMeta(roundInView);
+            setStart(start);
+            setDuration(duration);
+            setName(meta);
+          } catch (e) {
+            console.error(e);
+          }
         }
       })(),
     [roundInView, readContracts?.IDStaking],
