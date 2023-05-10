@@ -4,10 +4,10 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: IDStaking
-    network: mainnet
+    network: localhost
     source:
       abi: IDStaking
-      address: "0x0E3efD5BE54CC0f4C64e0D186b0af4b7F2A0e95F"
+      address: "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6

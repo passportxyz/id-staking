@@ -7,6 +7,7 @@ import UnstakeButton from "./UnstakeButton";
 
 const StakeItemCommunity = ({
   icon,
+  pending,
   title,
   roundEnded,
   description,
@@ -43,6 +44,7 @@ const StakeItemCommunity = ({
           <UnstakeButton amount={amount} handler={unstakeHandler} />
         ) : (
           <button
+            disabled={pending}
             onClick={buttonHandler}
             className="flex md:max-w-button w-full justify-center text-white text-center bg-purple-connectPurple border-0 py-2 focus:outline-none hover:bg-indigo-600 rounded-sm text-lg"
           >
