@@ -45,7 +45,7 @@ export default function CommonStakingModalContent({
       if (address && readContracts?.Token && readContracts?.IDStaking) {
         const adjustedAmount = ethers.utils.parseUnits(amount.toString() || "0", decimals);
         const allowance = await readContracts.Token.allowance(address, readContracts.IDStaking.address);
-        return allowance?.isZero() || allowance?.lt(adjustedAmount);
+        return !allowance || allowance.isZero() || allowance.lt(adjustedAmount);
       }
     },
     [readContracts.Token, readContracts.IDStaking, address],
@@ -72,7 +72,7 @@ export default function CommonStakingModalContent({
       footer={
         <Button
           onClick={async () => {
-            if (modalStatus === 2 || (await checkIfNeedsApprovalForAmount(getNewStakeAmount()))) {
+            if (await checkIfNeedsApprovalForAmount(getNewStakeAmount())) {
               setModalStatus(2);
               setButtonText("Approving... (Transaction 1 of 2)");
               await approve();
@@ -89,7 +89,6 @@ export default function CommonStakingModalContent({
 
             try {
               await onStake();
-              await new Promise(resolve => setTimeout(resolve, 3000));
             } finally {
               reset();
             }
