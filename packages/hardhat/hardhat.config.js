@@ -108,6 +108,12 @@ module.exports = {
         mnemonic: mnemonic(),
       },
     },
+    sepolia: {
+      url: `https://sepolia.infura.io/v3/${process.env.SEPOLIA_INFURA_KEY}`, // <---- YOUR INFURA ID! (or it won't work)
+      accounts: {
+        mnemonic: mnemonic(),
+      },
+    },
     xdai: {
       url: "https://rpc.xdaichain.com/",
       gasPrice: 1000000000,
@@ -319,6 +325,7 @@ module.exports = {
   etherscan: {
     apiKey: {
       mainnet: process.env.ETHERSCAN_KEY,
+      sepolia: process.env.ETHERSCAN_KEY,
       // add other network's API key here
     },
   },
