@@ -108,7 +108,7 @@ export default function CommunityStakingModalContent({
       )}
       renderStakeSummary={() => (
         <p className="mt-4">
-          You’ll be staking <span className="font-bold">{stakeAmount} GTC</span> on yourself.
+          You’ll be staking <span className="font-bold">{getNewStakeAmount()} GTC</span> on yourself.
         </p>
       )}
     />

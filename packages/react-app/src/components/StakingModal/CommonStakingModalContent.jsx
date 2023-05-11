@@ -27,15 +27,15 @@ export default function CommonStakingModalContent({
   
   1) Initial
   2) Approving
-  3) Staking
+  3) Stake
+  4) Staking
   */
 
   useEffect(
     () =>
       (async () => {
-        if (readContracts?.Token && readContracts?.IDStaking && address) {
+        if (readContracts?.Token && readContracts?.IDStaking && address)
           setDecimals(await readContracts.Token.decimals());
-        }
       })(),
     [readContracts.Token, readContracts.IDStaking, address],
   );
@@ -76,12 +76,16 @@ export default function CommonStakingModalContent({
               setModalStatus(2);
               setButtonText("Approving... (Transaction 1 of 2)");
               await approve();
+              setButtonText("Stake");
+              setModalStatus(3);
+              return;
+            } else if (modalStatus === 3) {
               setButtonText("Staking... (Transaction 2 of 2)");
             } else {
               setButtonText("Staking...");
             }
 
-            setModalStatus(3);
+            setModalStatus(4);
 
             try {
               await onStake();
@@ -91,7 +95,7 @@ export default function CommonStakingModalContent({
             }
           }}
           disabled={parseFloat(getTotalAmountStaked()) <= 0}
-          loading={modalStatus > 1}
+          loading={modalStatus === 2 || modalStatus === 4}
           style={{ backgroundColor: "#6F3FF5", color: "white" }}
         >
           {buttonText}
@@ -112,7 +116,7 @@ export default function CommonStakingModalContent({
           </div>
         )}
 
-        {modalStatus === 3 && (
+        {modalStatus >= 3 && (
           <div>
             {renderStakeSummary()}
             <div className="border-2 border-gray-200 px-4 py-6 rounded-lg bg-yellow-200 mt-4">
