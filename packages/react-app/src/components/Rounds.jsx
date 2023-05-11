@@ -18,6 +18,7 @@ const Rounds = ({
   readContracts,
   writeContracts,
   migrate,
+  pending,
   round,
   roundEnded,
   mainnetProvider,
@@ -42,6 +43,7 @@ const Rounds = ({
     <>
       <div className="text-gray-600 body-font">
         <StakeItem
+          pending={pending}
           icon={<UserOutlined style={{ fontSize: "25px" }} />}
           title="Self Staking"
           roundEnded={roundEnded}
@@ -56,6 +58,7 @@ const Rounds = ({
         />
 
         <StakeItemCommunity
+          pending={pending}
           icon={<UsergroupAddOutlined style={{ fontSize: "25px" }} />}
           roundEnded={roundEnded}
           unstakeUsers={unstakeUsers}

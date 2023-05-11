@@ -62,7 +62,7 @@ function App(props) {
   const { address, setAddress, setCurrentNetwork } = useContext(Web3Context);
   // specify all the chains your app is available on. Eg: ['localhost', 'mainnet', ...otherNetworks ]
   // reference './constants.js' for other networks
-  const networkOptions = [initialNetwork.name, "mainnet", "goerli"];
+  const networkOptions = [initialNetwork.name, "mainnet", "goerli", "sepolia"];
 
   const [injectedProvider, setInjectedProvider] = useState();
   // const [address, setAddress] = useState("");

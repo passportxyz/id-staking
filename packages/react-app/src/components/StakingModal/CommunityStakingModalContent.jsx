@@ -1,13 +1,12 @@
 // @ts-nocheck
 import React, { useState, useEffect } from "react";
-import { Button, Modal, Input, Row, Col, notification } from "antd";
+import { Button, Input, Row, Col, notification } from "antd";
 import { WarningOutlined } from "@ant-design/icons";
 import { ethers } from "ethers";
-import axios from "axios";
 import AddressInput from "../AddressInput";
 import DisplayAddressEns from "../DisplayAddressEns";
-import Loading from "../Loading";
 import { getCommunityStakeAmount } from "./utils";
+import CommonStakingModalContent from "./CommonStakingModalContent";
 
 // starting all stake amounts
 const initialStakeAmounts = {
@@ -47,28 +46,15 @@ export default function CommunityStakingModalContent({
   address,
   isModalVisible,
   setIsModalVisible,
-  userSigner,
   round,
   mainnetProvider,
-  targetNetwork,
   handleStakingTransaction,
 }) {
-  const [loading, setLoading] = useState(true);
-  const [modalStatus, setModalStatus] = useState(1);
   const [numberOfCommunityStakes, setNumberOfCommunityStakes] = useState(1);
   const [allStakeAmounts, setAllStakeAmounts] = useState(initialStakeAmounts);
   const [allStakeAddresses, setAllStakeAddresses] = useState(initialStakeAddresses);
   // array of amounts loaded from existing stakes
   const [allLoadedAmounts, setAllLoadedAmounts] = useState(initialLoadedValues);
-
-  /*
-  Modal Status
-  
-  1) Not Approved
-  2) Approving
-  3) Ready To Stake
-  4) Staking
-  */
 
   /////////// UNCOMMENT TO HELP WITH DEBUGGING
   // useEffect(() => {
@@ -116,10 +102,6 @@ export default function CommunityStakingModalContent({
     return total;
   };
 
-  const getTotalAmountStakedString = () => {
-    return getTotalAmountStaked().toFixed(2);
-  };
-
   const getTotalNumberOfStakees = () => {
     const stakees = Object.values(allStakeAddresses);
     let total = 0;
@@ -129,46 +111,10 @@ export default function CommunityStakingModalContent({
     return total;
   };
 
-  // Modal button should be hidden if user already approved tokens
-  useEffect(() => {
-    const refreshApprovalStatus = async () => {
-      if (address && readContracts?.Token) {
-        const readUpdate = readContracts?.Token;
-        const decimals = await readUpdate?.decimals();
-        const allowance = await readUpdate?.allowance(address, readContracts?.IDStaking?.address);
-        const balance = await readUpdate?.balanceOf(address);
-
-        const total = getTotalAmountStaked();
-        const adjustedAmount = ethers.utils.parseUnits(total.toString() || "0", decimals);
-        const hasEnoughAllowance = allowance.lt(adjustedAmount);
-
-        if (balance.isZero()) {
-          notification.open({
-            message: "Not Enough Balance",
-          });
-        } else {
-          if (allowance.isZero() || hasEnoughAllowance) {
-            setModalStatus(1);
-          } else {
-            setModalStatus(3);
-          }
-        }
-
-        setLoading(false);
-      }
-    };
-    refreshApprovalStatus();
-  }, [readContracts.Token, address]);
-
-  const approveTokenAllowance = async () => {
-    setModalStatus(2);
-    await approve();
-    setModalStatus(3);
-  };
-
   const stakeUsers = async (id, amounts, users) => {
     const stakeTx = tx(writeContracts.IDStaking.stakeUsers(id + "", users, amounts));
     handleStakingTransaction(stakeTx);
+    await stakeTx;
   };
 
   // Allows the user to change stake amount
@@ -180,6 +126,7 @@ export default function CommunityStakingModalContent({
       [index]: newStakeAmount.toFixed(2).toString(),
     });
   };
+
   const decreaseStakeAmount = index => {
     const newStakeAmount = parseFloat(allStakeAmounts[index]) - 1.0;
     const loadedAmount = parseFloat(allLoadedAmounts[index]);
@@ -189,28 +136,6 @@ export default function CommunityStakingModalContent({
         [index]: newStakeAmount.toFixed(2).toString(),
       });
     }
-  };
-
-  // This loads the address for stake amount displayed below the inputs
-  const getStakeAddressAtIndex = index => {
-    const addresslookup = allStakeAddresses[index];
-    if (!addresslookup) return "unknown";
-    let displayAddress = addresslookup?.substr(0, 5) + "..." + addresslookup?.substr(-4);
-    return displayAddress;
-  };
-
-  // User approves usage of token
-  const approve = async () => {
-    await tx(writeContracts.Token.approve(readContracts.IDStaking.address, ethers.utils.parseUnits("10000000")));
-  };
-
-  const handleCancel = () => {
-    // reset values
-    setAllStakeAddresses(initialStakeAddresses);
-    setAllStakeAmounts(initialStakeAmounts);
-    setAllLoadedAmounts(initialLoadedValues);
-    // close modal
-    setIsModalVisible(false);
   };
 
   // used to remove either address or amount from an index
@@ -248,229 +173,185 @@ export default function CommunityStakingModalContent({
     return newValues;
   };
 
-  return (
-    <Modal
-      title={"Stake on other people"}
-      visible={isModalVisible}
-      onCancel={handleCancel}
-      okText={`Create a Passport`}
-      footer={
-        loading
-          ? null
-          : [
-              <Button
-                onClick={async () => await approveTokenAllowance()}
-                hidden={modalStatus === 3 || modalStatus === 4}
-                key="Approve GTC"
-                loading={modalStatus === 2}
-                className="rounded-sm rounded bg-purple-connectPurple py-2 px-10 text-white"
-                style={{ backgroundColor: "#6F3FF5", color: "white" }}
-              >
-                Approve GTC
-              </Button>,
-              <Button
-                loading={modalStatus === 4}
-                onClick={async () => {
-                  // TODO This code does not work as intended for updating existing lines. Refactor this
-                  const amounts = Object.values(allStakeAmounts);
-                  let copiedAddresses = allStakeAddresses;
-                  let canStake = true;
+  const resetAmounts = () => {
+    setAllStakeAddresses(initialStakeAddresses);
+    setAllStakeAmounts(initialStakeAmounts);
+  };
 
-                  // filter amounts for 0
-                  const filteredAmounts = amounts.filter((amount, i) => {
-                    const currentAmount = parseFloat(amount);
-                    const loadedAmount = parseFloat(allLoadedAmounts[i]) || 0.0;
-                    const valid = currentAmount > 0 && currentAmount > loadedAmount;
-                    // remove the address from list if it belongs to an existing stake that will not change
-                    if (!valid) {
-                      copiedAddresses = removeItemAtIndex(allStakeAddresses, i, undefined, initialStakeAddresses);
-                      //Remove from allLoadedAmounts
-                      const tempAllLoadedAmounts = removeItemAtIndex(allLoadedAmounts, i, "0", initialLoadedValues);
-                      setAllLoadedAmounts(tempAllLoadedAmounts);
-                    }
-                    return valid;
-                  });
+  const onStake = async () => {
+    // TODO This code does not work as intended for updating existing lines. refactor this
+    const amounts = Object.values(allStakeAmounts);
+    let copiedAddresses = allStakeAddresses;
+    let canStake = true;
 
-                  // filter addresses for undefined
-                  const addresses = Object.values(copiedAddresses);
-                  const filteredAddresses = addresses.filter(address => address !== undefined);
-
-                  //Parse units on amounts  and substract loaded amounts
-                  const parsedAmounts = [];
-                  filteredAmounts.forEach((amount, i) => {
-                    let currentAmount = parseFloat(amount);
-                    const loadedAmount = parseFloat(allLoadedAmounts[i]) || 0.0;
-                    //Substract loaded amount from current amount
-                    if (loadedAmount > 0) {
-                      currentAmount -= loadedAmount;
-                    }
-                    console.log("current amount ", currentAmount);
-                    parsedAmounts.push(ethers.utils.parseUnits(currentAmount.toFixed(2).toString()));
-                  });
-
-                  // Block user from community staking on self
-                  filteredAddresses.forEach(filteredAddress => {
-                    if (filteredAddress === address) {
-                      canStake = false;
-                      return notification.open({
-                        message: "User Address found in Community Stake",
-                        description: "Please remove your address as one of the staked address",
-                        icon: <WarningOutlined style={{ color: "#FFA500" }} />,
-                      });
-                    }
-                  });
-
-                  // Final check before allowing user to stake
-                  if (parsedAmounts.length === filteredAddresses.length && canStake) {
-                    setModalStatus(4);
-                    await stakeUsers(round.toString(), parsedAmounts, filteredAddresses);
-                    setModalStatus(3);
-
-                    // reset modal values
-                    setAllStakeAddresses(initialStakeAddresses);
-                    setAllStakeAmounts(initialStakeAmounts);
-
-                    // close the modal
-                    setIsModalVisible(false);
-                  }
-                }}
-                disabled={modalStatus === 1 || getTotalAmountStaked() <= 0}
-                key="Stake"
-                style={{ backgroundColor: "#6F3FF5", color: "white" }}
-              >
-                Stake
-              </Button>,
-            ]
+    // filter amounts for 0
+    const filteredAmounts = amounts.filter((amount, i) => {
+      const currentAmount = parseFloat(amount);
+      const loadedAmount = parseFloat(allLoadedAmounts[i]) || 0.0;
+      const valid = currentAmount > 0 && currentAmount > loadedAmount;
+      // remove the address from list if it belongs to an existing stake that will not change
+      if (!valid) {
+        copiedAddresses = removeItemAtIndex(allStakeAddresses, i, undefined, initialStakeAddresses);
+        //Remove from allLoadedAmounts
+        const tempAllLoadedAmounts = removeItemAtIndex(allLoadedAmounts, i, "0", initialLoadedValues);
+        setAllLoadedAmounts(tempAllLoadedAmounts);
       }
-    >
-      {loading ? (
-        <Loading />
-      ) : (
-        <>
-          <p>Your stake amount (in GTC)</p>
+      return valid;
+    });
 
-          <div className="flex flex-col justify-center overflow--auto">
-            <Row gutter={20} style={{ paddingBottom: "10px" }}>
-              <Col span={12}>Address</Col>
-              <Col span={12}>Amount(GTC)</Col>
-            </Row>
-            {[...Array(numberOfCommunityStakes)].map((_, i) => (
-              <Row gutter={20} style={{ paddingTop: "10px", paddingBottom: "10px" }} key={i}>
-                <Col className="gutter-row" span={12}>
-                  <AddressInput
-                    value={allStakeAddresses[i]}
-                    onChange={e => {
-                      const tempAllAddresses = allStakeAddresses;
-                      tempAllAddresses[i] = e;
-                      setAllStakeAddresses(tempAllAddresses);
-                    }}
-                    ensProvider={mainnetProvider}
-                    placeholder="Address of user"
-                  />
-                </Col>
-                <Col className="gutter-row" span={10}>
-                  <Button onClick={e => decreaseStakeAmount(i)}>-</Button>
-                  <Input
-                    style={{ width: "50%" }}
-                    defaultValue={0}
-                    value={allStakeAmounts[i]}
-                    onChange={e => {
-                      const newAmount = e.target.value;
-                      setAllStakeAmounts({
-                        ...allStakeAmounts,
-                        [i]: newAmount,
-                      });
-                    }}
-                  />
-                  <Button onClick={e => increaseStakeAmount(i)}>+</Button>
-                </Col>
-                <Col className="gutter-row" span={2}>
-                  <Button
-                    style={{ border: "0px" }}
-                    onClick={() => {
-                      //Remove from allStakeAddresses
-                      const tempAllAddresses = removeItemAtIndex(
-                        allStakeAddresses,
-                        i,
-                        undefined,
-                        initialStakeAddresses,
-                      );
-                      setAllStakeAddresses(tempAllAddresses);
+    // filter addresses for undefined
+    const addresses = Object.values(copiedAddresses);
+    const filteredAddresses = addresses.filter(address => address !== undefined);
 
-                      //Remove from allStakeAmounts
-                      const tempAllAmounts = removeItemAtIndex(allStakeAmounts, i, "0", initialStakeAmounts);
-                      setAllStakeAmounts(tempAllAmounts);
+    //Parse units on amounts  and subtract loaded amounts
+    const parsedAmounts = [];
+    filteredAmounts.forEach((amount, i) => {
+      let currentAmount = parseFloat(amount);
+      const loadedAmount = parseFloat(allLoadedAmounts[i]) || 0.0;
+      //Subtract loaded amount from current amount
+      if (loadedAmount > 0) {
+        currentAmount -= loadedAmount;
+      }
+      console.log("current amount ", currentAmount);
+      parsedAmounts.push(ethers.utils.parseUnits(currentAmount.toFixed(2).toString()));
+    });
 
-                      //Remove from allLoadedAmounts
-                      const tempAllLoadedAmounts = removeItemAtIndex(allLoadedAmounts, i, "0", initialLoadedValues);
-                      setAllLoadedAmounts(tempAllLoadedAmounts);
+    // Block user from community staking on self
+    filteredAddresses.forEach(filteredAddress => {
+      if (filteredAddress === address) {
+        canStake = false;
+        return notification.open({
+          message: "User Address found in Community Stake",
+          description: "Please remove your address as one of the staked address",
+          icon: <WarningOutlined style={{ color: "#FFA500" }} />,
+        });
+      }
+    });
 
-                      // Decrease number of stake inputs
-                      setNumberOfCommunityStakes(numberOfCommunityStakes - 1);
-                    }}
-                  >
-                    X
-                  </Button>
-                </Col>
-              </Row>
-            ))}
-            <Row style={{ paddingTop: "10px" }}>
-              <Col span={24}>
-                <Button
-                  onClick={() => {
-                    setNumberOfCommunityStakes(numberOfCommunityStakes + 1);
+    // Final check before allowing user to stake
+    if (parsedAmounts.length === filteredAddresses.length && canStake) {
+      await stakeUsers(round.toString(), parsedAmounts, filteredAddresses);
+    }
+  };
+
+  return (
+    <CommonStakingModalContent
+      title={"Stake on other people"}
+      getTotalAmountStaked={getTotalAmountStaked}
+      getNewStakeAmount={
+        getTotalAmountStaked /* This isn't exactly right, should be fixed along with refactor mentioned above */
+      }
+      isModalVisible={isModalVisible}
+      setIsModalVisible={setIsModalVisible}
+      tx={tx}
+      address={address}
+      writeContracts={writeContracts}
+      readContracts={readContracts}
+      resetAmounts={resetAmounts}
+      onStake={onStake}
+      renderStakeForm={disabled => (
+        <div className="flex flex-col justify-center overflow--auto">
+          <Row gutter={20} style={{ paddingBottom: "10px" }}>
+            <Col span={12}>Address</Col>
+            <Col span={12}>Amount(GTC)</Col>
+          </Row>
+          {[...Array(numberOfCommunityStakes)].map((_, i) => (
+            <Row gutter={20} style={{ paddingTop: "10px", paddingBottom: "10px" }} key={i}>
+              <Col className="gutter-row" span={12}>
+                <AddressInput
+                  disabled={disabled}
+                  value={allStakeAddresses[i]}
+                  onChange={e => {
+                    const tempAllAddresses = allStakeAddresses;
+                    tempAllAddresses[i] = e;
+                    setAllStakeAddresses(tempAllAddresses);
                   }}
-                  block
+                  ensProvider={mainnetProvider}
+                  placeholder="Address of user"
+                />
+              </Col>
+              <Col className="gutter-row" span={10}>
+                <Button disabled={disabled} onClick={e => decreaseStakeAmount(i)}>
+                  -
+                </Button>
+                <Input
+                  disabled={disabled}
+                  style={{ width: "50%" }}
+                  defaultValue={0}
+                  value={allStakeAmounts[i]}
+                  onChange={e => {
+                    const newAmount = e.target.value;
+                    setAllStakeAmounts({
+                      ...allStakeAmounts,
+                      [i]: newAmount,
+                    });
+                  }}
+                />
+                <Button disabled={disabled} onClick={e => increaseStakeAmount(i)}>
+                  +
+                </Button>
+              </Col>
+              <Col className="gutter-row" span={2}>
+                <Button
+                  disabled={disabled}
+                  style={{ border: "0px" }}
+                  onClick={() => {
+                    //Remove from allStakeAddresses
+                    const tempAllAddresses = removeItemAtIndex(allStakeAddresses, i, undefined, initialStakeAddresses);
+                    setAllStakeAddresses(tempAllAddresses);
+
+                    //Remove from allStakeAmounts
+                    const tempAllAmounts = removeItemAtIndex(allStakeAmounts, i, "0", initialStakeAmounts);
+                    setAllStakeAmounts(tempAllAmounts);
+
+                    //Remove from allLoadedAmounts
+                    const tempAllLoadedAmounts = removeItemAtIndex(allLoadedAmounts, i, "0", initialLoadedValues);
+                    setAllLoadedAmounts(tempAllLoadedAmounts);
+
+                    // Decrease number of stake inputs
+                    setNumberOfCommunityStakes(numberOfCommunityStakes - 1);
+                  }}
                 >
-                  + Add Address
+                  X
                 </Button>
               </Col>
             </Row>
-
-            {getTotalAmountStaked() > 0 && (modalStatus === 3 || modalStatus === 4) && (
-              <>
-                <p className="mt-4">
-                  You’ll be staking a total of{" "}
-                  <span className="font-bold">
-                    {getTotalAmountStakedString()}
-                    GTC
-                  </span>{" "}
-                  on {getTotalNumberOfStakees()} people.
-                </p>
-                <ul className="ml-4 list-disc">
-                  {[...Array(numberOfCommunityStakes)].map((_, i) => (
-                    <li key={i}>
-                      {`${allStakeAmounts[i]} GTC on `}
-                      <DisplayAddressEns address={allStakeAddresses[i]} ensProvider={mainnetProvider} />
-                    </li>
-                  ))}
-                </ul>
-                <div className="border-2 border-gray-200 px-4 py-6 rounded-lg bg-yellow-200 mt-4">
-                  <h1>Important!</h1>
-                  <ul className="list-disc ml-4">
-                    <li>
-                      Your staked GTC will be locked when the grant round starts, and you will not be able to withdraw
-                      it until after the round ends.
-                    </li>
-                    <li>
-                      The staking contract has been checked by our engineering team, but it has not been audited by a
-                      professional audit firm.
-                    </li>
-                  </ul>
-                </div>
-              </>
-            )}
-          </div>
-
-          {modalStatus === 1 && (
-            <div className="mt-4 border-2 border-blue-alertBorder px-4 py-6 rounded-md bg-blue-alertBg font-libre-franklin">
-              In order to stake any GTC (self or community) on a Passport, you must first send a one-time transaction
-              approving the use of your GTC with the Smart Contract. (This is standard for smart contract engagement,
-              token approval must be stored on-chain.)
-            </div>
-          )}
+          ))}
+          <Row style={{ paddingTop: "10px" }}>
+            <Col span={24}>
+              <Button
+                disabled={disabled}
+                onClick={() => {
+                  setNumberOfCommunityStakes(numberOfCommunityStakes + 1);
+                }}
+                block
+              >
+                + Add Address
+              </Button>
+            </Col>
+          </Row>
+        </div>
+      )}
+      renderStakeSummary={total => (
+        <>
+          <p className="mt-4">
+            You’ll be staking a total of{" "}
+            <span className="font-bold">
+              {total}
+              GTC
+            </span>{" "}
+            on {getTotalNumberOfStakees()} people.
+          </p>
+          <ul className="ml-4 list-disc">
+            {[...Array(numberOfCommunityStakes)].map((_, i) => (
+              <li key={i}>
+                {`${allStakeAmounts[i]} GTC on `}
+                <DisplayAddressEns address={allStakeAddresses[i]} ensProvider={mainnetProvider} />
+              </li>
+            ))}
+          </ul>
         </>
       )}
-    </Modal>
+    />
   );
 }

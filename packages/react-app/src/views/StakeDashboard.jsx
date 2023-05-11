@@ -222,6 +222,7 @@ function StakeDashboard({
               <div className="text-gray-600 body-font w-full">
                 {roundInView && (
                   <Rounds
+                    pending={pending}
                     tx={tx}
                     key={roundInView}
                     round={roundInView}
