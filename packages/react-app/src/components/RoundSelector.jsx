@@ -2,7 +2,6 @@ import React, { useContext } from "react";
 import { Web3Context } from "../helpers/Web3Context";
 
 const ROUNDS = {
-
   "Alpha Round": { roundId: 1 },
   "Beta Round": { roundId: 2 },
   "Season 18": { roundId: 3 },
