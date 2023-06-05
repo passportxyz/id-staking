@@ -4,6 +4,7 @@ import { Web3Context } from "../helpers/Web3Context";
 const ROUNDS = {
   Alpha: { roundId: 1 },
   Beta: { roundId: 2 },
+  "Season 18": { roundId: 3 },
 };
 
 const RoundSelector = () => {
