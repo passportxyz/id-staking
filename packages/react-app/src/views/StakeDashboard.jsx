@@ -193,7 +193,7 @@ function StakeDashboard({
       <main className="container flex flex-1 flex-col px-8 md:mx-auto pb-10">
         <div className="mt-8 flex items-center justify-between">
           <div>
-            <p className="mb-0 text-3xl text-left">Gitcoin Grants {name} Round</p>
+            <p className="mb-0 text-3xl text-left">Gitcoin {name}</p>
             {roundInView && start ? (
               <p className="text-base text-left mb-0">
                 {moment.unix((start || zero).toString()).format("MMMM Do YYYY (h:mm:ss a)")} {" - "}
