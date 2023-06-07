@@ -135,7 +135,7 @@ function StakeDashboard({
 
   const [getData, { loading, data, error }] = useLazyQuery(query, {
     variables: {
-      address: "0x5b5b174827aEcf33882B502b160A75D9AF5E986E".toLowerCase(),
+      address: address.toLowerCase(),
       round: roundInView,
     },
     fetchPolicy: "network-only",

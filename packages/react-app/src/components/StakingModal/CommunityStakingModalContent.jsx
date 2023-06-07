@@ -87,7 +87,7 @@ export default function CommunityStakingModalContent({
   // set starting amount on modal open
   useEffect(() => {
     const communityStakeAmount = getCommunityStakeAmount(roundData);
-    if (isModalVisible && communityStakeAmount && parseFloat(communityStakeAmount) > 0) {
+    if (isModalVisible && communityStakeAmount && communityStakeAmount.gt(0)) {
       const xstakes = roundData?.user?.xstakeTo;
       if (xstakes.length > 0) {
         setNumberOfCommunityStakes(xstakes.length);
@@ -96,9 +96,9 @@ export default function CommunityStakingModalContent({
         const tempLoadedAmounts = {};
         // populate modal with each loaded amount and address
         xstakes.forEach((element, i) => {
-          const amount = element?.amount;
+          const amount = ethers.BigNumber.from(element?.amount || "0");
           const address = element?.to?.address;
-          if (amount.gt(0) && address?.length > 0) {
+          if (amount?.gt(0) && address?.length > 0) {
             tempAmounts[i] = amount;
             tempLoadedAmounts[i] = amount;
             tempAddresses[i] = amount;
@@ -112,6 +112,7 @@ export default function CommunityStakingModalContent({
   }, [isModalVisible]);
 
   const stakeUsers = async (id, amounts, users) => {
+    console.log("stakeUsers", id, amounts, users);
     const stakeTx = tx(writeContracts.IDStaking.stakeUsers(id + "", users, amounts));
     handleStakingTransaction(stakeTx);
     await stakeTx;

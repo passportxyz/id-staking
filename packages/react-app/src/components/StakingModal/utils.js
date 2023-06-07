@@ -63,34 +63,19 @@ export const ERC20ABI = [
 ];
 
 export const getSelfStakeAmount = data => {
-  if (!data || !data?.user) return 0;
-  const stake = data?.user?.stakes[0]?.stake;
-  if (!stake) {
-    return 0;
-  }
-  return stake;
+  return ethers.BigNumber.from(data?.user?.stakes[0]?.stake || "0");
 };
 
 export const getCommunityStakeAmount = data => {
-  if (!data || !data?.user) return 0;
-  const xstakes = data?.user?.xstakeTo;
-  if (xstakes.length < 1) {
-    return 0;
-  }
-  let total = 0.0;
-  xstakes.forEach(element => {
-    total += element.amount;
+  let total = ethers.BigNumber.from(0);
+  data?.user?.xstakeTo?.forEach(element => {
+    total = total.add(ethers.BigNumber.from(element.amount));
   });
   return total;
 };
 
 export const getAmountStakedOnMe = data => {
-  if (!data || !data?.user) return 0;
-  const stake = data?.user?.xstakeAggregates[0]?.total;
-  if (!stake) {
-    return 0;
-  }
-  return stake;
+  return ethers.BigNumber.from(data?.user?.xstakeAggregates[0]?.total || "0");
 };
 
 // Given e.g. 1e18, return "1.00"
