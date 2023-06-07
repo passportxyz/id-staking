@@ -198,7 +198,7 @@ function StakeDashboard({
               {name === "Alpha" || name === "Beta" ? " Round" : ""}
             </p>
             {roundInView && start ? (
-              <p className="text-base text-left mb-0">
+              <p className="text-base font-bold text-left mb-0">
                 {moment.unix((start || zero).toString()).format("MMMM Do YYYY (h:mm:ss a)")} {" - "}
                 {roundEndTimestamp.format("MMMM Do YYYY (h:mm:ss a)")}
               </p>
@@ -206,9 +206,12 @@ function StakeDashboard({
               <></>
             )}
             <p className="text-base text-left mb-0">
-              Staking only affects your Passport score when GTC is staked for an active round
+              Staked GTC only affects your Passport score during the above time period.
             </p>
-            <p className="text-base text-left mb-4">Once the round completes, GTC may be unstaked</p>
+            <p className="text-base text-left mb-0">
+              When this time period is over, you can re-stake your GTC for the next period
+            </p>
+            <p className="text-base text-left mb-4">or you can un-stake your GTC.</p>
           </div>
           <Button
             disabled={pending}
