@@ -10,7 +10,7 @@ import moment from "moment";
 import { gql, useLazyQuery } from "@apollo/client";
 import { UsergroupAddOutlined, LockOutlined } from "@ant-design/icons";
 
-import { getAmountStakedOnMe } from "../components/StakingModal/utils";
+import { getAmountStakedOnMe, formatGtc } from "../components/StakingModal/utils";
 import StakingDoneNotificationModal from "../components/StakingModal/StakingDoneNotificationModal";
 import RoundSelector from "../components/RoundSelector";
 
@@ -135,7 +135,7 @@ function StakeDashboard({
 
   const [getData, { loading, data, error }] = useLazyQuery(query, {
     variables: {
-      address: address.toLowerCase(),
+      address: "0x5b5b174827aEcf33882B502b160A75D9AF5E986E".toLowerCase(),
       round: roundInView,
     },
     fetchPolicy: "network-only",
@@ -157,6 +157,7 @@ function StakeDashboard({
 
   const roundEndTimestamp = moment.unix((start || zero).add(duration || zero).toString());
   const roundEnded = moment().unix() >= roundEndTimestamp.unix();
+  const amountStakedOnMe = getAmountStakedOnMe(data);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -255,19 +256,19 @@ function StakeDashboard({
                   <UsergroupAddOutlined style={{ fontSize: "25px" }} />
                 </div>
                 <h2 className="text-gray-900 text-md text-left ml-4 mb-0">
-                  {getAmountStakedOnMe(data)
+                  {amountStakedOnMe
                     ? "People from your community have staked on your identity!"
                     : "Collect a Community Staking stamp when other people stake on your identity."}
                 </h2>
               </div>
 
               <div className="flex-grow mt-4">
-                {getAmountStakedOnMe(data) ? (
+                {amountStakedOnMe ? (
                   <div className="flex flex-col">
                     <p className="leading-relaxed text-base text-left">
                       You can now collect a Community Staking stamp on your Passport - visit Passport to do so now!
                     </p>
-                    <p className="text-black text-left text-xl">{getAmountStakedOnMe(data)} GTC</p>
+                    <p className="text-black text-left text-xl">{formatGtc(amountStakedOnMe)} GTC</p>
                   </div>
                 ) : (
                   <p className="leading-relaxed text-base text-left">

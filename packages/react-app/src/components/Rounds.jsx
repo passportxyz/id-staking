@@ -32,7 +32,8 @@ const Rounds = ({
   const [stakingType, setStakingType] = useState("self");
 
   const unstake = async amount => {
-    tx(writeContracts.IDStaking.unstake(round + "", ethers.utils.parseUnits(amount)));
+    console.log("unstake", round + "", ethers.utils.parseUnits(amount));
+    // tx(writeContracts.IDStaking.unstake(round + "", ethers.utils.parseUnits(amount)));
   };
 
   const unstakeUsers = async users => {

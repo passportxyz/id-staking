@@ -1,4 +1,5 @@
 import React from "react";
+import { formatGtc } from "./StakingModal/utils";
 import UnstakeButton from "./UnstakeButton";
 
 const StakeItem = ({ icon, pending, roundEnded, unstake, title, description, amount, buttonText, buttonHandler }) => {
@@ -14,7 +15,7 @@ const StakeItem = ({ icon, pending, roundEnded, unstake, title, description, amo
         </div>
       </div>
       <div className="flex flex-col md:flex-auto items-center justify-center flex-grow text-left md:text-center md:my-0 my-7">
-        <h2 className="text-gray-900 text-lg title-font font-medium mb-0">{amount} GTC</h2>
+        <h2 className="text-gray-900 text-lg title-font font-medium mb-0">{formatGtc(amount)} GTC</h2>
         <span className="leading-relaxed text-base">Staked</span>
       </div>
       {roundEnded ? (

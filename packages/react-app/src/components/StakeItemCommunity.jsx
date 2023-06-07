@@ -2,7 +2,7 @@ import React from "react";
 
 // Format User Address
 import DisplayAddressEns from "./DisplayAddressEns";
-import { formatAmountUnits } from "./StakingModal/utils";
+import { formatGtc } from "./StakingModal/utils";
 import UnstakeButton from "./UnstakeButton";
 
 const StakeItemCommunity = ({
@@ -37,7 +37,7 @@ const StakeItemCommunity = ({
           </div>
         </div>
         <div className="flex flex-col md:flex-auto items-center justify-center flex-grow text-left md:text-center md:my-0 my-7">
-          <h2 className="text-gray-900 text-lg title-font font-medium mb-0">{amount} GTC</h2>
+          <h2 className="text-gray-900 text-lg title-font font-medium mb-0">{formatGtc(amount)} GTC</h2>
           <span className="leading-relaxed text-base">Staked</span>
         </div>
         {roundEnded ? (
@@ -61,7 +61,7 @@ const StakeItemCommunity = ({
               <div className="text-xl flex flex-1">
                 <DisplayAddressEns style={{ color: "black" }} address={data.to.address} ensProvider={mainnetProvider} />
               </div>
-              <div className="text-xl flex flex-1">{formatAmountUnits(data.amount)} GTC</div>
+              <div className="text-xl flex flex-1">{formatGtc(data.amount)} GTC</div>
             </li>
           ))}
       </ul>
