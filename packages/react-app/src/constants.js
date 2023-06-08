@@ -20,6 +20,7 @@ export const NETWORKS = {
     chainId: 31337,
     blockExplorer: "",
     rpcUrl: localRpcUrl,
+    price: 1,
   },
   mainnet: {
     name: "mainnet",

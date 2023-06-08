@@ -63,8 +63,8 @@ function StakeDashboard({
   blockExplorer,
 }: StakeDashboardProps) {
   const [pending, setPending] = useState(false);
-  const [start, setStart] = useState(0);
-  const [duration, setDuration] = useState(0);
+  const [start, setStart] = useState("0");
+  const [duration, setDuration] = useState("0");
   const [name, setName] = useState("");
   const [stakingDoneNotificationModalVisible, setStakingDoneNotificationModalVisible] = useState(false);
 
@@ -164,7 +164,7 @@ function StakeDashboard({
     }, 7000);
   };
 
-  const roundEndTimestamp = moment.unix((start || 0) + (duration || 0));
+  const roundEndTimestamp = moment.unix(parseInt(start || "0") + parseInt(duration || "0"));
   const roundEnded = moment().unix() >= roundEndTimestamp.unix();
   const amountStakedOnMe = getAmountStakedOnMe(data);
 
@@ -205,7 +205,7 @@ function StakeDashboard({
             </p>
             {roundInView && start ? (
               <p className="text-base font-bold text-left mb-0">
-                {moment.unix(start || 0).format("MMMM Do YYYY (h:mm:ss a)")} {" - "}
+                {moment.unix(parseFloat(start || "0")).format("MMMM Do YYYY (h:mm:ss a)")} {" - "}
                 {roundEndTimestamp.format("MMMM Do YYYY (h:mm:ss a)")}
               </p>
             ) : (

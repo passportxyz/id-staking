@@ -10606,10 +10606,10 @@ eth-gas-reporter@^0.2.20:
     sha1 "^1.1.1"
     sync-request "^6.0.0"
 
-eth-hooks@2.3.16:
-  version "2.3.16"
-  resolved "https://registry.npmjs.org/eth-hooks/-/eth-hooks-2.3.16.tgz"
-  integrity sha512-2RXCxj+Un1K88Fs90qi+ltFoSZBnQSVwf/TRFOkRbvkPvWP9BVgLajHplOPdMWV2j3JHFeKvJbGPXhDLzSIKAQ==
+eth-hooks@2.3.19:
+  version "2.3.19"
+  resolved "https://registry.yarnpkg.com/eth-hooks/-/eth-hooks-2.3.19.tgz#f181cb8108d7c9d64e4d1c2493445a7a56e90150"
+  integrity sha512-6joofp23+Pc2m+HgSyD4uSGEACq1wnffBQsgECk5KkDdyCRKTgTI5rJSZuvyuDk6a2PbatPk29iAcOPA75TqlQ==
   dependencies:
     "@ethersproject/address" "^5.4.0"
     "@ethersproject/bignumber" "^5.4.0"
