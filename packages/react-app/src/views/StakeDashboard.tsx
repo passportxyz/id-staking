@@ -240,7 +240,7 @@ function StakeDashboard({
                     round={roundInView}
                     address={address}
                     migrate={migrate}
-                    roundEnded={roundEnded}
+                    roundEnded={true}
                     readContracts={readContracts}
                     writeContracts={writeContracts}
                     mainnetProvider={mainnetProvider}

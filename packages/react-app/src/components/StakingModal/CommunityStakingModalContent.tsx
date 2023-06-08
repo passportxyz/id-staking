@@ -73,6 +73,9 @@ export default function CommunityStakingModalContent({
   // array of amounts loaded from existing stakes
   const [allLoadedAmounts, setAllLoadedAmounts] = useState<StakeAmounts>(initialLoadedValues);
 
+  const [newStakes, setNewStakes] = useState<NewStake[]>([]);
+  const [newStakesTotal, setNewStakesTotal] = useState<ethers.BigNumber>(ethers.BigNumber.from("0"));
+
   const totalAmountStaked = useMemo(() => {
     // Sums up all the stake amounts entered on screen
     const amounts = Object.values(allStakeAmounts);
@@ -82,15 +85,6 @@ export default function CommunityStakingModalContent({
     });
     return total;
   }, [allStakeAmounts]);
-
-  const totalNumberOfStakees = useMemo(() => {
-    const stakees = Object.values(allStakeAddresses);
-    let total = 0;
-    stakees.forEach(stakee => {
-      if (stakee !== undefined) total++;
-    });
-    return total;
-  }, [allStakeAddresses]);
 
   /////////// UNCOMMENT TO HELP WITH DEBUGGING
   // useEffect(() => {
@@ -199,23 +193,29 @@ export default function CommunityStakingModalContent({
     setAllStakeAmounts(initialStakeAmounts);
   };
 
+  useEffect(() => {
+    (async () => {
+      const newStakes: NewStake[] = Object.values(allStakeAmounts).reduce((newStakes, amount, index) => {
+        const address = allStakeAddresses[index];
+        const loadedAmount = allLoadedAmounts[index] || ethers.BigNumber.from("0");
+        if (amount.gt(0) && amount.gt(loadedAmount) && address?.length) {
+          const newAmount = amount.sub(loadedAmount);
+          newStakes.push({ address, amount: newAmount });
+        }
+        return newStakes;
+      }, Array<NewStake>());
+
+      setNewStakes(newStakes);
+      setNewStakesTotal(
+        newStakes.reduce((total, stake) => {
+          return total.add(stake.amount);
+        }, ethers.BigNumber.from("0")) || ethers.BigNumber.from("0"),
+      );
+    })();
+  }, [allStakeAmounts]);
+
   const onStake = async () => {
-    // TODO This code does not work as intended for updating existing lines. refactor this
-    const amounts = Object.values(allStakeAmounts);
-    let copiedAddresses = allStakeAddresses;
     let canStake = true;
-
-    const newStakes: NewStake[] = Object.values(allStakeAmounts).reduce((newStakes, amount, index) => {
-      const address = allStakeAddresses[index];
-      const loadedAmount = allLoadedAmounts[index] || ethers.BigNumber.from("0");
-      if (amount.gt(0) && amount.gt(loadedAmount) && address?.length) {
-        const newAmount = amount.sub(loadedAmount);
-        newStakes.push({ address, amount: newAmount });
-      }
-      return newStakes;
-    }, Array<NewStake>());
-
-    console.log("newStakes", newStakes);
 
     // Block user from community staking on self
     newStakes.forEach(stake => {
@@ -236,14 +236,11 @@ export default function CommunityStakingModalContent({
       await stakeUsers(round.toString(), amountsToStake, addressesToStakeOn);
     }
   };
-
   return (
     <CommonStakingModalContent
       title={"Stake on other people"}
       totalAmountStaked={totalAmountStaked}
-      newStakeAmount={
-        totalAmountStaked /* This isn't exactly right, should be fixed along with refactor mentioned above */
-      }
+      newStakeAmount={newStakesTotal}
       isModalVisible={isModalVisible}
       setIsModalVisible={setIsModalVisible}
       tx={tx}
@@ -345,21 +342,17 @@ export default function CommunityStakingModalContent({
           </Row>
         </div>
       )}
-      renderStakeSummary={(total: ethers.BigNumber) => (
+      renderStakeSummary={() => (
         <>
           <p className="mt-4">
-            You’ll be staking a total of{" "}
-            <span className="font-bold">
-              {total}
-              GTC
-            </span>{" "}
-            on {totalNumberOfStakees} people.
+            You’ll be staking a total of <span className="font-bold">{formatGtc(newStakesTotal)} GTC</span> on{" "}
+            {newStakes.length} people.
           </p>
           <ul className="ml-4 list-disc">
-            {[...Array(numberOfCommunityStakes)].map((_, i) => (
+            {newStakes.map(({ address, amount }, i) => (
               <li key={i}>
-                {`${formatGtc(allStakeAmounts[i] || 0)} GTC on `}
-                <DisplayAddressEns address={allStakeAddresses[i]} ensProvider={mainnetProvider} />
+                {`${formatGtc(amount)} GTC on `}
+                <DisplayAddressEns address={address} ensProvider={mainnetProvider} />
               </li>
             ))}
           </ul>

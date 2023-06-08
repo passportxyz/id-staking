@@ -33,7 +33,7 @@ export default function CommunityStakingModalContent({
   // amount loaded from an existing stake
   const [loadedAmount, setLoadedAmount] = useState(ethers.BigNumber.from("0"));
 
-  const newStakeAmount = stakeAmount.sub(loadedAmount);
+  const newStakeAmount = stakeAmount.gt(loadedAmount) ? stakeAmount.sub(loadedAmount) : ethers.BigNumber.from("0");
 
   // set starting amount on modal open
   useEffect(() => {
@@ -51,6 +51,7 @@ export default function CommunityStakingModalContent({
 
   const onStake = async () => {
     try {
+      if (!newStakeAmount.gt(0)) return;
       const stakeTx = tx(writeContracts.IDStaking.stake(round.toString(), newStakeAmount));
       handleStakingTransaction(stakeTx);
       await stakeTx;
