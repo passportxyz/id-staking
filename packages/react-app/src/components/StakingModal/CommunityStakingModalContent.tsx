@@ -123,7 +123,6 @@ export default function CommunityStakingModalContent({
   }, [isModalVisible, roundData]);
 
   const stakeUsers = async (roundId: string, amounts: ethers.BigNumber[], users: string[]) => {
-    console.log("stakeUsers", roundId, amounts, users);
     const stakeTx = tx(writeContracts.IDStaking.stakeUsers(roundId, users, amounts));
     handleStakingTransaction(stakeTx);
     await stakeTx;
@@ -215,22 +214,14 @@ export default function CommunityStakingModalContent({
   }, [allStakeAmounts]);
 
   const onStake = async () => {
-    let canStake = true;
-
-    // Block user from community staking on self
-    newStakes.forEach(stake => {
-      if (stake.address === address) {
-        canStake = false;
-        return notification.open({
-          message: "User Address found in Community Stake",
-          description: "Please remove your address as one of the staked address",
-          icon: <WarningOutlined style={{ color: "#FFA500" }} />,
-        });
-      }
-    });
-
-    // Final check before allowing user to stake
-    if (newStakes.length && canStake) {
+    if (newStakes.find(stake => stake.address === address)) {
+      // Block user from community staking on self
+      notification.open({
+        message: "User Address found in Community Stake",
+        description: "Please remove your address as one of the staked address",
+        icon: <WarningOutlined style={{ color: "#FFA500" }} />,
+      });
+    } else if (newStakes.length) {
       const amountsToStake = newStakes.map(stake => stake.amount);
       const addressesToStakeOn = newStakes.map(stake => stake.address);
       await stakeUsers(round.toString(), amountsToStake, addressesToStakeOn);

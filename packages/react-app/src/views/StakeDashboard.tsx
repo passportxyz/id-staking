@@ -240,7 +240,7 @@ function StakeDashboard({
                     round={roundInView}
                     address={address}
                     migrate={migrate}
-                    roundEnded={true}
+                    roundEnded={roundEnded}
                     readContracts={readContracts}
                     writeContracts={writeContracts}
                     mainnetProvider={mainnetProvider}
@@ -261,14 +261,14 @@ function StakeDashboard({
                   <UsergroupAddOutlined style={{ fontSize: "25px" }} />
                 </div>
                 <h2 className="text-gray-900 text-md text-left ml-4 mb-0">
-                  {amountStakedOnMe
+                  {amountStakedOnMe.gt(0)
                     ? "People from your community have staked on your identity!"
                     : "Collect a Community Staking stamp when other people stake on your identity."}
                 </h2>
               </div>
 
               <div className="flex-grow mt-4">
-                {amountStakedOnMe ? (
+                {amountStakedOnMe.gt(0) ? (
                   <div className="flex flex-col">
                     <p className="leading-relaxed text-base text-left">
                       You can now collect a Community Staking stamp on your Passport - visit Passport to do so now!

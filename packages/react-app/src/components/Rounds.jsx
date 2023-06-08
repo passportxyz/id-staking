@@ -32,13 +32,11 @@ const Rounds = ({
   const [stakingType, setStakingType] = useState("self");
 
   const unstake = async amount => {
-    console.log("unstake", round + "", amount);
-    // tx(writeContracts.IDStaking.unstake(round + "", amount));
+    tx(writeContracts.IDStaking.unstake(round + "", amount));
   };
 
   const unstakeUsers = async users => {
-    console.log("unstakeUsers", round + "", users);
-    // tx(writeContracts.IDStaking.unstakeUsers(round + "", users));
+    tx(writeContracts.IDStaking.unstakeUsers(round + "", users));
   };
 
   return (
