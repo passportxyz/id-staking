@@ -3,6 +3,20 @@ import { Button, Input, notification } from "antd";
 import { getSelfStakeAmount, parseGtc, formatGtc } from "./utils";
 import { ethers } from "ethers";
 import CommonStakingModalContent from "./CommonStakingModalContent";
+import type { IndexedStakeData } from "../../types";
+
+type CommunityStakingModalContentProps = {
+  roundData: IndexedStakeData;
+  writeContracts: any;
+  readContracts: any;
+  tx: any;
+  address: string;
+  isModalVisible: boolean;
+  setIsModalVisible: (value: boolean) => void;
+  round: number;
+  mainnetProvider: ethers.providers.Web3Provider;
+  handleStakingTransaction: (tx: any) => void;
+};
 
 export default function CommunityStakingModalContent({
   roundData,
@@ -14,27 +28,21 @@ export default function CommunityStakingModalContent({
   setIsModalVisible,
   round,
   handleStakingTransaction,
-}) {
+}: CommunityStakingModalContentProps) {
   const [stakeAmount, setStakeAmount] = useState(ethers.BigNumber.from("0"));
   // amount loaded from an existing stake
   const [loadedAmount, setLoadedAmount] = useState(ethers.BigNumber.from("0"));
 
   const newStakeAmount = stakeAmount.sub(loadedAmount);
-  console.log("loadedAmount", loadedAmount);
-  console.log("stakeAmount", stakeAmount);
-  console.log("formatted", formatGtc(stakeAmount));
-  console.log("newStakeAmount", newStakeAmount);
 
   // set starting amount on modal open
   useEffect(() => {
     const selfStakeAmount = getSelfStakeAmount(roundData);
-    if (isModalVisible && selfStakeAmount && parseFloat(selfStakeAmount) > 0) {
+    if (isModalVisible && selfStakeAmount && selfStakeAmount.gt(0)) {
       setStakeAmount(selfStakeAmount);
       setLoadedAmount(selfStakeAmount);
     }
   }, [isModalVisible]);
-
-  // Modal button should be hidden if user already approved tokens
 
   // Allows the user to change stake amount
   const increaseStakeAmount = () => setStakeAmount(stakeAmount => stakeAmount.add(parseGtc("1")));
@@ -46,10 +54,10 @@ export default function CommunityStakingModalContent({
       const stakeTx = tx(writeContracts.IDStaking.stake(round.toString(), newStakeAmount));
       handleStakingTransaction(stakeTx);
       await stakeTx;
-    } catch (e) {
+    } catch (e: any) {
       notification.open({
         message: "Staking unsuccessful",
-        description: `Error: ${e.message}`,
+        description: `Error: ${e?.message}`,
       });
       return null;
     }
@@ -73,7 +81,7 @@ export default function CommunityStakingModalContent({
       readContracts={readContracts}
       resetAmounts={resetAmounts}
       onStake={onStake}
-      renderStakeForm={disabled => (
+      renderStakeForm={(disabled: boolean) => (
         <div>
           <div className="flex flex-row justify-center">
             <Button disabled={disabled} onClick={decreaseStakeAmount}>

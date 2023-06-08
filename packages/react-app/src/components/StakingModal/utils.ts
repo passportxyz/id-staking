@@ -1,5 +1,6 @@
 // ----- Ethers library
 import { ethers } from "ethers";
+import type { IndexedStakeData } from "../../types";
 
 // ERC20 ABI
 export const ERC20ABI = [
@@ -62,11 +63,11 @@ export const ERC20ABI = [
   },
 ];
 
-export const getSelfStakeAmount = data => {
-  return ethers.BigNumber.from(data?.user?.stakes[0]?.stake || "0");
+export const getSelfStakeAmount = (data: IndexedStakeData): ethers.BigNumber => {
+  return ethers.BigNumber.from(data?.user?.stakes?.[0]?.stake || "0");
 };
 
-export const getCommunityStakeAmount = data => {
+export const getCommunityStakeAmount = (data: IndexedStakeData): ethers.BigNumber => {
   let total = ethers.BigNumber.from(0);
   data?.user?.xstakeTo?.forEach(element => {
     total = total.add(ethers.BigNumber.from(element.amount));
@@ -74,14 +75,14 @@ export const getCommunityStakeAmount = data => {
   return total;
 };
 
-export const getAmountStakedOnMe = data => {
-  return ethers.BigNumber.from(data?.user?.xstakeAggregates[0]?.total || "0");
+export const getAmountStakedOnMe = (data: IndexedStakeData): ethers.BigNumber => {
+  return ethers.BigNumber.from(data?.user?.xstakeAggregates?.[0]?.total || "0");
 };
 
 // Given e.g. 1e18, return "1.00"
-export const formatGtc = amount => {
+export const formatGtc = (amount: ethers.BigNumber) => {
   return parseFloat(ethers.utils.formatUnits(amount.toString(), 18)).toFixed(2).toString();
 };
 
 // Given e.g. 1 GTC, return 1e18
-export const parseGtc = amount => ethers.utils.parseUnits(amount, 18);
+export const parseGtc = (amount: string): ethers.BigNumber => ethers.utils.parseUnits(amount, 18);

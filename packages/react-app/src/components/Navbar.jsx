@@ -21,7 +21,7 @@ export default function Navbar({
   loadWeb3Modal,
   blockExplorer,
 }) {
-  const { address, setAddress, currentNetwork } = useContext(Web3Context);
+  const { address } = useContext(Web3Context);
   return (
     <nav className="App md:pb-4 sm:pb-20 flex flex-col">
       <div className="p-4 mx-auto flex items-center w-full">
@@ -55,8 +55,6 @@ export default function Navbar({
             targetNetwork={targetNetwork}
             USE_NETWORK_SELECTOR={USE_NETWORK_SELECTOR}
             networkDisplay={undefined}
-            selectedNetwork={undefined}
-            setSelectedNetwork={undefined}
           />
         </div>
       </div>

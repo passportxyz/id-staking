@@ -1,9 +1,25 @@
 import React from "react";
+import { ethers } from "ethers";
 
 // Format User Address
 import DisplayAddressEns from "./DisplayAddressEns";
-import { formatGtc } from "./StakingModal/utils";
+import { formatGtc, parseGtc } from "./StakingModal/utils";
 import UnstakeButton from "./UnstakeButton";
+import type { XstakeTo } from "../types";
+
+type StakeItemCommunityProps = {
+  icon: React.ReactNode;
+  pending: boolean;
+  title: string;
+  roundEnded: boolean;
+  description: string;
+  amount: ethers.BigNumber;
+  unstakeUsers: (users: string[]) => Promise<void>;
+  buttonText: string;
+  buttonHandler: () => void;
+  xstakesTo: XstakeTo[];
+  mainnetProvider: ethers.providers.Web3Provider;
+};
 
 const StakeItemCommunity = ({
   icon,
@@ -15,11 +31,11 @@ const StakeItemCommunity = ({
   unstakeUsers,
   buttonText,
   buttonHandler,
-  roundData,
+  xstakesTo,
   mainnetProvider,
-}) => {
+}: StakeItemCommunityProps) => {
   const unstakeHandler = async () => {
-    const users = roundData.map(i => i?.to?.address);
+    const users = xstakesTo.map(i => i?.to?.address);
 
     await unstakeUsers(users);
   };
@@ -55,13 +71,13 @@ const StakeItemCommunity = ({
 
       {/* List all users staked on  */}
       <ul className="flex flex-col w-full">
-        {roundData &&
-          roundData.map(data => (
+        {xstakesTo &&
+          xstakesTo.map(data => (
             <li className="flex flex-grow ml-24">
               <div className="text-xl flex flex-1">
                 <DisplayAddressEns style={{ color: "black" }} address={data.to.address} ensProvider={mainnetProvider} />
               </div>
-              <div className="text-xl flex flex-1">{formatGtc(data.amount)} GTC</div>
+              <div className="text-xl flex flex-1">{formatGtc(ethers.BigNumber.from(data.amount))} GTC</div>
             </li>
           ))}
       </ul>

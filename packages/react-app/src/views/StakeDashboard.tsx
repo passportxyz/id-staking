@@ -1,10 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import { Button } from "antd";
-import { useContractReader } from "eth-hooks";
 import { ethers } from "ethers";
-import { Select } from "antd";
 import { Rounds, Navbar } from "../components";
-import { STARTING_GRANTS_ROUND } from "../components/Rounds";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
 import { gql, useLazyQuery } from "@apollo/client";
@@ -19,11 +16,30 @@ import { Web3Context } from "../helpers/Web3Context";
 // --- sdk import
 import { PassportReader } from "@gitcoinco/passport-sdk-reader";
 
-const { Option } = Select;
-
-const zero = ethers.BigNumber.from("0");
 // Update Passport on address change
 const reader = new PassportReader();
+
+type StakeDashboardProps = {
+  tx: any;
+  readContracts: any;
+  address: string;
+  writeContracts: any;
+  mainnetProvider: ethers.providers.Web3Provider;
+  networkOptions: any;
+  USE_NETWORK_SELECTOR: any;
+  localProvider: any;
+  targetNetwork: any;
+  logoutOfWeb3Modal: any;
+  selectedChainId: any;
+  localChainId: any;
+  NETWORKCHECK: any;
+  passport: any;
+  userSigner: any;
+  price: any;
+  web3Modal: any;
+  loadWeb3Modal: any;
+  blockExplorer: any;
+};
 
 function StakeDashboard({
   tx,
@@ -32,9 +48,6 @@ function StakeDashboard({
   writeContracts,
   mainnetProvider,
   networkOptions,
-  selectedNetwork,
-  setSelectedNetwork,
-  yourLocalBalance,
   USE_NETWORK_SELECTOR,
   localProvider,
   targetNetwork,
@@ -48,7 +61,7 @@ function StakeDashboard({
   web3Modal,
   loadWeb3Modal,
   blockExplorer,
-}) {
+}: StakeDashboardProps) {
   const [pending, setPending] = useState(false);
   const [start, setStart] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -84,29 +97,23 @@ function StakeDashboard({
     }
   }, [address]);
 
-  useEffect(
-    () =>
-      (async () => {
-        if (roundInView && readContracts?.IDStaking) {
-          try {
-            const [start, duration, _tvl, meta] = await readContracts.IDStaking.fetchRoundMeta(roundInView);
-            setStart(start);
-            setDuration(duration);
-            setName(meta);
-          } catch (e) {
-            console.error(e);
-          }
+  useEffect(() => {
+    (async () => {
+      if (roundInView && readContracts?.IDStaking) {
+        try {
+          const [start, duration, _tvl, meta] = await readContracts.IDStaking.fetchRoundMeta(roundInView);
+          setStart(start);
+          setDuration(duration);
+          setName(meta);
+        } catch (e) {
+          console.error(e);
         }
-      })(),
-    [roundInView, readContracts?.IDStaking],
-  );
+      }
+    })();
+  }, [roundInView, readContracts?.IDStaking]);
 
-  const mintToken = async () => {
-    tx(writeContracts.Token.mintAmount(ethers.utils.parseUnits("1000")));
-  };
-
-  const migrate = async id => {
-    tx(writeContracts.IDStaking.migrateStake(id + ""));
+  const migrate = async (id: string) => {
+    tx(writeContracts.IDStaking.migrateStake(id));
   };
 
   // Populate Round Data
@@ -141,11 +148,13 @@ function StakeDashboard({
     fetchPolicy: "network-only",
   });
 
-  useEffect(() => address && getData(), [getData, address, roundInView]);
+  useEffect(() => {
+    address && getData();
+  }, [getData, address, roundInView]);
 
-  const awaitTransactionThenRefreshData = async asyncFunc => {
+  const awaitTransactionThenRefreshData = async (asyncResult: Promise<any>) => {
     setPending(true);
-    await asyncFunc;
+    await asyncResult;
     // Wait for subgraph to update
     setTimeout(() => {
       getData();
@@ -155,7 +164,7 @@ function StakeDashboard({
     }, 7000);
   };
 
-  const roundEndTimestamp = moment.unix((start || zero).add(duration || zero).toString());
+  const roundEndTimestamp = moment.unix((start || 0) + (duration || 0));
   const roundEnded = moment().unix() >= roundEndTimestamp.unix();
   const amountStakedOnMe = getAmountStakedOnMe(data);
 
@@ -164,12 +173,8 @@ function StakeDashboard({
       <Navbar
         readContracts={readContracts}
         networkOptions={networkOptions}
-        selectedNetwork={selectedNetwork}
-        setSelectedNetwork={setSelectedNetwork}
-        yourLocalBalance={yourLocalBalance}
         USE_NETWORK_SELECTOR={USE_NETWORK_SELECTOR}
         localProvider={localProvider}
-        address={address}
         targetNetwork={targetNetwork}
         logoutOfWeb3Modal={logoutOfWeb3Modal}
         selectedChainId={selectedChainId}
@@ -200,7 +205,7 @@ function StakeDashboard({
             </p>
             {roundInView && start ? (
               <p className="text-base font-bold text-left mb-0">
-                {moment.unix((start || zero).toString()).format("MMMM Do YYYY (h:mm:ss a)")} {" - "}
+                {moment.unix(start || 0).format("MMMM Do YYYY (h:mm:ss a)")} {" - "}
                 {roundEndTimestamp.format("MMMM Do YYYY (h:mm:ss a)")}
               </p>
             ) : (
@@ -216,7 +221,7 @@ function StakeDashboard({
           </div>
           <Button
             disabled={pending}
-            onClick={getData}
+            onClick={() => getData()}
             className="rounded-sm bg-purple-connectPurple py-2 px-10 text-white"
             style={{ backgroundColor: "#6F3FF5", color: "white" }}
           >

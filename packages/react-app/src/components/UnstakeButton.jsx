@@ -1,7 +1,8 @@
 import React from "react";
+import { ethers } from "ethers";
 
-const UnstakeButton = ({ amount = 0, handler }) => {
-  const noBalance = parseFloat(amount) <= 0;
+const UnstakeButton = ({ amount = ethers.BigNumber.from("0"), handler = () => {} }) => {
+  const noBalance = amount.lte(0);
 
   return (
     <button

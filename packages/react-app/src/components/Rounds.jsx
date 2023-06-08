@@ -71,7 +71,7 @@ const Rounds = ({
             setStakingType("community");
             setIsModalVisible(true);
           }}
-          roundData={roundData?.user?.xstakeTo}
+          xstakesTo={roundData?.user?.xstakeTo}
           mainnetProvider={mainnetProvider}
         />
       </div>

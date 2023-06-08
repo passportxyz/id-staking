@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState, useEffect, useMemo } from "react";
 import { Button, Input, Row, Col, notification } from "antd";
 import { WarningOutlined } from "@ant-design/icons";
@@ -7,9 +6,14 @@ import AddressInput from "../AddressInput";
 import DisplayAddressEns from "../DisplayAddressEns";
 import { getCommunityStakeAmount, parseGtc, formatGtc } from "./utils";
 import CommonStakingModalContent from "./CommonStakingModalContent";
+import { IndexedStakeData } from "../../types";
+
+type StakeAmounts = { [key: number]: ethers.BigNumber };
+type StakeAddresses = { [key: number]: string | undefined };
+type NewStake = { address: string; amount: ethers.BigNumber };
 
 // starting all stake amounts
-const initialStakeAmounts = {
+const initialStakeAmounts: StakeAmounts = {
   0: ethers.BigNumber.from("0"),
   1: ethers.BigNumber.from("0"),
   2: ethers.BigNumber.from("0"),
@@ -19,7 +23,7 @@ const initialStakeAmounts = {
 };
 
 // starting all stake addresses
-const initialStakeAddresses = {
+const initialStakeAddresses: StakeAddresses = {
   0: undefined,
   1: undefined,
   2: undefined,
@@ -29,13 +33,26 @@ const initialStakeAddresses = {
 };
 
 // starting all loaded values
-const initialLoadedValues = {
+const initialLoadedValues: StakeAmounts = {
   0: ethers.BigNumber.from("0"),
   1: ethers.BigNumber.from("0"),
   2: ethers.BigNumber.from("0"),
   3: ethers.BigNumber.from("0"),
   4: ethers.BigNumber.from("0"),
   5: ethers.BigNumber.from("0"),
+};
+
+type CommunityStakingModalContentProps = {
+  roundData: IndexedStakeData;
+  writeContracts: any;
+  readContracts: any;
+  tx: any;
+  address: string;
+  isModalVisible: boolean;
+  setIsModalVisible: (value: boolean) => void;
+  round: number;
+  mainnetProvider: ethers.providers.Web3Provider;
+  handleStakingTransaction: (tx: any) => void;
 };
 
 export default function CommunityStakingModalContent({
@@ -49,12 +66,12 @@ export default function CommunityStakingModalContent({
   round,
   mainnetProvider,
   handleStakingTransaction,
-}) {
+}: CommunityStakingModalContentProps) {
   const [numberOfCommunityStakes, setNumberOfCommunityStakes] = useState(1);
-  const [allStakeAmounts, setAllStakeAmounts] = useState(initialStakeAmounts);
-  const [allStakeAddresses, setAllStakeAddresses] = useState(initialStakeAddresses);
+  const [allStakeAmounts, setAllStakeAmounts] = useState<StakeAmounts>(initialStakeAmounts);
+  const [allStakeAddresses, setAllStakeAddresses] = useState<StakeAddresses>(initialStakeAddresses);
   // array of amounts loaded from existing stakes
-  const [allLoadedAmounts, setAllLoadedAmounts] = useState(initialLoadedValues);
+  const [allLoadedAmounts, setAllLoadedAmounts] = useState<StakeAmounts>(initialLoadedValues);
 
   const totalAmountStaked = useMemo(() => {
     // Sums up all the stake amounts entered on screen
@@ -89,11 +106,11 @@ export default function CommunityStakingModalContent({
     const communityStakeAmount = getCommunityStakeAmount(roundData);
     if (isModalVisible && communityStakeAmount && communityStakeAmount.gt(0)) {
       const xstakes = roundData?.user?.xstakeTo;
-      if (xstakes.length > 0) {
+      if (xstakes?.length) {
         setNumberOfCommunityStakes(xstakes.length);
-        const tempAddresses = {};
-        const tempAmounts = {};
-        const tempLoadedAmounts = {};
+        const tempAddresses: StakeAddresses = {};
+        const tempAmounts: StakeAmounts = {};
+        const tempLoadedAmounts: StakeAmounts = {};
         // populate modal with each loaded amount and address
         xstakes.forEach((element, i) => {
           const amount = ethers.BigNumber.from(element?.amount || "0");
@@ -101,7 +118,7 @@ export default function CommunityStakingModalContent({
           if (amount?.gt(0) && address?.length > 0) {
             tempAmounts[i] = amount;
             tempLoadedAmounts[i] = amount;
-            tempAddresses[i] = amount;
+            tempAddresses[i] = address;
           }
         });
         setAllStakeAddresses(tempAddresses);
@@ -109,17 +126,17 @@ export default function CommunityStakingModalContent({
         setAllLoadedAmounts(tempLoadedAmounts);
       }
     }
-  }, [isModalVisible]);
+  }, [isModalVisible, roundData]);
 
-  const stakeUsers = async (id, amounts, users) => {
-    console.log("stakeUsers", id, amounts, users);
-    const stakeTx = tx(writeContracts.IDStaking.stakeUsers(id + "", users, amounts));
+  const stakeUsers = async (roundId: string, amounts: ethers.BigNumber[], users: string[]) => {
+    console.log("stakeUsers", roundId, amounts, users);
+    const stakeTx = tx(writeContracts.IDStaking.stakeUsers(roundId, users, amounts));
     handleStakingTransaction(stakeTx);
     await stakeTx;
   };
 
   // Allows the user to change stake amount
-  const increaseStakeAmount = index => {
+  const increaseStakeAmount = (index: keyof StakeAmounts) => {
     const currentAmount = allStakeAmounts[index] || ethers.BigNumber.from("0");
     const newStakeAmount = currentAmount.add(parseGtc("1"));
     setAllStakeAmounts({
@@ -128,7 +145,7 @@ export default function CommunityStakingModalContent({
     });
   };
 
-  const decreaseStakeAmount = index => {
+  const decreaseStakeAmount = (index: keyof StakeAmounts) => {
     const currentAmount = allStakeAmounts[index] || ethers.BigNumber.from("0");
     const newStakeAmount = currentAmount.sub(parseGtc("1"));
     setAllStakeAmounts({
@@ -144,7 +161,12 @@ export default function CommunityStakingModalContent({
     nullVal -> a null value for array could be a string, undefined or null
     initial -> empty/initial state of objOfVal
   */
-  const removeItemAtIndex = (objOfVal, index, nullVal, initial) => {
+  const removeItemAtIndex = <T,>(
+    objOfVal: { [key: number]: T },
+    index: number,
+    nullVal: T,
+    initial: { [key: number]: T },
+  ) => {
     const allValues = Object.values(objOfVal);
     let newVal = [];
 
@@ -152,7 +174,7 @@ export default function CommunityStakingModalContent({
     if (index === 0) {
       allValues.shift();
       newVal = allValues.concat(nullVal);
-    } else if (index === objOfVal.length) {
+    } else if (index === Object.keys(objOfVal).length) {
       allValues.pop();
       newVal = allValues.concat(nullVal);
     } else {
@@ -183,42 +205,21 @@ export default function CommunityStakingModalContent({
     let copiedAddresses = allStakeAddresses;
     let canStake = true;
 
-    // filter amounts for 0
-    const filteredAmounts = amounts.filter((amount, i) => {
-      const loadedAmount = allLoadedAmounts[i] || ethers.BigNumber.from("0");
-      const valid = amount.gt(0) && amount.gt(loadedAmount);
-      // remove the address from list if it belongs to an existing stake that will not change
-      if (!valid) {
-        copiedAddresses = removeItemAtIndex(allStakeAddresses, i, undefined, initialStakeAddresses);
-        //Remove from allLoadedAmounts
-        const tempAllLoadedAmounts = removeItemAtIndex(
-          allLoadedAmounts,
-          i,
-          ethers.BigNumber.from("0"),
-          initialLoadedValues,
-        );
-        setAllLoadedAmounts(tempAllLoadedAmounts);
+    const newStakes: NewStake[] = Object.values(allStakeAmounts).reduce((newStakes, amount, index) => {
+      const address = allStakeAddresses[index];
+      const loadedAmount = allLoadedAmounts[index] || ethers.BigNumber.from("0");
+      if (amount.gt(0) && amount.gt(loadedAmount) && address?.length) {
+        const newAmount = amount.sub(loadedAmount);
+        newStakes.push({ address, amount: newAmount });
       }
-      return valid;
-    });
+      return newStakes;
+    }, Array<NewStake>());
 
-    // filter addresses for undefined
-    const addresses = Object.values(copiedAddresses);
-    const filteredAddresses = addresses.filter(address => address !== undefined);
-
-    const amountsToStake = filteredAmounts.map((amount, i) => {
-      const loadedAmount = allLoadedAmounts[i] || ethers.BigNumber.from("0");
-      //Subtract loaded amount from current amount
-      const amountToStake = loadedAmount.gt(0) ? amount.sub(loadedAmount) : amount;
-
-      console.log("amountToStake", amountToStake);
-
-      return amountToStake;
-    });
+    console.log("newStakes", newStakes);
 
     // Block user from community staking on self
-    filteredAddresses.forEach(filteredAddress => {
-      if (filteredAddress === address) {
+    newStakes.forEach(stake => {
+      if (stake.address === address) {
         canStake = false;
         return notification.open({
           message: "User Address found in Community Stake",
@@ -229,8 +230,10 @@ export default function CommunityStakingModalContent({
     });
 
     // Final check before allowing user to stake
-    if (amountsToStake.length === filteredAddresses.length && canStake) {
-      await stakeUsers(round.toString(), amountsToStake, filteredAddresses);
+    if (newStakes.length && canStake) {
+      const amountsToStake = newStakes.map(stake => stake.amount);
+      const addressesToStakeOn = newStakes.map(stake => stake.address);
+      await stakeUsers(round.toString(), amountsToStake, addressesToStakeOn);
     }
   };
 
@@ -249,7 +252,7 @@ export default function CommunityStakingModalContent({
       readContracts={readContracts}
       resetAmounts={resetAmounts}
       onStake={onStake}
-      renderStakeForm={disabled => (
+      renderStakeForm={(disabled: boolean) => (
         <div className="flex flex-col justify-center overflow--auto">
           <Row gutter={20} style={{ paddingBottom: "10px" }}>
             <Col span={12}>Address</Col>
@@ -261,9 +264,9 @@ export default function CommunityStakingModalContent({
                 <AddressInput
                   disabled={disabled}
                   value={allStakeAddresses[i]}
-                  onChange={e => {
+                  onChange={(address: string) => {
                     const tempAllAddresses = allStakeAddresses;
-                    tempAllAddresses[i] = e;
+                    tempAllAddresses[i] = address;
                     setAllStakeAddresses(tempAllAddresses);
                   }}
                   ensProvider={mainnetProvider}
@@ -271,14 +274,14 @@ export default function CommunityStakingModalContent({
                 />
               </Col>
               <Col className="gutter-row" span={10}>
-                <Button disabled={disabled} onClick={e => decreaseStakeAmount(i)}>
+                <Button disabled={disabled} onClick={() => decreaseStakeAmount(i)}>
                   -
                 </Button>
                 <Input
                   disabled={disabled}
                   style={{ width: "50%" }}
                   defaultValue={0}
-                  value={formatGtc(allStakeAmounts[i])}
+                  value={formatGtc(allStakeAmounts[i] || 0)}
                   onChange={e => {
                     const newAmount = parseGtc(e.target.value);
                     setAllStakeAmounts({
@@ -287,7 +290,7 @@ export default function CommunityStakingModalContent({
                     });
                   }}
                 />
-                <Button disabled={disabled} onClick={e => increaseStakeAmount(i)}>
+                <Button disabled={disabled} onClick={() => increaseStakeAmount(i)}>
                   +
                 </Button>
               </Col>
@@ -342,7 +345,7 @@ export default function CommunityStakingModalContent({
           </Row>
         </div>
       )}
-      renderStakeSummary={total => (
+      renderStakeSummary={(total: ethers.BigNumber) => (
         <>
           <p className="mt-4">
             You’ll be staking a total of{" "}
@@ -355,7 +358,7 @@ export default function CommunityStakingModalContent({
           <ul className="ml-4 list-disc">
             {[...Array(numberOfCommunityStakes)].map((_, i) => (
               <li key={i}>
-                {`${formatGtc(allStakeAmounts[i])} GTC on `}
+                {`${formatGtc(allStakeAmounts[i] || 0)} GTC on `}
                 <DisplayAddressEns address={allStakeAddresses[i]} ensProvider={mainnetProvider} />
               </li>
             ))}
