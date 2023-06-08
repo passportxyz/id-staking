@@ -1,12 +1,13 @@
 // @ts-nocheck
 import React, { useState, useEffect, useCallback } from "react";
 import { Button, Modal } from "antd";
+import { formatGtc, parseGtc } from "./utils";
 import { ethers } from "ethers";
 
 export default function CommonStakingModalContent({
   title,
-  getTotalAmountStaked,
-  getNewStakeAmount,
+  totalAmountStaked,
+  newStakeAmount,
   onStake,
   resetAmounts,
   renderStakeForm,
@@ -18,7 +19,6 @@ export default function CommonStakingModalContent({
   isModalVisible,
   setIsModalVisible,
 }) {
-  const [decimals, setDecimals] = useState(18);
   const [buttonText, setButtonText] = useState("Submit");
   const [modalStatus, setModalStatus] = useState(1);
 
@@ -31,21 +31,11 @@ export default function CommonStakingModalContent({
   4) Staking
   */
 
-  useEffect(
-    () =>
-      (async () => {
-        if (readContracts?.Token && readContracts?.IDStaking && address)
-          setDecimals(await readContracts.Token.decimals());
-      })(),
-    [readContracts.Token, readContracts.IDStaking, address],
-  );
-
   const checkIfNeedsApprovalForAmount = useCallback(
     async amount => {
       if (address && readContracts?.Token && readContracts?.IDStaking) {
-        const adjustedAmount = ethers.utils.parseUnits(amount.toString() || "0", decimals);
         const allowance = await readContracts.Token.allowance(address, readContracts.IDStaking.address);
-        return !allowance || allowance.isZero() || allowance.lt(adjustedAmount);
+        return !allowance || allowance.isZero() || allowance.lt(amount);
       }
     },
     [readContracts.Token, readContracts.IDStaking, address],
@@ -53,7 +43,7 @@ export default function CommonStakingModalContent({
 
   // User approves usage of token
   const approve = async () => {
-    await tx(writeContracts.Token.approve(readContracts.IDStaking.address, ethers.utils.parseUnits("10000000")));
+    await tx(writeContracts.Token.approve(readContracts.IDStaking.address, parseGtc("10000000")));
   };
 
   const reset = () => {
@@ -72,7 +62,7 @@ export default function CommonStakingModalContent({
       footer={
         <Button
           onClick={async () => {
-            if (await checkIfNeedsApprovalForAmount(getNewStakeAmount())) {
+            if (await checkIfNeedsApprovalForAmount(newStakeAmount)) {
               setModalStatus(2);
               setButtonText("Approving... (Transaction 1 of 2)");
               await approve();
@@ -93,7 +83,7 @@ export default function CommonStakingModalContent({
               reset();
             }
           }}
-          disabled={parseFloat(getTotalAmountStaked()) <= 0}
+          disabled={totalAmountStaked <= 0}
           loading={modalStatus === 2 || modalStatus === 4}
           style={{ backgroundColor: "#6F3FF5", color: "white" }}
         >
@@ -111,7 +101,7 @@ export default function CommonStakingModalContent({
             In order to stake any GTC (self or community) on a Passport, you must first approve the use of your GTC with
             the Smart Contract.
             <br />
-            You should set an approval of at least <b>{getNewStakeAmount()} GTC</b>.
+            You should set an approval of at least <b>{formatGtc(newStakeAmount)} GTC</b>.
           </div>
         )}
 

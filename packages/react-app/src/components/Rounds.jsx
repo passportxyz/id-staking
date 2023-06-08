@@ -32,7 +32,7 @@ const Rounds = ({
   const [stakingType, setStakingType] = useState("self");
 
   const unstake = async amount => {
-    tx(writeContracts.IDStaking.unstake(round + "", ethers.utils.parseUnits(amount)));
+    tx(writeContracts.IDStaking.unstake(round + "", amount));
   };
 
   const unstakeUsers = async users => {
@@ -70,7 +70,7 @@ const Rounds = ({
             setStakingType("community");
             setIsModalVisible(true);
           }}
-          roundData={roundData?.user?.xstakeTo}
+          xstakesTo={roundData?.user?.xstakeTo}
           mainnetProvider={mainnetProvider}
         />
       </div>

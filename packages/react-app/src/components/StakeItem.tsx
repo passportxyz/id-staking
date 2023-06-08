@@ -1,7 +1,31 @@
+import { ethers } from "ethers";
 import React from "react";
+import { formatGtc } from "./StakingModal/utils";
 import UnstakeButton from "./UnstakeButton";
 
-const StakeItem = ({ icon, pending, roundEnded, unstake, title, description, amount, buttonText, buttonHandler }) => {
+type StakeItemProps = {
+  icon: React.ReactNode;
+  pending: boolean;
+  roundEnded: boolean;
+  unstake: (amount: ethers.BigNumber) => void;
+  title: string;
+  description: string;
+  amount: ethers.BigNumber;
+  buttonText: string;
+  buttonHandler: () => void;
+};
+
+const StakeItem = ({
+  icon,
+  pending,
+  roundEnded,
+  unstake,
+  title,
+  description,
+  amount,
+  buttonText,
+  buttonHandler,
+}: StakeItemProps) => {
   return (
     <div className="flex items-start md:items-center mx-auto border-b pb-10 mb-10 border-divider flex-col md:flex-row">
       <div className="flex flex-1 items-center justify-start">
@@ -14,7 +38,7 @@ const StakeItem = ({ icon, pending, roundEnded, unstake, title, description, amo
         </div>
       </div>
       <div className="flex flex-col md:flex-auto items-center justify-center flex-grow text-left md:text-center md:my-0 my-7">
-        <h2 className="text-gray-900 text-lg title-font font-medium mb-0">{amount} GTC</h2>
+        <h2 className="text-gray-900 text-lg title-font font-medium mb-0">{formatGtc(amount)} GTC</h2>
         <span className="leading-relaxed text-base">Staked</span>
       </div>
       {roundEnded ? (
