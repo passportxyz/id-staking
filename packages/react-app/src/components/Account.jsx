@@ -77,16 +77,6 @@ export default function Account({
         <>
           <div className="flex items-center text-base justify-center">
             <>
-              <span className="mr-5 hover:text-gray-900">
-                <TokenBalance
-                  contracts={readContracts}
-                  img={"./gtcTokenLogo.svg"}
-                  contractName={"Token"}
-                  displayName={"GTC"}
-                  address={address}
-                  dollarMultiplier={null}
-                />
-              </span>
               <div className="hidden md:inline-flex">
                 <a
                   className="mr-5 hover:text-gray-900 flex flex-row"
