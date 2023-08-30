@@ -5,6 +5,7 @@ const ROUNDS = {
   "Alpha Round": { roundId: 1 },
   "Beta Round": { roundId: 2 },
   "Season 18": { roundId: 3 },
+  "Season 19": { roundId: 4 },
 };
 
 const RoundSelector = () => {
