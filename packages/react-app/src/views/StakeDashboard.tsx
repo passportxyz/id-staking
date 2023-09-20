@@ -5,7 +5,7 @@ import { Rounds, Navbar } from "../components";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
 import { gql, useLazyQuery } from "@apollo/client";
-import { UsergroupAddOutlined, LockOutlined } from "@ant-design/icons";
+import { UsergroupAddOutlined, LockOutlined, InfoCircleOutlined } from "@ant-design/icons";
 
 import { getAmountStakedOnMe, formatGtc } from "../components/StakingModal/utils";
 import StakingDoneNotificationModal from "../components/StakingModal/StakingDoneNotificationModal";
@@ -294,6 +294,24 @@ function StakeDashboard({
                 </div>
               </div>
             </div>
+            <div className="border border-asideBorder px-4 py-6 rounded-lg bg-asideBG mt-6">
+              <div className="flex flex-row items-center">
+                <div className="w-10 h-10 inline-flex items-center justify-center rounded-full bg-indigo-100 text-indigo-500 flex-shrink-0">
+                  <InfoCircleOutlined style={{ fontSize: "25px" }} />
+                </div>
+                <h2 className="text-gray-900 text-md text-left ml-4 mb-0">
+                  Prior Seasons & Unstaking Information:
+                </h2>
+              </div>
+
+              <div className="flex-grow mt-4">
+                <div className="flex flex-col">
+                  <p className="leading-relaxed text-base text-left">
+                  Season 18 concluded on August 31st. If you wish to manage stakes from previous seasons, including Alpha, Beta, and Season 18, scroll down to the <a className="underline" href="#viewing-stake-for">Viewing Stake for</a> section at the bottom of this page. You can select the relevant round to unstake or restake as needed.
+                  </p>
+                </div>
+              </div>
+            </div>
             {roundEnded || (
               <div className="border border-asideBorder px-4 py-6 rounded-lg mt-6 bg-asideBG">
                 <div className="flex flex-row items-center">
@@ -324,7 +342,7 @@ function StakeDashboard({
         </div>
       </main>
       <footer className="p-4 mt-4 text-center">
-        <div>
+        <div id="viewing-stake-for">
           Viewing Stake for:
           <span className="ml-2">
             <RoundSelector />
