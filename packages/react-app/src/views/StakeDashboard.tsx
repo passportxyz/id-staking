@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useCallback } from "react";
 import { Button } from "antd";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { Rounds, Navbar } from "../components";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
-import { gql, useLazyQuery } from "@apollo/client";
 import { UsergroupAddOutlined, LockOutlined, InfoCircleOutlined } from "@ant-design/icons";
+import { IndexedStakeData } from "../types";
 
 import { getAmountStakedOnMe, formatGtc } from "../components/StakingModal/utils";
 import StakingDoneNotificationModal from "../components/StakingModal/StakingDoneNotificationModal";
@@ -15,6 +15,19 @@ import { Web3Context } from "../helpers/Web3Context";
 
 // --- sdk import
 import { PassportReader } from "@gitcoinco/passport-sdk-reader";
+import axios from "axios";
+
+type StakeData = {
+  id: number;
+  event_type: string;
+  round_id: number;
+  staker?: string;
+  address?: string;
+  amount: string;
+  staked: boolean;
+  block_number: number;
+  tx_hash: string;
+};
 
 // Update Passport on address change
 const reader = new PassportReader();
@@ -116,37 +129,66 @@ function StakeDashboard({
     tx(writeContracts.IDStaking.migrateStake(id));
   };
 
-  // Populate Round Data
-  const query = gql(`
-  query User($address: String!, $round: BigInt!) {
-    user(id: $address) {
-      xstakeAggregates (where: { round: $round }) {
-        id
-        total
-      },
-      stakes(where: { round: $round }) {
-        stake
-        round {
-          id
-        }
-      },
-      xstakeTo(where: { round: $round }) {
-        amount,
-        to {
-          address
+  const [data, setData] = useState<IndexedStakeData>({
+    user: {
+      xstakeAggregates: [],
+      stakes: [],
+      xstakeTo: [],
+    },
+  });
+
+  const getData = useCallback(async () => {
+    if (address && roundInView) {
+      const stakes: StakeData[] =
+        (
+          await axios.get(
+            `${process.env.REACT_APP_SCORER_URL}/registry/gtc-stake/${address.toLowerCase()}/${roundInView}`,
+          )
+        ).data?.results || [];
+
+      let stakedOnByOthersTotal = BigNumber.from(0);
+      let selfStakeTotal = BigNumber.from(0);
+      const xstakeToTotals: Record<string, BigNumber> = {};
+
+      for (const stake of stakes) {
+        // These amounts come from the API as decimal strings with 18 decimal places
+        const stakeAmount = BigNumber.from(stake.amount.replace(".", ""));
+        const operation = stake.staked ? "add" : "sub";
+
+        if (stake.address?.toLowerCase() === address.toLowerCase()) {
+          stakedOnByOthersTotal = stakedOnByOthersTotal[operation](stakeAmount);
+        } else if (stake.staker?.toLowerCase() === address.toLowerCase()) {
+          if (stake.address) {
+            if (!xstakeToTotals[stake.address]) xstakeToTotals[stake.address] = BigNumber.from(0);
+            xstakeToTotals[stake.address] = xstakeToTotals[stake.address][operation](stakeAmount);
+          } else {
+            selfStakeTotal = selfStakeTotal[operation](stakeAmount);
+          }
         }
       }
-    }
-  }
-`);
 
-  const [getData, { loading, data, error }] = useLazyQuery(query, {
-    variables: {
-      address: address.toLowerCase(),
-      round: roundInView,
-    },
-    fetchPolicy: "network-only",
-  });
+      setData({
+        user: {
+          xstakeAggregates: [
+            {
+              total: stakedOnByOthersTotal.toString(),
+            },
+          ],
+          stakes: [
+            {
+              stake: selfStakeTotal.toString(),
+            },
+          ],
+          xstakeTo: Object.entries(xstakeToTotals).map(([address, total]) => ({
+            to: {
+              address,
+            },
+            amount: total.toString(),
+          })),
+        },
+      });
+    }
+  }, [address, roundInView]);
 
   useEffect(() => {
     address && getData();
@@ -299,15 +341,19 @@ function StakeDashboard({
                 <div className="w-10 h-10 inline-flex items-center justify-center rounded-full bg-indigo-100 text-indigo-500 flex-shrink-0">
                   <InfoCircleOutlined style={{ fontSize: "25px" }} />
                 </div>
-                <h2 className="text-gray-900 text-md text-left ml-4 mb-0">
-                  Prior Seasons & Unstaking Information:
-                </h2>
+                <h2 className="text-gray-900 text-md text-left ml-4 mb-0">Prior Seasons & Unstaking Information:</h2>
               </div>
 
               <div className="flex-grow mt-4">
                 <div className="flex flex-col">
                   <p className="leading-relaxed text-base text-left">
-                  Season 18 concluded on August 31st. If you wish to manage stakes from previous seasons, including Alpha, Beta, and Season 18, scroll down to the <a className="underline" href="#viewing-stake-for">Viewing Stake for</a> section at the bottom of this page. You can select the relevant round to unstake or restake as needed.
+                    Season 18 concluded on August 31st. If you wish to manage stakes from previous seasons, including
+                    Alpha, Beta, and Season 18, scroll down to the{" "}
+                    <a className="underline" href="#viewing-stake-for">
+                      Viewing Stake for
+                    </a>{" "}
+                    section at the bottom of this page. You can select the relevant round to unstake or restake as
+                    needed.
                   </p>
                 </div>
               </div>
