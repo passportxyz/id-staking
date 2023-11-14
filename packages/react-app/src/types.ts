@@ -9,15 +9,14 @@ export type Stake = {
   stake: string;
 };
 
-export type XstakeAggregates = {
+export type XstakeAggregate = {
   total: string;
-  id: string;
 };
 
 export type IndexedStakeData = {
   user?: {
     xstakeTo?: XstakeTo[];
-    xstakeAggregates?: XstakeAggregates[];
+    xstakeAggregates?: XstakeAggregate[];
     stakes?: Stake[];
   };
 };
