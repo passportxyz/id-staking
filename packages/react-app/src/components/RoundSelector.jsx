@@ -6,6 +6,7 @@ const ROUNDS = {
   "Beta Round": { roundId: 2 },
   "Season 18": { roundId: 3 },
   "Season 19": { roundId: 4 },
+  "Season 20": { roundId: 5 },
 };
 
 const RoundSelector = () => {
