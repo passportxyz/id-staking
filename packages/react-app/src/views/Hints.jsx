@@ -107,7 +107,6 @@ export default function Hints({ yourLocalBalance, mainnetProvider, price, addres
           showSearch
           value={selectedToken}
           onChange={value => {
-            console.log(`selected ${value}`);
             setSelectedToken(value);
           }}
           filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
