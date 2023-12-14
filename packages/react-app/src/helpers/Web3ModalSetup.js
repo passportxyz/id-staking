@@ -1,5 +1,5 @@
 import Portis from "@portis/web3";
-import WalletConnectProvider from "@walletconnect/web3-provider";
+// import WalletConnectProvider from "@walletconnect/web3-provider";
 import Authereum from "authereum";
 import Fortmatic from "fortmatic";
 import WalletLink from "walletlink";
@@ -24,22 +24,22 @@ const web3ModalSetup = () =>
     cacheProvider: true, // optional
     theme: "light", // optional. Change to "dark" for a dark theme.
     providerOptions: {
-      walletconnect: {
-        package: WalletConnectProvider, // required
-        options: {
-          bridge: "https://polygon.bridge.walletconnect.org",
-          infuraId: INFURA_ID,
-          rpc: {
-            10: "https://mainnet.optimism.io", // xDai
-            100: "https://rpc.gnosischain.com", // xDai
-            137: "https://polygon-rpc.com",
-            31337: "http://localhost:8545",
-            42161: "https://arb1.arbitrum.io/rpc",
-            80001: "https://rpc-mumbai.maticvigil.com",
-            71401: "https://godwoken-testnet-v1.ckbapp.dev",
-          },
-        },
-      },
+      // walletconnect: {
+      //   package: WalletConnectProvider, // required
+      //   options: {
+      //     bridge: "https://polygon.bridge.walletconnect.org",
+      //     infuraId: INFURA_ID,
+      //     rpc: {
+      //       10: "https://mainnet.optimism.io", // xDai
+      //       100: "https://rpc.gnosischain.com", // xDai
+      //       137: "https://polygon-rpc.com",
+      //       31337: "http://localhost:8545",
+      //       42161: "https://arb1.arbitrum.io/rpc",
+      //       80001: "https://rpc-mumbai.maticvigil.com",
+      //       71401: "https://godwoken-testnet-v1.ckbapp.dev",
+      //     },
+      //   },
+      // },
       portis: {
         display: {
           logo: "https://user-images.githubusercontent.com/9419140/128913641-d025bc0c-e059-42de-a57b-422f196867ce.png",
