@@ -9,16 +9,12 @@ export default function Navbar({
   USE_NETWORK_SELECTOR,
   localProvider,
   targetNetwork,
-  logoutOfWeb3Modal,
   selectedChainId,
   localChainId,
   NETWORKCHECK,
   passport,
   userSigner,
   mainnetProvider,
-  price,
-  web3Modal,
-  loadWeb3Modal,
   blockExplorer,
 }) {
   const { address } = useContext(Web3Context);
@@ -41,10 +37,6 @@ export default function Navbar({
             localProvider={localProvider}
             userSigner={userSigner}
             mainnetProvider={mainnetProvider}
-            price={price}
-            web3Modal={web3Modal}
-            loadWeb3Modal={loadWeb3Modal}
-            logoutOfWeb3Modal={logoutOfWeb3Modal}
             blockExplorer={blockExplorer}
             minimized={undefined}
             isContract={undefined}

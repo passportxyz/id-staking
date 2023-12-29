@@ -3,6 +3,7 @@ import { Modal } from "antd";
 import { ExportOutlined } from "@ant-design/icons";
 import { Navbar, Account, AccountHomePage } from "../components";
 import { useNavigate } from "react-router-dom";
+import { useWeb3ModalAccount } from "@web3modal/ethers5/react";
 
 // --- sdk import
 import { PassportReader } from "@gitcoinco/passport-sdk-reader";
@@ -20,18 +21,15 @@ function Home({
   USE_NETWORK_SELECTOR,
   localProvider,
   targetNetwork,
-  logoutOfWeb3Modal,
   selectedChainId,
   localChainId,
   NETWORKCHECK,
   passport,
   userSigner,
-  price,
-  web3Modal,
-  loadWeb3Modal,
   blockExplorer,
   networkOptions,
 }) {
+  const { isConnected } = useWeb3ModalAccount();
   const navigate = useNavigate();
   const { address, loggedIn, setLoggedIn } = useContext(Web3Context);
 
@@ -48,7 +46,7 @@ function Home({
           try {
             newPassport = await reader.getPassport(newAddress);
           } catch {}
-          if (web3Modal?.cachedProvider && newPassport) {
+          if (isConnected && newPassport) {
             navigate("/StakeDashboard");
             setLoggedIn(true);
           } else if (!loggedIn) {
@@ -60,14 +58,7 @@ function Home({
       }
     }
     getPassport();
-  }, [userSigner, web3Modal?.cachedProvider]);
-
-  // useEffect(() => {
-  //   console.log("no passport check ", passport, web3Modal?.cachedProvider);
-  //   if (!passport.expiryDate && !passport.issuanceDate && web3Modal?.cachedProvider) {
-  //     showModal();
-  //   }
-  // }, [userSigner]);
+  }, [userSigner, isConnected, loggedIn]);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -117,16 +108,12 @@ function Home({
         localProvider={localProvider}
         address={address}
         targetNetwork={targetNetwork}
-        logoutOfWeb3Modal={logoutOfWeb3Modal}
         selectedChainId={selectedChainId}
         localChainId={localChainId}
         NETWORKCHECK={NETWORKCHECK}
         passport={passport}
         userSigner={userSigner}
         mainnetProvider={mainnetProvider}
-        price={price}
-        web3Modal={web3Modal}
-        loadWeb3Modal={loadWeb3Modal}
         blockExplorer={blockExplorer}
       />
       <div className="container mx-auto px-5 py-2">
@@ -145,12 +132,7 @@ function Home({
               current Grants Round.
             </div>
             <div className="mt-4 w-full sm:mt-10 sm:w-1/2 md:mt-10 md:block md:w-1/2">
-              <AccountHomePage
-                passport={passport}
-                web3Modal={web3Modal}
-                loadWeb3Modal={loadWeb3Modal}
-                logoutOfWeb3Modal={logoutOfWeb3Modal}
-              />
+              <AccountHomePage />
             </div>
           </div>
         </div>

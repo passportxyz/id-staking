@@ -1,5 +1,6 @@
 const tailwindcss = require("tailwindcss");
 const autoprefixer = require("autoprefixer");
+const path = require("path");
 
 module.exports = {
   style: {
@@ -15,6 +16,7 @@ module.exports = {
           plugin.options.typescript = plugin.options.typescript || {};
           plugin.options.typescript.memoryLimit = 4096;
         });
+
       return config;
     },
   },

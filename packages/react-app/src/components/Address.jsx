@@ -2,7 +2,7 @@ import { Skeleton, Typography } from "antd";
 import React from "react";
 import { useThemeSwitcher } from "react-css-theme-switcher";
 import Blockies from "react-blockies";
-import { useLookupAddress } from "eth-hooks/dapps/ens";
+import { useResolveEnsAddress } from "eth-hooks/dapps";
 
 // changed value={address} to address={address}
 
@@ -36,7 +36,7 @@ const blockExplorerLink = (address, blockExplorer) => `${blockExplorer || "https
 export default function Address(props) {
   const { currentTheme } = useThemeSwitcher();
   const address = props.value || props.address;
-  const ens = useLookupAddress(props.ensProvider, address);
+  const ens = useResolveEnsAddress(props.ensProvider, address);
   const ensSplit = ens && ens.split(".");
   const validEnsCheck = ensSplit && ensSplit[ensSplit.length - 1] === "eth";
   const etherscanLink = blockExplorerLink(address, props.blockExplorer);

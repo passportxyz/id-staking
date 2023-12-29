@@ -1,6 +1,6 @@
 import { Skeleton } from "antd";
 import React from "react";
-import { useLookupAddress } from "eth-hooks/dapps/ens";
+import { useResolveEnsAddress } from "eth-hooks/dapps";
 
 const blockExplorerLink = (address, blockExplorer) =>
   `${blockExplorer || "https://etherscan.io/"}${"address/"}${address}`;
@@ -8,7 +8,7 @@ const blockExplorerLink = (address, blockExplorer) =>
 export default function DisplayAddressEns(props) {
   const address = props.value || props.address;
 
-  const ens = useLookupAddress(props.ensProvider, address);
+  const ens = useResolveEnsAddress(props.ensProvider, address);
 
   if (!address) {
     return <span>undefined</span>;

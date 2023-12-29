@@ -2,10 +2,13 @@ import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
 import React from "react";
 import { ThemeSwitcherProvider } from "react-css-theme-switcher";
 import { BrowserRouter } from "react-router-dom";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
 import { Web3Provider } from "./helpers/Web3Context";
+import { QueryClient, QueryClientProvider } from "react-query";
+
+const queryClient = new QueryClient();
 
 const targetNetwork = "goerli";
 
@@ -25,15 +28,18 @@ const client = new ApolloClient({
   cache: new InMemoryCache(),
 });
 
-ReactDOM.render(
-  <Web3Provider network={targetNetwork}>
-    <ApolloProvider client={client}>
-      <ThemeSwitcherProvider themeMap={themes} defaultTheme={prevTheme || "light"}>
-        <BrowserRouter>
-          <App subgraphUri={subgraphUri} />
-        </BrowserRouter>
-      </ThemeSwitcherProvider>
-    </ApolloProvider>
-  </Web3Provider>,
-  document.getElementById("root"),
+const container = document.getElementById("root");
+const root = createRoot(container);
+root.render(
+  <BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <Web3Provider network={targetNetwork}>
+        <ApolloProvider client={client}>
+          <ThemeSwitcherProvider themeMap={themes} defaultTheme={prevTheme || "light"}>
+            <App subgraphUri={subgraphUri} />
+          </ThemeSwitcherProvider>
+        </ApolloProvider>
+      </Web3Provider>
+    </QueryClientProvider>
+  </BrowserRouter>,
 );

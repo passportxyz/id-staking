@@ -1,7 +1,7 @@
 import { Button, Input, Form, Select, InputNumber, Table, Radio } from "antd";
 import React, { useState, useEffect } from "react";
 import { utils, ethers } from "ethers";
-import { useContractLoader, useOnBlock } from "eth-hooks";
+import { useContractLoader } from "eth-hooks";
 
 import { NETWORKS } from "../constants";
 import { Transactor } from "../helpers";
@@ -61,13 +61,13 @@ export default function L2ArbitrumBridge({ address, userSigner }) {
 
   const contracts = useContractLoader(userSigner, { externalContracts: L1BridgeMetadata, hardhatContracts: {} });
 
-  useOnBlock(L1Provider, async () => {
-    console.log(`⛓ A new mainnet block is here: ${L1Provider._lastBlockNumber}`);
-    const yourL1Balance = await L1Provider.getBalance(address);
-    setL1EthBalance(yourL1Balance ? ethers.utils.formatEther(yourL1Balance) : "...");
-    const yourL2Balance = await L2Provider.getBalance(address);
-    setL2EthBalance(yourL2Balance ? ethers.utils.formatEther(yourL2Balance) : "...");
-  });
+  // useOnBlock(L1Provider, async () => {
+  //   console.log(`⛓ A new mainnet block is here: ${L1Provider._lastBlockNumber}`);
+  //   const yourL1Balance = await L1Provider.getBalance(address);
+  //   setL1EthBalance(yourL1Balance ? ethers.utils.formatEther(yourL1Balance) : "...");
+  //   const yourL2Balance = await L2Provider.getBalance(address);
+  //   setL2EthBalance(yourL2Balance ? ethers.utils.formatEther(yourL2Balance) : "...");
+  // });
 
   const { Option } = Select;
   const formItemLayout = {

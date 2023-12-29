@@ -1,13 +1,13 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useMemo, useState, useCallback } from "react";
 import { useThemeSwitcher } from "react-css-theme-switcher";
 import { Menu, Dropdown, Space, Drawer } from "antd";
 import { DownOutlined, LogoutOutlined } from "@ant-design/icons";
+import { useWeb3Modal, useWeb3ModalAccount, useDisconnect } from "@web3modal/ethers5/react";
 
 import Address from "./Address";
 import AddressDropDown from "./AddressDropDown";
 import Balance from "./Balance";
 import Wallet from "./Wallet";
-import TokenBalance from "./TokenBalance";
 import NetworkDisplay from "./NetworkDisplay";
 
 import { Web3Context } from "../helpers/Web3Context";
@@ -18,11 +18,7 @@ export default function Account({
   userSigner,
   localProvider,
   mainnetProvider,
-  price,
   minimized,
-  web3Modal,
-  loadWeb3Modal,
-  logoutOfWeb3Modal,
   blockExplorer,
   isContract,
   readContracts,
@@ -36,20 +32,35 @@ export default function Account({
   setSelectedNetwork,
   networkOptions,
 }) {
-  const { currentNetwork, loggedIn } = useContext(Web3Context);
-  const { currentTheme } = useThemeSwitcher();
+  const { isConnected } = useWeb3ModalAccount();
+  const { open } = useWeb3Modal();
+  const { disconnect } = useDisconnect();
+  const { currentNetwork } = useContext(Web3Context);
   const [openNavDrawer, setOpenNavDrawer] = useState(false);
-  let accountButtonInfo;
-  if (web3Modal?.cachedProvider && passport) {
-    accountButtonInfo = { name: "Logout", action: logoutOfWeb3Modal };
-  } else {
-    accountButtonInfo = { name: "Connect Wallet", action: loadWeb3Modal };
-  }
+
+  const logout = useCallback(() => {
+    disconnect();
+    window.location.reload();
+  }, [disconnect]);
+
+  const accountButtonInfo = useMemo(() => {
+    if (isConnected) {
+      return {
+        name: "Logout",
+        action: logout,
+      };
+    } else {
+      return {
+        name: "Connect Wallet",
+        action: open,
+      };
+    }
+  }, [isConnected, logout, open]);
 
   const menu = (
     <Menu>
       <Menu.ItemGroup key="2">
-        <a key="logoutbutton" size="medium" style={{ color: "red" }} onClick={logoutOfWeb3Modal}>
+        <a key="logoutbutton" size="medium" style={{ color: "red" }} onClick={logout}>
           <LogoutOutlined style={{ color: "red" }} />
           {` Logout`}
         </a>
@@ -68,12 +79,12 @@ export default function Account({
 
   return (
     <div className="flex">
-      {!web3Modal?.cachedProvider && (
+      {!isConnected && (
         <button className="rounded-sm bg-purple-connectPurple py-4 px-10 text-white" onClick={accountButtonInfo.action}>
           {accountButtonInfo.name}
         </button>
       )}
-      {web3Modal?.cachedProvider && (
+      {isConnected && (
         <>
           <div className="flex items-center text-base justify-center">
             <>
@@ -157,8 +168,7 @@ export default function Account({
                       href="/"
                       onClick={e => {
                         e.preventDefault();
-
-                        logoutOfWeb3Modal();
+                        logout();
                       }}
                       className="text-signout"
                     >

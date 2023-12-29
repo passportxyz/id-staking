@@ -1,7 +1,7 @@
 import { Skeleton, Typography, Card } from "antd";
 import React from "react";
 import Blockies from "react-blockies";
-import { useLookupAddress } from "eth-hooks/dapps/ens";
+import { useResolveEnsAddress } from "eth-hooks/dapps";
 const { Meta } = Card;
 
 const { Text } = Typography;
@@ -12,7 +12,7 @@ const blockExplorerLink = (address, blockExplorer) =>
 export default function Address(props) {
   const address = props.value || props.address;
 
-  const ens = useLookupAddress(props.ensProvider, address);
+  const ens = useResolveEnsAddress(props.ensProvider, address);
 
   if (!address) {
     return (

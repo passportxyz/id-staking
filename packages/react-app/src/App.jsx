@@ -1,6 +1,5 @@
 import "antd/dist/antd.css";
-import { useBalance, useContractLoader, useGasPrice, useOnBlock, useUserProviderAndSigner } from "eth-hooks";
-import { useExchangeEthPrice } from "eth-hooks/dapps/dex";
+import { useBalance, useContractLoader, useGasPrice } from "eth-hooks";
 import React, { useCallback, useEffect, useState, useContext } from "react";
 import { Route, Routes } from "react-router-dom";
 import "./App.css";
@@ -10,13 +9,14 @@ import externalContracts from "./contracts/external_contracts";
 // contracts
 import deployedContracts from "./contracts/hardhat_contracts.json";
 import { Transactor, Web3ModalSetup } from "./helpers";
-import { Admin, Home, Subgraph, StakeDashboard, Stakes } from "./views";
+import { Admin, Home, StakeDashboard } from "./views";
 import { useStaticJsonRPC } from "./hooks";
 
 // --- sdk import
 import { PassportReader } from "@gitcoinco/passport-sdk-reader";
 
 import { Web3Context } from "./helpers/Web3Context";
+import { useWeb3ModalProvider } from "@web3modal/ethers5/react";
 
 const { ethers } = require("ethers");
 
@@ -48,7 +48,7 @@ const NETWORKCHECK = true;
 const USE_BURNER_WALLET = false; // toggle burner wallet feature
 const USE_NETWORK_SELECTOR = false;
 
-const web3Modal = Web3ModalSetup();
+Web3ModalSetup();
 
 // 🛰 providers
 const providers = [
@@ -60,6 +60,7 @@ const providers = [
 function App(props) {
   //User Context
   const { address, setAddress, setCurrentNetwork } = useContext(Web3Context);
+
   // specify all the chains your app is available on. Eg: ['localhost', 'mainnet', ...otherNetworks ]
   // reference './constants.js' for other networks
   const networkOptions = [initialNetwork.name, "mainnet", "goerli", "sepolia"];
@@ -88,25 +89,6 @@ function App(props) {
   // 🛰 providers
   if (DEBUG) console.log("📡 Connecting to Mainnet Ethereum");
 
-  const logoutOfWeb3Modal = async () => {
-    await web3Modal.clearCachedProvider();
-    if (injectedProvider && injectedProvider.provider && typeof injectedProvider.provider.disconnect == "function") {
-      await injectedProvider.provider.disconnect();
-    }
-    setTimeout(() => {
-      window.location.reload();
-    }, 1);
-  };
-
-  /* 💵 This hook will get the price of ETH from 🦄 Uniswap: */
-  const price = useExchangeEthPrice(targetNetwork, mainnetProvider);
-
-  /* 🔥 This hook will get the price of Gas from ⛽️ EtherGasStation */
-  const gasPrice = useGasPrice(targetNetwork, "fast");
-  // Use your injected provider from 🦊 Metamask or if you don't have it then instantly generate a 🔥 burner wallet.
-  const userProviderAndSigner = useUserProviderAndSigner(injectedProvider, localProvider, USE_BURNER_WALLET);
-  const userSigner = userProviderAndSigner.signer;
-
   // Update Passport on address change
   const reader = new PassportReader();
 
@@ -114,6 +96,17 @@ function App(props) {
     setCurrentNetwork(targetNetwork);
   }, [targetNetwork]);
 
+  /* 🔥 This hook will get the price of Gas from ⛽️ EtherGasStation */
+  const gasPrice = useGasPrice(undefined, "fast", targetNetwork);
+  // Use your injected provider from 🦊 Metamask or if you don't have it then instantly generate a 🔥 burner wallet.
+  const all = useWeb3ModalProvider();
+  const { walletProvider } = all;
+
+  let userSigner;
+  if (walletProvider) {
+    const ethersProvider = new ethers.providers.Web3Provider(walletProvider);
+    userSigner = ethersProvider.getSigner();
+  }
   useEffect(() => {
     (async () => {
       if (userSigner) {
@@ -142,7 +135,7 @@ function App(props) {
   const tx = Transactor(userSigner, gasPrice);
 
   // 🏗 scaffold-eth is full of handy hooks like this one to get your balance:
-  const yourLocalBalance = useBalance(localProvider, address);
+  const yourLocalBalance = useBalance(address);
 
   // const contractConfig = useContractConfig();
 
@@ -154,41 +147,29 @@ function App(props) {
   // If you want to make 🔐 write transactions to your contracts, use the userSigner:
   const writeContracts = useContractLoader(userSigner, contractConfig, localChainId);
 
-  // If you want to call a function on a new block
-  useOnBlock(mainnetProvider, () => {
-    console.log(`⛓ A new mainnet block is here: ${mainnetProvider._lastBlockNumber}`);
-  });
+  // const loadWeb3Modal = useCallback(
+  //   async result => {
+  //     setInjectedProvider(new ethers.providers.Web3Provider(walletProvider));
 
-  const loadWeb3Modal = useCallback(
-    async result => {
-      const provider = await web3Modal.connect();
-      setInjectedProvider(new ethers.providers.Web3Provider(provider));
+  //     walletProvider.on("chainChanged", chainId => {
+  //       console.log(`chain changed to ${chainId}! updating providers`);
+  //       setInjectedProvider(new ethers.providers.Web3Provider(walletProvider));
+  //     });
 
-      provider.on("chainChanged", chainId => {
-        console.log(`chain changed to ${chainId}! updating providers`);
-        setInjectedProvider(new ethers.providers.Web3Provider(provider));
-      });
+  //     walletProvider.on("accountsChanged", () => {
+  //       console.log(`account changed!`);
+  //       setInjectedProvider(new ethers.providers.Web3Provider(walletProvider));
+  //     });
 
-      provider.on("accountsChanged", () => {
-        console.log(`account changed!`);
-        setInjectedProvider(new ethers.providers.Web3Provider(provider));
-      });
-
-      // Subscribe to session disconnection
-      provider.on("disconnect", (code, reason) => {
-        console.log(code, reason);
-        logoutOfWeb3Modal();
-      });
-      // eslint-disable-next-line
-    },
-    [setInjectedProvider],
-  );
-
-  useEffect(() => {
-    if (web3Modal.cachedProvider) {
-      loadWeb3Modal();
-    }
-  }, [loadWeb3Modal]);
+  //     // Subscribe to session disconnection
+  //     walletProvider.on("disconnect", (code, reason) => {
+  //       console.log(code, reason);
+  //       logoutOfWeb3Modal();
+  //     });
+  //     // eslint-disable-next-line
+  //   },
+  //   [setInjectedProvider],
+  // );
 
   //intercom intergration app id
   const INTERCOM_APP_ID = process.env.REACT_APP_INTERCOM_APP_ID || "";
@@ -255,15 +236,11 @@ function App(props) {
               USE_NETWORK_SELECTOR={USE_NETWORK_SELECTOR}
               localProvider={localProvider}
               targetNetwork={targetNetwork}
-              logoutOfWeb3Modal={logoutOfWeb3Modal}
               selectedChainId={selectedChainId}
               localChainId={localChainId}
               NETWORKCHECK={NETWORKCHECK}
               passport={passport}
               userSigner={userSigner}
-              price={price}
-              web3Modal={web3Modal}
-              loadWeb3Modal={loadWeb3Modal}
               blockExplorer={blockExplorer}
             />
           }
@@ -284,15 +261,11 @@ function App(props) {
               USE_NETWORK_SELECTOR={USE_NETWORK_SELECTOR}
               localProvider={localProvider}
               targetNetwork={targetNetwork}
-              logoutOfWeb3Modal={logoutOfWeb3Modal}
               selectedChainId={selectedChainId}
               localChainId={localChainId}
               NETWORKCHECK={NETWORKCHECK}
               passport={passport}
               userSigner={userSigner}
-              price={price}
-              web3Modal={web3Modal}
-              loadWeb3Modal={loadWeb3Modal}
               blockExplorer={blockExplorer}
             />
           }
@@ -310,25 +283,11 @@ function App(props) {
           }
         />
         <Route
-          path="/stake-log"
-          element={
-            <Stakes
-              tx={tx}
-              address={address}
-              localProvider={localProvider}
-              readContracts={readContracts}
-              writeContracts={writeContracts}
-              mainnetProvider={mainnetProvider}
-            />
-          }
-        />
-        <Route
           path="/debug"
           element={
             <div>
               <Contract
                 name="Token"
-                price={price}
                 signer={userSigner}
                 provider={localProvider}
                 address={address}
@@ -337,7 +296,6 @@ function App(props) {
               />
               <Contract
                 name="IDStaking"
-                price={price}
                 signer={userSigner}
                 provider={localProvider}
                 address={address}
@@ -345,17 +303,6 @@ function App(props) {
                 contractConfig={contractConfig}
               />
             </div>
-          }
-        />
-        <Route
-          path="/subgraph"
-          element={
-            <Subgraph
-              subgraphUri={props.subgraphUri}
-              tx={tx}
-              writeContracts={writeContracts}
-              mainnetProvider={mainnetProvider}
-            />
           }
         />
       </Routes>

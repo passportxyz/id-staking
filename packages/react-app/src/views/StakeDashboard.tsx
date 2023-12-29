@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import moment from "moment";
 import { UsergroupAddOutlined, LockOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import { IndexedStakeData } from "../types";
+import { useWeb3ModalAccount } from "@web3modal/ethers5/react";
 
 import { getAmountStakedOnMe, formatGtc } from "../components/StakingModal/utils";
 import StakingDoneNotificationModal from "../components/StakingModal/StakingDoneNotificationModal";
@@ -42,15 +43,11 @@ type StakeDashboardProps = {
   USE_NETWORK_SELECTOR: any;
   localProvider: any;
   targetNetwork: any;
-  logoutOfWeb3Modal: any;
   selectedChainId: any;
   localChainId: any;
   NETWORKCHECK: any;
   passport: any;
   userSigner: any;
-  price: any;
-  web3Modal: any;
-  loadWeb3Modal: any;
   blockExplorer: any;
 };
 
@@ -64,15 +61,11 @@ function StakeDashboard({
   USE_NETWORK_SELECTOR,
   localProvider,
   targetNetwork,
-  logoutOfWeb3Modal,
   selectedChainId,
   localChainId,
   NETWORKCHECK,
   passport,
   userSigner,
-  price,
-  web3Modal,
-  loadWeb3Modal,
   blockExplorer,
 }: StakeDashboardProps) {
   const [pending, setPending] = useState(false);
@@ -80,16 +73,17 @@ function StakeDashboard({
   const [duration, setDuration] = useState("0");
   const [name, setName] = useState("");
   const [stakingDoneNotificationModalVisible, setStakingDoneNotificationModalVisible] = useState(false);
+  const { isConnected } = useWeb3ModalAccount();
 
   // Round in view is actually not currently set dynamically
   const { roundInView, setLoggedIn } = useContext(Web3Context);
   const navigate = useNavigate();
   // Route user to dashboard when wallet is connected
   useEffect(() => {
-    if (!web3Modal?.cachedProvider) {
+    if (!isConnected) {
       navigate("/");
     }
-  }, [web3Modal?.cachedProvider]);
+  }, [isConnected]);
 
   // Logout user if they do not have a passport
   // Route user to dashboard when wallet is connected
@@ -218,16 +212,12 @@ function StakeDashboard({
         USE_NETWORK_SELECTOR={USE_NETWORK_SELECTOR}
         localProvider={localProvider}
         targetNetwork={targetNetwork}
-        logoutOfWeb3Modal={logoutOfWeb3Modal}
         selectedChainId={selectedChainId}
         localChainId={localChainId}
         NETWORKCHECK={NETWORKCHECK}
         passport={passport}
         userSigner={userSigner}
         mainnetProvider={mainnetProvider}
-        price={price}
-        web3Modal={web3Modal}
-        loadWeb3Modal={loadWeb3Modal}
         blockExplorer={blockExplorer}
       />
 

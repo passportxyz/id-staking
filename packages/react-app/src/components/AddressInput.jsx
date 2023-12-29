@@ -2,7 +2,7 @@ import { Badge, Input } from "antd";
 import React, { useCallback, useState } from "react";
 import { ethers } from "ethers";
 import { CameraOutlined, QrcodeOutlined } from "@ant-design/icons";
-import { useLookupAddress } from "eth-hooks/dapps/ens";
+import { useResolveEnsAddress } from "eth-hooks/dapps";
 import QrReader from "react-qr-reader";
 
 import Blockie from "./Blockie";
@@ -41,7 +41,7 @@ export default function AddressInput(props) {
   const [scan, setScan] = useState(false);
 
   const currentValue = typeof props.value !== "undefined" ? props.value : value;
-  const ens = useLookupAddress(props.ensProvider, currentValue);
+  const ens = useResolveEnsAddress(props.ensProvider, currentValue);
 
   const updateAddress = useCallback(
     async newValue => {
