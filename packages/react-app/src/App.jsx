@@ -12,6 +12,7 @@ import deployedContracts from "./contracts/hardhat_contracts.json";
 import { Transactor, Web3ModalSetup } from "./helpers";
 import { Admin, Home, Subgraph, StakeDashboard, Stakes } from "./views";
 import { useStaticJsonRPC } from "./hooks";
+import Overlay from "./components/Overlay";
 
 // --- sdk import
 import { PassportReader } from "@gitcoinco/passport-sdk-reader";
@@ -238,6 +239,7 @@ function App(props) {
 
   return (
     <div className="App">
+      <Overlay />
       <Routes>
         <Route
           path="/"
