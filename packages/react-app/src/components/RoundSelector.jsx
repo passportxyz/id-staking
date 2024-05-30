@@ -8,6 +8,7 @@ const ROUNDS = {
   "Season 19": { roundId: 4 },
   "Season 20": { roundId: 5 },
   "Season 21": { roundId: 6 },
+  "Season 22": { roundId: 7 },
 };
 
 const RoundSelector = () => {
