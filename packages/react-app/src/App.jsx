@@ -21,6 +21,8 @@ import { Web3Context } from "./helpers/Web3Context";
 
 const { ethers } = require("ethers");
 
+const DISPLAY_V2_OVERLAY = process.env.REACT_APP_DISPLAY_V2_OVERLAY === "true";
+
 /*
     Welcome to 🏗 scaffold-eth !
 
@@ -239,7 +241,7 @@ function App(props) {
 
   return (
     <div className="App">
-      <Overlay />
+      {DISPLAY_V2_OVERLAY && <Overlay />}
       <Routes>
         <Route
           path="/"
