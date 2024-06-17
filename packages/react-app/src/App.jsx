@@ -239,9 +239,14 @@ function App(props) {
     }
   }, []);
 
+  const [overlayOpen, setOverlayOpen] = useState(DISPLAY_V2_OVERLAY);
+  const closeOverlay = useCallback(() => {
+    setOverlayOpen(false);
+  }, []);
+
   return (
     <div className="App">
-      {DISPLAY_V2_OVERLAY && <Overlay />}
+      <Overlay open={overlayOpen} onClose={closeOverlay} />
       <Routes>
         <Route
           path="/"
